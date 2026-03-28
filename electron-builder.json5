@@ -1,6 +1,6 @@
 {
   appId: "com.aistreamer.app",
-  productName: "AI Streamer",
+  productName: "AI Music Feedback",
   asar: true,
   directories: {
     output: "release"
@@ -24,9 +24,9 @@
     icon: "resources/icon.png",
     category: "public.app-category.music",
     extendInfo: {
-      NSAudioCaptureUsageDescription: "AI Streamer needs access to audio to stream your music to OpenAI for feedback.",
-      NSMicrophoneUsageDescription: "AI Streamer needs microphone access to capture audio for AI feedback.",
-      NSScreenCaptureDescription: "AI Streamer needs screen recording access to capture system audio."
+      NSAudioCaptureUsageDescription: "AI Music Feedback needs access to audio to stream your music to OpenAI for feedback.",
+      NSMicrophoneUsageDescription: "AI Music Feedback needs microphone access to capture audio for AI feedback.",
+      NSScreenCaptureDescription: "AI Music Feedback needs screen recording access to capture system audio."
     }
   },
   win: {

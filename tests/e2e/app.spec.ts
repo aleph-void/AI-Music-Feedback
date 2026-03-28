@@ -1,5 +1,5 @@
 /**
- * End-to-end tests for AI Streamer using Playwright + Electron.
+ * End-to-end tests for AI Music Feedback using Playwright + Electron.
  *
  * Prerequisites:
  *   npm run build   — must be run before these tests
@@ -40,14 +40,14 @@ test('window opens successfully', async () => {
   expect(page).toBeTruthy()
 })
 
-test('window title is "AI Streamer"', async () => {
-  expect(await page.title()).toBe('AI Streamer')
+test('window title is "AI Music Feedback"', async () => {
+  expect(await page.title()).toBe('AI Music Feedback')
 })
 
 // ── Sidebar ────────────────────────────────────────────────────────────────
 
-test('displays "AI Streamer" in the sidebar header', async () => {
-  await expect(page.locator('.app-name')).toHaveText('AI Streamer')
+test('displays "AI Music Feedback" in the sidebar header', async () => {
+  await expect(page.locator('.app-name')).toHaveText('AI Music Feedback')
 })
 
 test('sidebar shows the info panel by default', async () => {

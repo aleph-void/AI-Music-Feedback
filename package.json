@@ -1,5 +1,5 @@
 {
-  "name": "ai-streamer",
+  "name": "ai-music-feedback",
   "version": "1.0.0",
   "description": "Stream desktop audio to OpenAI for real-time music feedback",
   "author": {

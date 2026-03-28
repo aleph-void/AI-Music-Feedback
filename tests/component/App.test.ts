@@ -167,9 +167,9 @@ describe('App', () => {
     expect(w.find('.main-content').exists()).toBe(true)
   })
 
-  it('renders the app name "AI Streamer"', () => {
+  it('renders the app name "AI Music Feedback"', () => {
     const w = mountApp()
-    expect(w.find('.app-name').text()).toBe('AI Streamer')
+    expect(w.find('.app-name').text()).toBe('AI Music Feedback')
   })
 
   // ── Settings panel toggle ─────────────────────────────────────────────────

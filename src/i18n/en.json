@@ -1,0 +1,104 @@
+{
+  "language": "English",
+  "app": {
+    "name": "AI Streamer"
+  },
+  "sidebar": {
+    "settingsTitle": "Settings",
+    "howItWorks": "How it works",
+    "steps": {
+      "1": "Enter your OpenAI API key in Settings",
+      "2": "Select an audio source (your screen/soundcard)",
+      "3": "Click",
+      "3action": "Start Streaming",
+      "4": "The AI listens and gives feedback when it detects a pause"
+    },
+    "connectButton": "Connect to OpenAI",
+    "disconnectButton": "Disconnect",
+    "apiKeyHint": "Add your API key in Settings first"
+  },
+  "settings": {
+    "title": "Settings",
+    "apiKey": {
+      "label": "OpenAI API Key",
+      "placeholder": "sk-...",
+      "show": "Show",
+      "hide": "Hide",
+      "formatError": "This doesn't look like an OpenAI API key (should start with sk-)",
+      "encryptionWarning": "Encryption unavailable — key stored in plain text"
+    },
+    "model": {
+      "label": "Realtime Model",
+      "refreshTitle": "Refresh model list from OpenAI"
+    },
+    "outputMode": {
+      "label": "Output Mode",
+      "text": "Text",
+      "audio": "Audio",
+      "audioWarning": "⚠ Audio output uses significantly more tokens than text (~10–20× depending on response length). Monitor your usage carefully."
+    },
+    "silenceTimeout": {
+      "label": "Silence Timeout (seconds)",
+      "hint": "Stop streaming after this many seconds of silence to avoid wasting tokens."
+    },
+    "systemPrompt": {
+      "label": "System Prompt",
+      "placeholder": "Describe how you want the AI to give feedback on your music...",
+      "tooLong": "System prompt is very long and may be truncated by the API. Keep it under 4000 characters."
+    },
+    "language": {
+      "label": "Language"
+    },
+    "saveButton": "Save Settings",
+    "savingButton": "Saving...",
+    "savedMessage": "Saved!"
+  },
+  "audioControls": {
+    "audioSource": {
+      "sectionLabel": "Music / Audio Source",
+      "refreshTitle": "Refresh sources",
+      "placeholder": "Select audio source...",
+      "levelLabel": "Level"
+    },
+    "voicePrompt": {
+      "sectionLabel": "Voice Prompt Input",
+      "noMic": "None — type questions instead",
+      "hint": "Speak to ask the AI questions about your audio",
+      "levelLabel": "Level"
+    },
+    "errors": {
+      "deviceConflict": "Voice prompt mic and audio source must be different devices."
+    },
+    "startButton": "Start Streaming",
+    "stopButton": "Stop Streaming"
+  },
+  "transcript": {
+    "title": "Conversation",
+    "copyTitle": "Copy transcript",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "copyError": "Copy failed",
+    "clearTitle": "Clear transcript",
+    "clear": "Clear",
+    "emptyState": "Start streaming audio to receive feedback",
+    "emptyHint": "The AI will respond when it detects a pause in the audio",
+    "roles": {
+      "assistant": "AI Feedback",
+      "user": "Your Audio"
+    }
+  },
+  "messageInput": {
+    "placeholder": "Ask a question about your music… (Enter to send)",
+    "sendTitle": "Send (Enter)"
+  },
+  "statusBar": {
+    "streaming": "Streaming",
+    "reconnect": "Reconnect",
+    "status": {
+      "connected": "Connected",
+      "connecting": "Connecting...",
+      "error": "Error",
+      "disconnected": "Disconnected"
+    }
+  }
+}

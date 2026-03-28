@@ -1,0 +1,102 @@
+{
+  "language": "Hindi",
+  "app": {
+    "name": "AI Streamer"
+  },
+  "sidebar": {
+    "settingsTitle": "सेटिंग्स",
+    "howItWorks": "यह कैसे काम करता है",
+    "steps": {
+      "1": "सेटिंग्स में अपनी OpenAI API key दर्ज करें",
+      "2": "एक ऑडियो स्रोत चुनें (आपकी स्क्रीन/ऑडियो इंटरफेस)",
+      "3": "क्लिक करें",
+      "3action": "सुनना शुरू करें",
+      "4": "AI आपकी ट्रैक या मिक्स को सुनता है और विराम मिलने पर फीडबैक देता है"
+    },
+    "connectButton": "OpenAI से कनेक्ट करें",
+    "disconnectButton": "डिस्कनेक्ट करें",
+    "apiKeyHint": "पहले सेटिंग्स में अपनी API key जोड़ें"
+  },
+  "settings": {
+    "title": "सेटिंग्स",
+    "apiKey": {
+      "label": "OpenAI API Key",
+      "placeholder": "sk-...",
+      "show": "दिखाएँ",
+      "hide": "छिपाएँ",
+      "formatError": "यह OpenAI API key जैसी नहीं लगती (यह sk- से शुरू होनी चाहिए)",
+      "encryptionWarning": "एन्क्रिप्शन उपलब्ध नहीं है — key साधारण टेक्स्ट में संग्रहीत होगी"
+    },
+    "model": {
+      "label": "रीयलटाइम मॉडल",
+      "refreshTitle": "OpenAI से मॉडल सूची रीफ्रेश करें"
+    },
+    "outputMode": {
+      "label": "आउटपुट मोड",
+      "text": "टेक्स्ट",
+      "audio": "ऑडियो",
+      "audioWarning": "⚠ ऑडियो आउटपुट टेक्स्ट की तुलना में काफी अधिक tokens उपयोग करता है (~10–20×, उत्तर की लंबाई पर निर्भर). अपने उपयोग पर ध्यान रखें."
+    },
+    "silenceTimeout": {
+      "label": "साइलेंस टाइमआउट (सेकंड)",
+      "hint": "tokens बर्बाद होने से बचाने के लिए इतने सेकंड की चुप्पी के बाद सुनना रोक दें।"
+    },
+    "systemPrompt": {
+      "label": "सिस्टम प्रॉम्प्ट",
+      "placeholder": "बताइए कि आप चाहते हैं AI आपकी संगीत पर किस तरह फीडबैक दे..."
+    },
+    "language": {
+      "label": "भाषा"
+    },
+    "saveButton": "सेटिंग्स सहेजें",
+    "savingButton": "सहेजा जा रहा है...",
+    "savedMessage": "सहेजा गया!"
+  },
+  "audioControls": {
+    "audioSource": {
+      "sectionLabel": "संगीत / ऑडियो स्रोत",
+      "refreshTitle": "स्रोत रीफ्रेश करें",
+      "placeholder": "ऑडियो स्रोत चुनें...",
+      "levelLabel": "स्तर"
+    },
+    "voicePrompt": {
+      "sectionLabel": "वॉइस प्रश्न इनपुट",
+      "noMic": "कोई नहीं — इसके बजाय प्रश्न टाइप करें",
+      "hint": "अपनी ट्रैक, मिक्स या sound design के बारे में AI से प्रश्न पूछने के लिए बोलें",
+      "levelLabel": "स्तर"
+    },
+    "errors": {
+      "deviceConflict": "वॉइस प्रॉम्प्ट माइक्रोफोन और ऑडियो स्रोत अलग-अलग डिवाइस होने चाहिए।"
+    },
+    "startButton": "सुनना शुरू करें",
+    "stopButton": "सुनना रोकें"
+  },
+  "transcript": {
+    "title": "बातचीत",
+    "copyTitle": "ट्रांसक्रिप्ट कॉपी करें",
+    "copy": "कॉपी करें",
+    "copied": "कॉपी हो गया!",
+    "clearTitle": "ट्रांसक्रिप्ट साफ करें",
+    "clear": "साफ करें",
+    "emptyState": "फीडबैक पाने के लिए ऑडियो सुनना शुरू करें",
+    "emptyHint": "AI संगीत में विराम पहचानने पर जवाब देगा",
+    "roles": {
+      "assistant": "AI फीडबैक",
+      "user": "आपकी ट्रैक"
+    }
+  },
+  "messageInput": {
+    "placeholder": "अपने संगीत के बारे में प्रश्न पूछें… (भेजने के लिए Enter दबाएँ)",
+    "sendTitle": "भेजें (Enter)"
+  },
+  "statusBar": {
+    "streaming": "सुना जा रहा है",
+    "reconnect": "फिर से कनेक्ट करें",
+    "status": {
+      "connected": "कनेक्टेड",
+      "connecting": "कनेक्ट हो रहा है...",
+      "error": "त्रुटि",
+      "disconnected": "डिस्कनेक्टेड"
+    }
+  }
+}

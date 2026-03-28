@@ -10,6 +10,15 @@ beforeEach(async () => {
   useSettings = mod.useSettings
 })
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function mockFetch(models: { id: string }[], ok = true) {
+  return vi.fn().mockResolvedValue({
+    ok,
+    json: vi.fn().mockResolvedValue({ data: models })
+  })
+}
+
 describe('useSettings', () => {
   // ── Initial state ──────────────────────────────────────────────────────────
 
@@ -34,9 +43,21 @@ describe('useSettings', () => {
     expect(storageEncrypted.value).toBe(true)
   })
 
+  it('starts with the fallback realtime models list', () => {
+    const { realtimeModels } = useSettings()
+    expect(realtimeModels.value.length).toBeGreaterThan(0)
+    expect(realtimeModels.value[0].id).toContain('realtime')
+  })
+
+  it('starts with modelsLoading = false', () => {
+    const { modelsLoading } = useSettings()
+    expect(modelsLoading.value).toBe(false)
+  })
+
   // ── load() ─────────────────────────────────────────────────────────────────
 
   it('calls window.electronAPI.loadApiKey', async () => {
+    globalThis.fetch = mockFetch([])
     window.electronAPI.loadApiKey = vi.fn().mockResolvedValue({ key: null, encrypted: true })
     const { load } = useSettings()
     await load()
@@ -44,6 +65,7 @@ describe('useSettings', () => {
   })
 
   it('populates apiKey when the stored key is non-null', async () => {
+    globalThis.fetch = mockFetch([])
     window.electronAPI.loadApiKey = vi.fn().mockResolvedValue({ key: 'sk-saved', encrypted: true })
     const { apiKey, load } = useSettings()
     await load()
@@ -80,9 +102,29 @@ describe('useSettings', () => {
     expect(loadApiKey).toHaveBeenCalledTimes(1)
   })
 
+  it('fetches models from OpenAI when a key is loaded', async () => {
+    globalThis.fetch = mockFetch([{ id: 'gpt-4o-realtime-preview' }])
+    window.electronAPI.loadApiKey = vi.fn().mockResolvedValue({ key: 'sk-abc', encrypted: true })
+    const { load } = useSettings()
+    await load()
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      'https://api.openai.com/v1/models',
+      expect.objectContaining({ headers: { Authorization: 'Bearer sk-abc' } })
+    )
+  })
+
+  it('does not fetch models when no key is loaded', async () => {
+    globalThis.fetch = mockFetch([])
+    window.electronAPI.loadApiKey = vi.fn().mockResolvedValue({ key: null, encrypted: true })
+    const { load } = useSettings()
+    await load()
+    expect(globalThis.fetch).not.toHaveBeenCalled()
+  })
+
   // ── save() ─────────────────────────────────────────────────────────────────
 
   it('calls window.electronAPI.saveApiKey with the current apiKey', async () => {
+    globalThis.fetch = mockFetch([])
     window.electronAPI.saveApiKey = vi.fn().mockResolvedValue({ success: true })
     const { apiKey, save } = useSettings()
     apiKey.value = 'sk-tobeSaved'
@@ -90,10 +132,133 @@ describe('useSettings', () => {
     expect(window.electronAPI.saveApiKey).toHaveBeenCalledWith('sk-tobeSaved')
   })
 
+  it('trims the apiKey before saving', async () => {
+    globalThis.fetch = mockFetch([])
+    window.electronAPI.saveApiKey = vi.fn().mockResolvedValue({ success: true })
+    const { apiKey, save } = useSettings()
+    apiKey.value = '  sk-padded  '
+    await save()
+    expect(window.electronAPI.saveApiKey).toHaveBeenCalledWith('sk-padded')
+    expect(apiKey.value).toBe('sk-padded')
+  })
+
   it('calls saveApiKey with an empty string when apiKey is empty', async () => {
     window.electronAPI.saveApiKey = vi.fn().mockResolvedValue({ success: true })
     const { save } = useSettings()
     await save()
     expect(window.electronAPI.saveApiKey).toHaveBeenCalledWith('')
+  })
+
+  it('fetches models after saving', async () => {
+    globalThis.fetch = mockFetch([{ id: 'gpt-4o-realtime-preview' }])
+    window.electronAPI.saveApiKey = vi.fn().mockResolvedValue({ success: true })
+    const { apiKey, save } = useSettings()
+    apiKey.value = 'sk-new'
+    await save()
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      'https://api.openai.com/v1/models',
+      expect.anything()
+    )
+  })
+
+  // ── fetchModels() ──────────────────────────────────────────────────────────
+
+  it('updates realtimeModels with realtime-filtered results from OpenAI', async () => {
+    globalThis.fetch = mockFetch([
+      { id: 'gpt-4o' },
+      { id: 'gpt-4o-realtime-preview' },
+      { id: 'gpt-4o-mini-realtime-preview' },
+      { id: 'whisper-1' }
+    ])
+    const { apiKey, realtimeModels, fetchModels } = useSettings()
+    apiKey.value = 'sk-abc'
+    await fetchModels()
+    expect(realtimeModels.value.map(m => m.id)).toEqual([
+      'gpt-4o-mini-realtime-preview',
+      'gpt-4o-realtime-preview'
+    ])
+  })
+
+  it('appends "(latest)" to undated model IDs', async () => {
+    globalThis.fetch = mockFetch([{ id: 'gpt-4o-realtime-preview' }])
+    const { apiKey, realtimeModels, fetchModels } = useSettings()
+    apiKey.value = 'sk-abc'
+    await fetchModels()
+    expect(realtimeModels.value[0].label).toContain('(latest)')
+  })
+
+  it('does not append "(latest)" to dated model IDs', async () => {
+    globalThis.fetch = mockFetch([{ id: 'gpt-4o-realtime-preview-2024-12-17' }])
+    const { apiKey, realtimeModels, fetchModels } = useSettings()
+    apiKey.value = 'sk-abc'
+    await fetchModels()
+    expect(realtimeModels.value[0].label).not.toContain('(latest)')
+  })
+
+  it('keeps existing models when the API returns no realtime models', async () => {
+    globalThis.fetch = mockFetch([{ id: 'gpt-4o' }, { id: 'whisper-1' }])
+    const { apiKey, realtimeModels, fetchModels } = useSettings()
+    apiKey.value = 'sk-abc'
+    const before = realtimeModels.value.map(m => m.id)
+    await fetchModels()
+    expect(realtimeModels.value.map(m => m.id)).toEqual(before)
+  })
+
+  it('keeps existing models when the API returns data: null', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({ data: null })
+    })
+    const { apiKey, realtimeModels, fetchModels } = useSettings()
+    apiKey.value = 'sk-abc'
+    const before = realtimeModels.value.map(m => m.id)
+    await fetchModels()
+    expect(realtimeModels.value.map(m => m.id)).toEqual(before)
+  })
+
+  it('keeps existing models when the API response is missing the data field', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({})
+    })
+    const { apiKey, realtimeModels, fetchModels } = useSettings()
+    apiKey.value = 'sk-abc'
+    const before = realtimeModels.value.map(m => m.id)
+    await fetchModels()
+    expect(realtimeModels.value.map(m => m.id)).toEqual(before)
+  })
+
+  it('keeps existing models when the fetch fails', async () => {
+    globalThis.fetch = vi.fn().mockRejectedValue(new Error('network error'))
+    const { apiKey, realtimeModels, fetchModels } = useSettings()
+    apiKey.value = 'sk-abc'
+    const before = realtimeModels.value.map(m => m.id)
+    await fetchModels()
+    expect(realtimeModels.value.map(m => m.id)).toEqual(before)
+  })
+
+  it('keeps existing models when the API returns a non-OK response', async () => {
+    globalThis.fetch = mockFetch([], false)
+    const { apiKey, realtimeModels, fetchModels } = useSettings()
+    apiKey.value = 'sk-abc'
+    const before = realtimeModels.value.map(m => m.id)
+    await fetchModels()
+    expect(realtimeModels.value.map(m => m.id)).toEqual(before)
+  })
+
+  it('does nothing when apiKey is empty', async () => {
+    globalThis.fetch = mockFetch([{ id: 'gpt-4o-realtime-preview' }])
+    const { fetchModels } = useSettings()
+    await fetchModels()
+    expect(globalThis.fetch).not.toHaveBeenCalled()
+  })
+
+  it('resets model selection to first available if current model is no longer in list', async () => {
+    globalThis.fetch = mockFetch([{ id: 'gpt-4o-mini-realtime-preview' }])
+    const { apiKey, model, fetchModels } = useSettings()
+    apiKey.value = 'sk-abc'
+    model.value = 'gpt-4o-realtime-preview' // not in fetched list
+    await fetchModels()
+    expect(model.value).toBe('gpt-4o-mini-realtime-preview')
   })
 })

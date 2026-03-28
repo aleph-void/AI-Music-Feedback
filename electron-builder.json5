@@ -6,18 +6,22 @@
     output: "release"
   },
   files: [
-    "dist/**/*",
-    "dist-electron/**/*"
+    "out/**/*"
   ],
   extraResources: [
     {
       from: "src/public",
       to: "public",
       filter: ["**/*"]
+    },
+    {
+      from: "resources/icon.png",
+      to: "icon.png"
     }
   ],
   mac: {
     target: ["dmg", "zip"],
+    icon: "resources/icon.png",
     category: "public.app-category.music",
     extendInfo: {
       NSAudioCaptureUsageDescription: "AI Streamer needs access to audio to stream your music to OpenAI for feedback.",
@@ -31,6 +35,7 @@
   },
   linux: {
     target: ["AppImage", "deb"],
+    icon: "resources/icon.png",
     category: "Audio"
   },
   nsis: {

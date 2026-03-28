@@ -1,0 +1,102 @@
+{
+  "language": "Korean",
+  "app": {
+    "name": "AI Streamer"
+  },
+  "sidebar": {
+    "settingsTitle": "설정",
+    "howItWorks": "작동 방식",
+    "steps": {
+      "1": "설정에서 OpenAI API 키를 입력하세요",
+      "2": "오디오 소스(화면/오디오 인터페이스)를 선택하세요",
+      "3": "클릭",
+      "3action": "모니터링 시작",
+      "4": "AI가 당신의 트랙이나 믹스를 듣고, 멈춤이 감지되면 피드백을 제공합니다"
+    },
+    "connectButton": "OpenAI에 연결",
+    "disconnectButton": "연결 해제",
+    "apiKeyHint": "먼저 설정에서 API 키를 추가하세요"
+  },
+  "settings": {
+    "title": "설정",
+    "apiKey": {
+      "label": "OpenAI API 키",
+      "placeholder": "sk-...",
+      "show": "표시",
+      "hide": "숨기기",
+      "formatError": "OpenAI API 키 형식이 아닌 것 같습니다 (sk-로 시작해야 합니다)",
+      "encryptionWarning": "암호화를 사용할 수 없음 — 키가 평문으로 저장됩니다"
+    },
+    "model": {
+      "label": "실시간 모델",
+      "refreshTitle": "OpenAI에서 모델 목록 새로고침"
+    },
+    "outputMode": {
+      "label": "출력 모드",
+      "text": "텍스트",
+      "audio": "오디오",
+      "audioWarning": "⚠ 오디오 출력은 텍스트보다 훨씬 많은 토큰을 사용합니다 (~10–20배, 응답 길이에 따라 다름). 사용량을 주의 깊게 확인하세요."
+    },
+    "silenceTimeout": {
+      "label": "무음 제한 시간(초)",
+      "hint": "토큰 낭비를 막기 위해 이 시간만큼 무음이 지속되면 모니터링을 중지합니다."
+    },
+    "systemPrompt": {
+      "label": "시스템 프롬프트",
+      "placeholder": "AI가 당신의 음악에 대해 어떤 방식으로 피드백하길 원하는지 설명하세요..."
+    },
+    "language": {
+      "label": "언어"
+    },
+    "saveButton": "설정 저장",
+    "savingButton": "저장 중...",
+    "savedMessage": "저장되었습니다!"
+  },
+  "audioControls": {
+    "audioSource": {
+      "sectionLabel": "음악 / 오디오 소스",
+      "refreshTitle": "소스 새로고침",
+      "placeholder": "오디오 소스를 선택하세요...",
+      "levelLabel": "레벨"
+    },
+    "voicePrompt": {
+      "sectionLabel": "음성 질문 입력",
+      "noMic": "없음 — 대신 질문을 입력하세요",
+      "hint": "말해서 AI에게 당신의 트랙, 믹스, 사운드 디자인에 관한 질문을 하세요",
+      "levelLabel": "레벨"
+    },
+    "errors": {
+      "deviceConflict": "음성 질문용 마이크와 오디오 소스는 서로 다른 장치여야 합니다."
+    },
+    "startButton": "모니터링 시작",
+    "stopButton": "모니터링 중지"
+  },
+  "transcript": {
+    "title": "대화",
+    "copyTitle": "대화 내용 복사",
+    "copy": "복사",
+    "copied": "복사됨!",
+    "clearTitle": "대화 내용 지우기",
+    "clear": "지우기",
+    "emptyState": "피드백을 받으려면 오디오 모니터링을 시작하세요",
+    "emptyHint": "AI는 음악에서 멈춤을 감지하면 응답합니다",
+    "roles": {
+      "assistant": "AI 피드백",
+      "user": "내 트랙"
+    }
+  },
+  "messageInput": {
+    "placeholder": "음악에 관해 질문하세요… (Enter로 전송)",
+    "sendTitle": "전송 (Enter)"
+  },
+  "statusBar": {
+    "streaming": "모니터링 중",
+    "reconnect": "다시 연결",
+    "status": {
+      "connected": "연결됨",
+      "connecting": "연결 중...",
+      "error": "오류",
+      "disconnected": "연결 끊김"
+    }
+  }
+}

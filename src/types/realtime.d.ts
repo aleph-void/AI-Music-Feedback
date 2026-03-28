@@ -8,9 +8,13 @@ export interface TranscriptMessage {
   timestamp: number
 }
 
+export type OutputMode = 'text' | 'audio'
+
 export interface RealtimeSessionConfig {
   apiKey: string
   systemPrompt: string
+  model: string
+  outputMode: OutputMode
 }
 
 // OpenAI Realtime API server event types

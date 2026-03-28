@@ -1,0 +1,102 @@
+{
+  "language": "German",
+  "app": {
+    "name": "AI Streamer"
+  },
+  "sidebar": {
+    "settingsTitle": "Einstellungen",
+    "howItWorks": "So funktioniert es",
+    "steps": {
+      "1": "Gib deinen OpenAI-API-Schlüssel in den Einstellungen ein",
+      "2": "Wähle eine Audioquelle (dein Bildschirm/deine Soundkarte)",
+      "3": "Klicke auf",
+      "3action": "Streaming starten",
+      "4": "Die KI hört zu und gibt Feedback, wenn sie eine Pause erkennt"
+    },
+    "connectButton": "Mit OpenAI verbinden",
+    "disconnectButton": "Trennen",
+    "apiKeyHint": "Füge zuerst deinen API-Schlüssel in den Einstellungen hinzu"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "apiKey": {
+      "label": "OpenAI-API-Schlüssel",
+      "placeholder": "sk-...",
+      "show": "Anzeigen",
+      "hide": "Ausblenden",
+      "formatError": "Das sieht nicht wie ein OpenAI-API-Schlüssel aus (sollte mit sk- beginnen)",
+      "encryptionWarning": "Verschlüsselung nicht verfügbar — Schlüssel wird im Klartext gespeichert"
+    },
+    "model": {
+      "label": "Echtzeitmodell",
+      "refreshTitle": "Modellliste von OpenAI aktualisieren"
+    },
+    "outputMode": {
+      "label": "Ausgabemodus",
+      "text": "Text",
+      "audio": "Audio",
+      "audioWarning": "⚠ Die Audioausgabe verwendet deutlich mehr Tokens als Text (~10–20× abhängig von der Antwortlänge). Überwache deine Nutzung sorgfältig."
+    },
+    "silenceTimeout": {
+      "label": "Stille-Timeout (Sekunden)",
+      "hint": "Streaming nach dieser Anzahl von Sekunden ohne Ton stoppen, um Tokens nicht zu verschwenden."
+    },
+    "systemPrompt": {
+      "label": "System-Prompt",
+      "placeholder": "Beschreibe, wie die KI Feedback zu deiner Musik geben soll..."
+    },
+    "language": {
+      "label": "Sprache"
+    },
+    "saveButton": "Einstellungen speichern",
+    "savingButton": "Speichern...",
+    "savedMessage": "Gespeichert!"
+  },
+  "audioControls": {
+    "audioSource": {
+      "sectionLabel": "Musik / Audioquelle",
+      "refreshTitle": "Quellen aktualisieren",
+      "placeholder": "Audioquelle auswählen...",
+      "levelLabel": "Pegel"
+    },
+    "voicePrompt": {
+      "sectionLabel": "Spracheingabe",
+      "noMic": "Keine — stattdessen Fragen eingeben",
+      "hint": "Sprich, um der KI Fragen zu deinem Audio zu stellen",
+      "levelLabel": "Pegel"
+    },
+    "errors": {
+      "deviceConflict": "Mikrofon für Spracheingabe und Audioquelle müssen unterschiedliche Geräte sein."
+    },
+    "startButton": "Streaming starten",
+    "stopButton": "Streaming stoppen"
+  },
+  "transcript": {
+    "title": "Konversation",
+    "copyTitle": "Transkript kopieren",
+    "copy": "Kopieren",
+    "copied": "Kopiert!",
+    "clearTitle": "Transkript löschen",
+    "clear": "Löschen",
+    "emptyState": "Starte das Audio-Streaming, um Feedback zu erhalten",
+    "emptyHint": "Die KI antwortet, wenn sie eine Pause im Audio erkennt",
+    "roles": {
+      "assistant": "KI-Feedback",
+      "user": "Dein Audio"
+    }
+  },
+  "messageInput": {
+    "placeholder": "Stelle eine Frage zu deiner Musik… (Enter zum Senden)",
+    "sendTitle": "Senden (Enter)"
+  },
+  "statusBar": {
+    "streaming": "Streaming läuft",
+    "reconnect": "Neu verbinden",
+    "status": {
+      "connected": "Verbunden",
+      "connecting": "Verbindung wird hergestellt...",
+      "error": "Fehler",
+      "disconnected": "Getrennt"
+    }
+  }
+}

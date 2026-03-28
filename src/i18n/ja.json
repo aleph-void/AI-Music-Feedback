@@ -1,0 +1,102 @@
+{
+  "language": "Japanese",
+  "app": {
+    "name": "AI Streamer"
+  },
+  "sidebar": {
+    "settingsTitle": "設定",
+    "howItWorks": "使い方",
+    "steps": {
+      "1": "設定で OpenAI API キーを入力します",
+      "2": "音声ソースを選択します（画面/オーディオインターフェース）",
+      "3": "次をクリック",
+      "3action": "解析開始",
+      "4": "AI は演奏やミックスを聴き取り、間を検出するとフィードバックします"
+    },
+    "connectButton": "OpenAI に接続",
+    "disconnectButton": "切断",
+    "apiKeyHint": "先に設定で API キーを追加してください"
+  },
+  "settings": {
+    "title": "設定",
+    "apiKey": {
+      "label": "OpenAI API キー",
+      "placeholder": "sk-...",
+      "show": "表示",
+      "hide": "非表示",
+      "formatError": "OpenAI API キーの形式ではないようです（sk- で始まる必要があります）",
+      "encryptionWarning": "暗号化を利用できません — キーは平文で保存されます"
+    },
+    "model": {
+      "label": "リアルタイムモデル",
+      "refreshTitle": "OpenAI からモデル一覧を更新"
+    },
+    "outputMode": {
+      "label": "出力モード",
+      "text": "テキスト",
+      "audio": "音声",
+      "audioWarning": "⚠ 音声出力はテキストより大幅に多くのトークンを使用します（応答の長さにより約10〜20倍）。使用量を注意して確認してください。"
+    },
+    "silenceTimeout": {
+      "label": "無音タイムアウト（秒）",
+      "hint": "トークンの無駄を防ぐため、この秒数だけ無音が続いたら解析を停止します。"
+    },
+    "systemPrompt": {
+      "label": "システムプロンプト",
+      "placeholder": "音楽へのフィードバックを AI にどう返してほしいか説明してください..."
+    },
+    "language": {
+      "label": "言語"
+    },
+    "saveButton": "設定を保存",
+    "savingButton": "保存中...",
+    "savedMessage": "保存しました！"
+  },
+  "audioControls": {
+    "audioSource": {
+      "sectionLabel": "音楽 / 音声ソース",
+      "refreshTitle": "ソースを更新",
+      "placeholder": "音声ソースを選択...",
+      "levelLabel": "レベル"
+    },
+    "voicePrompt": {
+      "sectionLabel": "音声質問入力",
+      "noMic": "なし — 代わりに質問を入力",
+      "hint": "話しかけて、トラックやミックスについて AI に質問できます",
+      "levelLabel": "レベル"
+    },
+    "errors": {
+      "deviceConflict": "音声入力用マイクと音声ソースは別々のデバイスである必要があります。"
+    },
+    "startButton": "解析開始",
+    "stopButton": "解析停止"
+  },
+  "transcript": {
+    "title": "会話",
+    "copyTitle": "文字起こしをコピー",
+    "copy": "コピー",
+    "copied": "コピーしました！",
+    "clearTitle": "文字起こしを消去",
+    "clear": "消去",
+    "emptyState": "音声解析を開始するとフィードバックを受け取れます",
+    "emptyHint": "AI は音の切れ目を検出すると応答します",
+    "roles": {
+      "assistant": "AI フィードバック",
+      "user": "あなたのトラック"
+    }
+  },
+  "messageInput": {
+    "placeholder": "音楽について質問する…（Enter で送信）",
+    "sendTitle": "送信（Enter）"
+  },
+  "statusBar": {
+    "streaming": "解析中",
+    "reconnect": "再接続",
+    "status": {
+      "connected": "接続済み",
+      "connecting": "接続中...",
+      "error": "エラー",
+      "disconnected": "切断済み"
+    }
+  }
+}

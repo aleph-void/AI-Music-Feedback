@@ -1,23 +1,24 @@
 <template>
   <div class="transcript-view">
     <div class="transcript-header">
-      <span class="title">Conversation</span>
+      <span class="title">{{ t('transcript.title') }}</span>
       <div class="header-actions">
         <button
           v-if="transcript.length > 0"
           class="action-btn"
+          :class="{ error: copyError }"
           @click="copyTranscript"
-          title="Copy transcript"
+          :title="t('transcript.copyTitle')"
         >
-          {{ copied ? 'Copied!' : 'Copy' }}
+          {{ copyError ? t('transcript.copyError') : copied ? t('transcript.copied') : t('transcript.copy') }}
         </button>
         <button
           v-if="transcript.length > 0"
           class="action-btn danger"
           @click="emit('clear')"
-          title="Clear transcript"
+          :title="t('transcript.clearTitle')"
         >
-          Clear
+          {{ t('transcript.clear') }}
         </button>
       </div>
     </div>
@@ -27,8 +28,8 @@
         v-if="transcript.length === 0"
         class="empty-state"
       >
-        <p>Start streaming audio to receive feedback</p>
-        <p class="hint">The AI will respond when it detects a pause in the audio</p>
+        <p>{{ t('transcript.emptyState') }}</p>
+        <p class="hint">{{ t('transcript.emptyHint') }}</p>
       </div>
 
       <div
@@ -38,7 +39,7 @@
         :class="[msg.role, { pending: !msg.complete }]"
       >
         <div class="message-role">
-          {{ msg.role === 'assistant' ? 'AI Feedback' : 'Your Audio' }}
+          {{ msg.role === 'assistant' ? t('transcript.roles.assistant') : t('transcript.roles.user') }}
         </div>
         <div class="message-content">{{ msg.content }}<span v-if="!msg.complete" class="cursor" /></div>
         <div class="message-time">{{ formatTime(msg.timestamp) }}</div>
@@ -49,6 +50,7 @@
 
 <script setup lang="ts">
 import { ref, watch, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { TranscriptMessage } from '@/types/realtime'
 
 const props = defineProps<{
@@ -59,8 +61,11 @@ const emit = defineEmits<{
   clear: []
 }>()
 
+const { t } = useI18n()
 const messagesEl = ref<HTMLElement | null>(null)
 const copied = ref(false)
+const copyError = ref(false)
+let copiedTimer: ReturnType<typeof setTimeout> | null = null
 
 // Auto-scroll to bottom when transcript changes
 watch(
@@ -96,9 +101,19 @@ async function copyTranscript() {
   const text = props.transcript
     .map(m => `[${m.role === 'assistant' ? 'AI' : 'You'}] ${m.content}`)
     .join('\n\n')
-  await navigator.clipboard.writeText(text)
-  copied.value = true
-  setTimeout(() => { copied.value = false }, 2000)
+  if (copiedTimer !== null) {
+    clearTimeout(copiedTimer)
+    copiedTimer = null
+  }
+  try {
+    await navigator.clipboard.writeText(text)
+    copied.value = true
+    copyError.value = false
+    copiedTimer = setTimeout(() => { copied.value = false; copiedTimer = null }, 2000)
+  } catch {
+    copyError.value = true
+    copiedTimer = setTimeout(() => { copyError.value = false; copiedTimer = null }, 3000)
+  }
 }
 </script>
 
@@ -151,6 +166,11 @@ async function copyTranscript() {
 .action-btn.danger:hover {
   border-color: var(--color-error);
   color: var(--color-error);
+}
+
+.action-btn.error {
+  border-color: var(--color-warning);
+  color: var(--color-warning);
 }
 
 .messages {

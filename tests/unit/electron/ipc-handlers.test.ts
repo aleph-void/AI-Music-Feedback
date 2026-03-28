@@ -3,18 +3,27 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // Capture handlers as they are registered
 const registeredHandlers: Record<string, (...args: unknown[]) => unknown> = {}
 
+const { mockShowSaveDialog, mockWriteFileSync } = vi.hoisted(() => ({
+  mockShowSaveDialog: vi.fn(),
+  mockWriteFileSync: vi.fn()
+}))
+
 vi.mock('electron', () => ({
   ipcMain: {
     handle: vi.fn((channel: string, handler: (...args: unknown[]) => unknown) => {
       registeredHandlers[channel] = handler
     })
   },
-  desktopCapturer: {
-    getSources: vi.fn()
-  },
   shell: {
     openExternal: vi.fn()
+  },
+  dialog: {
+    showSaveDialog: mockShowSaveDialog
   }
+}))
+
+vi.mock('fs', () => ({
+  writeFileSync: mockWriteFileSync
 }))
 
 vi.mock('../../../electron/main/store', () => ({
@@ -23,12 +32,11 @@ vi.mock('../../../electron/main/store', () => ({
   isEncryptionAvailable: vi.fn(() => true)
 }))
 
-import { ipcMain, desktopCapturer, shell } from 'electron'
+import { ipcMain, shell } from 'electron'
 import * as store from '../../../electron/main/store'
 import { registerIpcHandlers } from '../../../electron/main/ipc-handlers'
 
 const ipcMock = vi.mocked(ipcMain)
-const dcMock = vi.mocked(desktopCapturer)
 const shellMock = vi.mocked(shell)
 const storeMock = vi.mocked(store)
 
@@ -93,56 +101,6 @@ describe('IPC Handlers', () => {
     })
   })
 
-  // ── audio:get-sources ──────────────────────────────────────────────────────
-
-  describe('audio:get-sources', () => {
-    it('calls desktopCapturer.getSources with screen and window types', async () => {
-      dcMock.getSources.mockResolvedValue([])
-      await call('audio:get-sources')
-      expect(dcMock.getSources).toHaveBeenCalledWith(
-        expect.objectContaining({ types: expect.arrayContaining(['screen', 'window']) })
-      )
-    })
-
-    it('requests zero-size thumbnails to avoid overhead', async () => {
-      dcMock.getSources.mockResolvedValue([])
-      await call('audio:get-sources')
-      expect(dcMock.getSources).toHaveBeenCalledWith(
-        expect.objectContaining({ thumbnailSize: { width: 0, height: 0 } })
-      )
-    })
-
-    it('maps sources with screen: prefix to type "screen"', async () => {
-      dcMock.getSources.mockResolvedValue([
-        { id: 'screen:0:0', name: 'Entire Screen', thumbnail: null } as never
-      ])
-      const result = await call('audio:get-sources') as Array<{ type: string }>
-      expect(result[0].type).toBe('screen')
-    })
-
-    it('maps sources without screen: prefix to type "window"', async () => {
-      dcMock.getSources.mockResolvedValue([
-        { id: 'window:1234:0', name: 'Firefox', thumbnail: null } as never
-      ])
-      const result = await call('audio:get-sources') as Array<{ type: string }>
-      expect(result[0].type).toBe('window')
-    })
-
-    it('strips thumbnail data from returned objects', async () => {
-      dcMock.getSources.mockResolvedValue([
-        { id: 'screen:0:0', name: 'Screen', thumbnail: { toDataURL: () => 'data:...' } } as never
-      ])
-      const result = await call('audio:get-sources') as Array<Record<string, unknown>>
-      expect(result[0]).not.toHaveProperty('thumbnail')
-    })
-
-    it('returns an empty array when no sources are found', async () => {
-      dcMock.getSources.mockResolvedValue([])
-      const result = await call('audio:get-sources')
-      expect(result).toEqual([])
-    })
-  })
-
   // ── shell:open-external ────────────────────────────────────────────────────
 
   describe('shell:open-external', () => {
@@ -169,6 +127,58 @@ describe('IPC Handlers', () => {
     it('blocks ftp:// URLs', async () => {
       await call('shell:open-external', 'ftp://example.com')
       expect(shellMock.openExternal).not.toHaveBeenCalled()
+    })
+  })
+
+  // ── dialog:export-transcript ───────────────────────────────────────────────
+
+  describe('dialog:export-transcript', () => {
+    beforeEach(() => {
+      mockShowSaveDialog.mockResolvedValue({ filePath: '/home/user/transcript-2024-01-01.txt', canceled: false })
+      mockWriteFileSync.mockImplementation(() => {})
+    })
+
+    it('shows a save dialog with the provided default name', async () => {
+      await call('dialog:export-transcript', 'hello', 'transcript-2024-01-01.txt')
+      expect(mockShowSaveDialog).toHaveBeenCalledWith(
+        expect.objectContaining({ defaultPath: 'transcript-2024-01-01.txt' })
+      )
+    })
+
+    it('writes the content to the chosen file path', async () => {
+      await call('dialog:export-transcript', 'transcript content', 'transcript.txt')
+      expect(mockWriteFileSync).toHaveBeenCalledWith(
+        '/home/user/transcript-2024-01-01.txt',
+        'transcript content',
+        'utf-8'
+      )
+    })
+
+    it('returns { success: true, filePath } on success', async () => {
+      const result = await call('dialog:export-transcript', 'content', 'file.txt')
+      expect(result).toEqual({ success: true, filePath: '/home/user/transcript-2024-01-01.txt' })
+    })
+
+    it('returns { success: false, canceled: true } when dialog is canceled', async () => {
+      mockShowSaveDialog.mockResolvedValue({ filePath: undefined, canceled: true })
+      const result = await call('dialog:export-transcript', 'content', 'file.txt')
+      expect(result).toEqual({ success: false, canceled: true })
+      expect(mockWriteFileSync).not.toHaveBeenCalled()
+    })
+
+    it('returns { success: false, error } when writeFileSync throws', async () => {
+      mockWriteFileSync.mockImplementation(() => { throw new Error('disk full') })
+      const result = await call('dialog:export-transcript', 'content', 'file.txt') as { success: boolean; error: string }
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('disk full')
+    })
+
+    it('dialog filters include txt and md options', async () => {
+      await call('dialog:export-transcript', 'content', 'file.txt')
+      const opts = mockShowSaveDialog.mock.calls[0][0] as { filters: { extensions: string[] }[] }
+      const allExtensions = opts.filters.flatMap(f => f.extensions)
+      expect(allExtensions).toContain('txt')
+      expect(allExtensions).toContain('md')
     })
   })
 })

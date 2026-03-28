@@ -1,0 +1,102 @@
+{
+  "language": "Dutch",
+  "app": {
+    "name": "AI Streamer"
+  },
+  "sidebar": {
+    "settingsTitle": "Instellingen",
+    "howItWorks": "Hoe het werkt",
+    "steps": {
+      "1": "Voer je OpenAI API-sleutel in bij Instellingen",
+      "2": "Selecteer een audiobron (je scherm/audio-interface)",
+      "3": "Klik op",
+      "3action": "Luisteren starten",
+      "4": "De AI luistert naar je track of mix en geeft feedback wanneer er een pauze wordt gedetecteerd"
+    },
+    "connectButton": "Verbinden met OpenAI",
+    "disconnectButton": "Verbinding verbreken",
+    "apiKeyHint": "Voeg eerst je API-sleutel toe in Instellingen"
+  },
+  "settings": {
+    "title": "Instellingen",
+    "apiKey": {
+      "label": "OpenAI API-sleutel",
+      "placeholder": "sk-...",
+      "show": "Tonen",
+      "hide": "Verbergen",
+      "formatError": "Dit lijkt geen OpenAI API-sleutel te zijn (moet met sk- beginnen)",
+      "encryptionWarning": "Versleuteling niet beschikbaar — sleutel wordt als platte tekst opgeslagen"
+    },
+    "model": {
+      "label": "Realtime-model",
+      "refreshTitle": "Modellijst vernieuwen vanuit OpenAI"
+    },
+    "outputMode": {
+      "label": "Uitvoermodus",
+      "text": "Tekst",
+      "audio": "Audio",
+      "audioWarning": "⚠ Audio-uitvoer gebruikt aanzienlijk meer tokens dan tekst (~10–20× afhankelijk van de lengte van het antwoord). Houd je gebruik goed in de gaten."
+    },
+    "silenceTimeout": {
+      "label": "Stilte-time-out (seconden)",
+      "hint": "Stop het luisteren na dit aantal seconden stilte om geen tokens te verspillen."
+    },
+    "systemPrompt": {
+      "label": "Systeemprompt",
+      "placeholder": "Beschrijf hoe je wilt dat de AI feedback geeft op je muziek..."
+    },
+    "language": {
+      "label": "Taal"
+    },
+    "saveButton": "Instellingen opslaan",
+    "savingButton": "Opslaan...",
+    "savedMessage": "Opgeslagen!"
+  },
+  "audioControls": {
+    "audioSource": {
+      "sectionLabel": "Muziek / Audiobron",
+      "refreshTitle": "Bronnen vernieuwen",
+      "placeholder": "Selecteer audiobron...",
+      "levelLabel": "Niveau"
+    },
+    "voicePrompt": {
+      "sectionLabel": "Spraakinvoer",
+      "noMic": "Geen — typ in plaats daarvan vragen",
+      "hint": "Spreek om de AI vragen te stellen over je track, mix of sound design",
+      "levelLabel": "Niveau"
+    },
+    "errors": {
+      "deviceConflict": "De microfoon voor spraakinvoer en de audiobron moeten verschillende apparaten zijn."
+    },
+    "startButton": "Luisteren starten",
+    "stopButton": "Luisteren stoppen"
+  },
+  "transcript": {
+    "title": "Gesprek",
+    "copyTitle": "Transcript kopiëren",
+    "copy": "Kopiëren",
+    "copied": "Gekopieerd!",
+    "clearTitle": "Transcript wissen",
+    "clear": "Wissen",
+    "emptyState": "Start met luisteren naar audio om feedback te ontvangen",
+    "emptyHint": "De AI reageert wanneer er een pauze in je muziek wordt gedetecteerd",
+    "roles": {
+      "assistant": "AI-feedback",
+      "user": "Jouw track"
+    }
+  },
+  "messageInput": {
+    "placeholder": "Stel een vraag over je muziek… (Enter om te verzenden)",
+    "sendTitle": "Verzenden (Enter)"
+  },
+  "statusBar": {
+    "streaming": "Luistert",
+    "reconnect": "Opnieuw verbinden",
+    "status": {
+      "connected": "Verbonden",
+      "connecting": "Verbinden...",
+      "error": "Fout",
+      "disconnected": "Verbroken"
+    }
+  }
+}

@@ -11,6 +11,47 @@ let activeResponseId: string | null = null
 // Map from item_id to transcript message for delta accumulation
 const itemMap = new Map<string, TranscriptMessage>()
 
+// ── Audio playback ─────────────────────────────────────────────────────────
+// Each response.audio.delta chunk is scheduled as an AudioBufferSource node
+// against a running cursor so chunks play back-to-back without gaps.
+let playbackCtx: AudioContext | null = null
+let playbackCursor = 0
+
+function scheduleAudioChunk(base64: string): void {
+  if (!playbackCtx || playbackCtx.state === 'closed') {
+    playbackCtx = new AudioContext({ sampleRate: 24000 })
+    playbackCursor = playbackCtx.currentTime
+  }
+
+  // Decode base64 PCM16 → Float32
+  const raw = atob(base64)
+  const bytes = new Uint8Array(raw.length)
+  for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i)
+  const pcm16 = new Int16Array(bytes.buffer)
+  const float32 = new Float32Array(pcm16.length)
+  for (let i = 0; i < pcm16.length; i++) float32[i] = pcm16[i] / 32768
+
+  const audioBuf = playbackCtx.createBuffer(1, float32.length, 24000)
+  audioBuf.getChannelData(0).set(float32)
+
+  const source = playbackCtx.createBufferSource()
+  source.buffer = audioBuf
+  source.connect(playbackCtx.destination)
+
+  // Schedule at cursor; if we've fallen behind real-time, play immediately
+  const startAt = Math.max(playbackCtx.currentTime, playbackCursor)
+  source.start(startAt)
+  playbackCursor = startAt + audioBuf.duration
+}
+
+function stopPlayback(): void {
+  playbackCtx?.close()
+  playbackCtx = null
+  playbackCursor = 0
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
 function generateId(): string {
   return Math.random().toString(36).slice(2, 10)
 }
@@ -42,12 +83,21 @@ export function useRealtimeApi() {
     status.value = 'connecting'
     statusMessage.value = 'Connecting to OpenAI...'
 
-    // Browser WebSocket: pass API key as subprotocol (documented for browser contexts)
+    // Browser WebSocket: pass API key as subprotocol (documented for browser contexts).
+    // Trim the key — leading/trailing whitespace is not valid in subprotocol tokens
+    // (RFC 6455 requires RFC 2616 token chars; spaces and newlines are forbidden).
+    const apiKey = config.apiKey.replace(/\s+/g, '')
+    if (!apiKey) {
+      status.value = 'error'
+      statusMessage.value = 'API key is missing. Enter your key in Settings.'
+      return
+    }
+
     ws = new WebSocket(
-      'wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17',
+      `wss://api.openai.com/v1/realtime?model=${encodeURIComponent(config.model)}`,
       [
         'realtime',
-        `openai-insecure-api-key.${config.apiKey}`,
+        `openai-insecure-api-key.${apiKey}`,
         'openai-beta.realtime-v1'
       ]
     )
@@ -56,11 +106,16 @@ export function useRealtimeApi() {
       status.value = 'connected'
       statusMessage.value = 'Connected'
 
-      // Initialize the session
+      const isAudio = config.outputMode === 'audio'
+
       send({
         type: 'session.update',
         session: {
-          modalities: ['text'],
+          modalities: isAudio ? ['audio', 'text'] : ['text'],
+          ...(isAudio && {
+            output_audio_format: 'pcm16',
+            voice: 'alloy'
+          }),
           instructions: config.systemPrompt,
           input_audio_format: 'pcm16',
           input_audio_transcription: {
@@ -96,6 +151,7 @@ export function useRealtimeApi() {
       }
       ws = null
       activeResponseId = null
+      stopPlayback()
     }
   }
 
@@ -124,7 +180,6 @@ export function useRealtimeApi() {
       }
 
       case 'response.output_item.added': {
-        // A new output item (text message) is being started
         const item = event.item as Record<string, unknown>
         if (item?.type === 'message' && item?.role === 'assistant') {
           const itemId = item.id as string
@@ -132,6 +187,8 @@ export function useRealtimeApi() {
         }
         break
       }
+
+      // ── Text output events ───────────────────────────────────────────────
 
       case 'response.text.delta': {
         const itemId = event.item_id as string
@@ -155,6 +212,37 @@ export function useRealtimeApi() {
         break
       }
 
+      // ── Audio output events ──────────────────────────────────────────────
+
+      case 'response.audio.delta': {
+        scheduleAudioChunk(event.delta as string)
+        break
+      }
+
+      // Transcript of what the model is saying (audio mode equivalent of
+      // response.text.delta / response.text.done)
+      case 'response.audio_transcript.delta': {
+        const itemId = event.item_id as string
+        const delta = event.delta as string
+        const msg = itemMap.get(itemId)
+        if (msg) {
+          msg.content += delta
+        } else {
+          addOrUpdateMessage(itemId, 'assistant', delta, false)
+        }
+        break
+      }
+
+      case 'response.audio_transcript.done': {
+        const itemId = event.item_id as string
+        const msg = itemMap.get(itemId)
+        if (msg) {
+          msg.content = event.transcript as string
+          msg.complete = true
+        }
+        break
+      }
+
       case 'response.done':
         activeResponseId = null
         break
@@ -166,6 +254,23 @@ export function useRealtimeApi() {
         break
       }
     }
+  }
+
+  function sendText(text: string) {
+    const trimmed = text.trim()
+    if (!trimmed || !ws || ws.readyState !== WebSocket.OPEN) return
+    const id = generateId()
+    addOrUpdateMessage(id, 'user', trimmed, true)
+    send({
+      type: 'conversation.item.create',
+      item: {
+        id,
+        type: 'message',
+        role: 'user',
+        content: [{ type: 'input_text', text: trimmed }]
+      }
+    })
+    send({ type: 'response.create' })
   }
 
   function appendAudio(buffer: ArrayBuffer) {
@@ -199,6 +304,7 @@ export function useRealtimeApi() {
     status.value = 'disconnected'
     statusMessage.value = ''
     activeResponseId = null
+    stopPlayback()
   }
 
   function clearTranscript() {
@@ -213,6 +319,7 @@ export function useRealtimeApi() {
     connect,
     disconnect,
     appendAudio,
+    sendText,
     clearTranscript
   }
 }

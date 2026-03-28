@@ -6,22 +6,23 @@
     </div>
     <div class="status-right">
       <span v-if="isCapturing" class="recording-badge">
-        &#9679; Streaming
+        &#9679; {{ t('statusBar.streaming') }}
       </span>
       <button
         v-if="status === 'error' || status === 'disconnected'"
         class="reconnect-btn"
-        @click="emit('reconnect')"
-        :disabled="!canReconnect"
+        @click="onReconnect"
+        :disabled="!canReconnect || reconnecting"
       >
-        Reconnect
+        {{ t('statusBar.reconnect') }}
       </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { ConnectionStatus } from '@/types/realtime'
 
 const props = defineProps<{
@@ -35,12 +36,23 @@ const emit = defineEmits<{
   reconnect: []
 }>()
 
+const { t } = useI18n()
+
+const reconnecting = ref(false)
+
+function onReconnect() {
+  if (reconnecting.value) return
+  reconnecting.value = true
+  emit('reconnect')
+  setTimeout(() => { reconnecting.value = false }, 2000)
+}
+
 const statusLabel = computed(() => {
   switch (props.status) {
-    case 'connected': return 'Connected'
-    case 'connecting': return 'Connecting...'
-    case 'error': return 'Error'
-    default: return 'Disconnected'
+    case 'connected': return t('statusBar.status.connected')
+    case 'connecting': return t('statusBar.status.connecting')
+    case 'error': return t('statusBar.status.error')
+    default: return t('statusBar.status.disconnected')
   }
 })
 </script>

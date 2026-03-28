@@ -1,0 +1,102 @@
+{
+  "language": "Chinese (Simplified, Mandarin)",
+  "app": {
+    "name": "AI Streamer"
+  },
+  "sidebar": {
+    "settingsTitle": "设置",
+    "howItWorks": "使用方式",
+    "steps": {
+      "1": "在设置中输入你的 OpenAI API 密钥",
+      "2": "选择音频来源（屏幕/音频接口）",
+      "3": "点击",
+      "3action": "开始监听",
+      "4": "AI 会监听你的演奏或混音，并在检测到停顿时提供反馈"
+    },
+    "connectButton": "连接到 OpenAI",
+    "disconnectButton": "断开连接",
+    "apiKeyHint": "请先在设置中添加 API 密钥"
+  },
+  "settings": {
+    "title": "设置",
+    "apiKey": {
+      "label": "OpenAI API 密钥",
+      "placeholder": "sk-...",
+      "show": "显示",
+      "hide": "隐藏",
+      "formatError": "这看起来不像 OpenAI API 密钥（应以 sk- 开头）",
+      "encryptionWarning": "无法加密 — 密钥将以明文存储"
+    },
+    "model": {
+      "label": "实时模型",
+      "refreshTitle": "从 OpenAI 刷新模型列表"
+    },
+    "outputMode": {
+      "label": "输出模式",
+      "text": "文本",
+      "audio": "音频",
+      "audioWarning": "⚠ 音频输出消耗的令牌数远高于文本（约为 10–20 倍，取决于回复长度）。请仔细监控使用量。"
+    },
+    "silenceTimeout": {
+      "label": "静音超时（秒）",
+      "hint": "静音达到该秒数后停止监听，以避免浪费令牌。"
+    },
+    "systemPrompt": {
+      "label": "系统提示词",
+      "placeholder": "描述你希望 AI 如何对你的音乐提供反馈..."
+    },
+    "language": {
+      "label": "语言"
+    },
+    "saveButton": "保存设置",
+    "savingButton": "保存中...",
+    "savedMessage": "已保存！"
+  },
+  "audioControls": {
+    "audioSource": {
+      "sectionLabel": "音乐 / 音频来源",
+      "refreshTitle": "刷新来源",
+      "placeholder": "选择音频来源...",
+      "levelLabel": "电平"
+    },
+    "voicePrompt": {
+      "sectionLabel": "语音提问",
+      "noMic": "无 — 改为输入问题",
+      "hint": "说话即可向 AI 询问你的编曲、混音或音色设计",
+      "levelLabel": "电平"
+    },
+    "errors": {
+      "deviceConflict": "语音提问麦克风和音频来源必须是不同设备。"
+    },
+    "startButton": "开始监听",
+    "stopButton": "停止监听"
+  },
+  "transcript": {
+    "title": "对话",
+    "copyTitle": "复制转录",
+    "copy": "复制",
+    "copied": "已复制！",
+    "clearTitle": "清除转录",
+    "clear": "清除",
+    "emptyState": "开始监听音频以接收反馈",
+    "emptyHint": "AI 会在检测到音乐停顿时作出回应",
+    "roles": {
+      "assistant": "AI 反馈",
+      "user": "你的音轨"
+    }
+  },
+  "messageInput": {
+    "placeholder": "询问有关你的音乐的问题…（按 Enter 发送）",
+    "sendTitle": "发送（Enter）"
+  },
+  "statusBar": {
+    "streaming": "监听中",
+    "reconnect": "重新连接",
+    "status": {
+      "connected": "已连接",
+      "connecting": "连接中...",
+      "error": "错误",
+      "disconnected": "已断开"
+    }
+  }
+}

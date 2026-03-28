@@ -1,54 +1,131 @@
 <template>
   <div class="settings-panel">
-    <h2>Settings</h2>
+    <h2>{{ t('settings.title') }}</h2>
 
     <div class="field">
-      <label for="api-key">OpenAI API Key</label>
+      <label for="api-key">{{ t('settings.apiKey.label') }}</label>
       <div class="input-row">
         <input
           id="api-key"
           v-model="settings.apiKey.value"
           :type="showKey ? 'text' : 'password'"
-          placeholder="sk-..."
+          :placeholder="t('settings.apiKey.placeholder')"
           autocomplete="off"
           spellcheck="false"
         />
-        <button class="icon-btn" @click="showKey = !showKey" :title="showKey ? 'Hide' : 'Show'">
+        <button class="icon-btn" @click="showKey = !showKey" :title="showKey ? t('settings.apiKey.hide') : t('settings.apiKey.show')">
           {{ showKey ? '🙈' : '👁' }}
         </button>
       </div>
-      <span v-if="!settings.storageEncrypted.value" class="warning">
-        ⚠ Encryption unavailable — key stored in plain text
+      <span v-if="keyFormatError" class="warning">⚠ {{ keyFormatError }}</span>
+      <span v-else-if="!settings.storageEncrypted.value" class="warning">
+        ⚠ {{ t('settings.apiKey.encryptionWarning') }}
       </span>
     </div>
 
     <div class="field">
-      <label for="system-prompt">System Prompt</label>
+      <div class="label-row">
+        <label for="model">{{ t('settings.model.label') }}</label>
+        <button
+          class="icon-btn"
+          @click="settings.fetchModels()"
+          :disabled="settings.modelsLoading.value || !settings.apiKey.value"
+          :title="t('settings.model.refreshTitle')"
+        >{{ settings.modelsLoading.value ? '…' : '↻' }}</button>
+      </div>
+      <select id="model" v-model="settings.model.value" :disabled="settings.modelsLoading.value">
+        <option v-for="m in settings.realtimeModels.value" :key="m.id" :value="m.id">
+          {{ m.label }}
+        </option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>{{ t('settings.outputMode.label') }}</label>
+      <div class="mode-toggle">
+        <button
+          class="mode-btn"
+          :class="{ active: settings.outputMode.value === 'text' }"
+          @click="settings.outputMode.value = 'text'"
+        >{{ t('settings.outputMode.text') }}</button>
+        <button
+          class="mode-btn"
+          :class="{ active: settings.outputMode.value === 'audio' }"
+          @click="settings.outputMode.value = 'audio'"
+        >{{ t('settings.outputMode.audio') }}</button>
+      </div>
+      <div v-if="settings.outputMode.value === 'audio'" class="audio-warning">
+        {{ t('settings.outputMode.audioWarning') }}
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="audio-timeout">{{ t('settings.silenceTimeout.label') }}</label>
+      <input
+        id="audio-timeout"
+        v-model.number="settings.audioTimeoutSeconds.value"
+        type="number"
+        min="1"
+        step="1"
+      />
+      <span class="hint">{{ t('settings.silenceTimeout.hint') }}</span>
+    </div>
+
+    <div class="field">
+      <div class="label-row">
+        <label for="system-prompt">{{ t('settings.systemPrompt.label') }}</label>
+        <span
+          class="char-count"
+          :class="{ warn: settings.systemPrompt.value.length > 3000, over: settings.systemPrompt.value.length > 4000 }"
+        >{{ settings.systemPrompt.value.length }} / 4000</span>
+      </div>
       <textarea
         id="system-prompt"
         v-model="settings.systemPrompt.value"
         rows="5"
-        placeholder="Describe how you want the AI to give feedback on your music..."
+        :placeholder="t('settings.systemPrompt.placeholder')"
       />
+      <span v-if="settings.systemPrompt.value.length > 4000" class="warning">
+        ⚠ {{ t('settings.systemPrompt.tooLong') }}
+      </span>
+    </div>
+
+    <div class="field">
+      <label for="language">{{ t('settings.language.label') }}</label>
+      <select id="language" v-model="locale">
+        <option v-for="lang in availableLocales" :key="lang.code" :value="lang.code">
+          {{ lang.name }}
+        </option>
+      </select>
     </div>
 
     <div class="actions">
       <button class="primary-btn" @click="save" :disabled="saving">
-        {{ saving ? 'Saving...' : 'Save Settings' }}
+        {{ saving ? t('settings.savingButton') : t('settings.saveButton') }}
       </button>
-      <span v-if="saved" class="saved-msg">Saved!</span>
+      <span v-if="saved" class="saved-msg">{{ t('settings.savedMessage') }}</span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useSettings } from '@/composables/useSettings'
+import { availableLocales } from '@/i18n'
 
+const { t, locale } = useI18n({ useScope: 'global' })
 const settings = useSettings()
 const showKey = ref(false)
 const saving = ref(false)
 const saved = ref(false)
+
+const keyFormatError = computed(() => {
+  const k = settings.apiKey.value.replace(/\s+/g, '')
+  if (!k) return null
+  if (!k.startsWith('sk-')) return t('settings.apiKey.formatError')
+  return null
+})
 
 async function save() {
   saving.value = true
@@ -83,6 +160,12 @@ h2 {
   gap: 0.4rem;
 }
 
+.label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 label {
   font-size: 0.8rem;
   font-weight: 500;
@@ -95,6 +178,22 @@ label {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+}
+
+select {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+select:focus {
+  border-color: var(--accent);
 }
 
 input, textarea {
@@ -134,9 +233,65 @@ input:focus, textarea:focus {
   background: var(--bg-hover);
 }
 
+.hint {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.char-count {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.char-count.warn {
+  color: var(--color-warning);
+}
+
+.char-count.over {
+  color: var(--color-error);
+  font-weight: 600;
+}
+
 .warning {
   font-size: 0.78rem;
   color: var(--color-warning);
+}
+
+.mode-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.mode-btn {
+  flex: 1;
+  padding: 0.45rem 0;
+  background: var(--bg-input);
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.mode-btn:first-child {
+  border-right: 1px solid var(--border);
+}
+
+.mode-btn.active {
+  background: var(--accent);
+  color: white;
+}
+
+.audio-warning {
+  font-size: 0.78rem;
+  color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+  border-radius: 5px;
+  padding: 0.4rem 0.6rem;
+  line-height: 1.4;
 }
 
 .actions {

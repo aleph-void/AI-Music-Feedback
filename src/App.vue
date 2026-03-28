@@ -3,12 +3,12 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-header">
-        <span class="app-name">AI Streamer</span>
+        <span class="app-name">{{ t('app.name') }}</span>
         <button
           class="tab-toggle"
           :class="{ active: showSettings }"
           @click="showSettings = !showSettings"
-          title="Settings"
+          :title="t('sidebar.settingsTitle')"
         >
           &#9881;
         </button>
@@ -20,12 +20,12 @@
 
       <div v-else class="sidebar-content sidebar-info">
         <div class="info-block">
-          <p class="info-label">How it works</p>
+          <p class="info-label">{{ t('sidebar.howItWorks') }}</p>
           <ol class="info-steps">
-            <li>Enter your OpenAI API key in Settings</li>
-            <li>Select an audio source (your screen/soundcard)</li>
-            <li>Click <strong>Start Streaming</strong></li>
-            <li>The AI listens and gives feedback when it detects a pause</li>
+            <li>{{ t('sidebar.steps.1') }}</li>
+            <li>{{ t('sidebar.steps.2') }}</li>
+            <li>{{ t('sidebar.steps.3') }} <strong>{{ t('sidebar.steps.3action') }}</strong></li>
+            <li>{{ t('sidebar.steps.4') }}</li>
           </ol>
         </div>
 
@@ -36,22 +36,24 @@
             @click="connectToApi"
             :disabled="!settings.apiKey.value"
           >
-            Connect to OpenAI
+            {{ t('sidebar.connectButton') }}
           </button>
           <button
             v-else-if="realtimeApi.status.value === 'connected' || realtimeApi.status.value === 'connecting'"
             class="danger-btn"
             @click="realtimeApi.disconnect()"
           >
-            Disconnect
+            {{ t('sidebar.disconnectButton') }}
           </button>
           <p v-if="!settings.apiKey.value" class="key-hint">
-            Add your API key in Settings first
+            {{ t('sidebar.apiKeyHint') }}
           </p>
         </div>
       </div>
 
       <AudioControls
+        :audio-timeout="settings.audioTimeoutSeconds.value"
+        :connected="realtimeApi.status.value === 'connected'"
         @chunk="onAudioChunk"
         @stopped="onCaptureStopped"
       />
@@ -62,6 +64,10 @@
       <TranscriptView
         :transcript="realtimeApi.transcript.value"
         @clear="realtimeApi.clearTranscript()"
+      />
+      <MessageInput
+        :connected="realtimeApi.status.value === 'connected'"
+        @send="realtimeApi.sendText($event)"
       />
       <StatusBar
         :status="realtimeApi.status.value"
@@ -75,29 +81,41 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import SettingsPanel from '@/components/SettingsPanel.vue'
 import AudioControls from '@/components/AudioControls.vue'
 import TranscriptView from '@/components/TranscriptView.vue'
+import MessageInput from '@/components/MessageInput.vue'
 import StatusBar from '@/components/StatusBar.vue'
 import { useSettings } from '@/composables/useSettings'
 import { useAudioCapture } from '@/composables/useAudioCapture'
 import { useRealtimeApi } from '@/composables/useRealtimeApi'
 
+const { t } = useI18n()
 const showSettings = ref(false)
 const settings = useSettings()
 const audioCapture = useAudioCapture()
 const realtimeApi = useRealtimeApi()
 
+let cleanupExportListener: (() => void) | undefined
+
 onMounted(async () => {
   await settings.load()
+  cleanupExportListener = window.electronAPI?.onMenuExportTranscript(handleExportTranscript)
+})
+
+onUnmounted(() => {
+  cleanupExportListener?.()
 })
 
 function connectToApi() {
   if (!settings.apiKey.value) return
   realtimeApi.connect({
     apiKey: settings.apiKey.value,
-    systemPrompt: settings.systemPrompt.value
+    systemPrompt: settings.systemPrompt.value,
+    model: settings.model.value,
+    outputMode: settings.outputMode.value
   })
 }
 
@@ -108,6 +126,23 @@ function onAudioChunk(buffer: ArrayBuffer) {
 function onCaptureStopped() {
   // Optionally flush the audio buffer when capture stops
   // The server VAD will handle the final response
+}
+
+async function handleExportTranscript() {
+  const msgs = realtimeApi.transcript.value
+  if (msgs.length === 0) return
+
+  const lines = msgs.map(m => {
+    const time = new Date(m.timestamp).toLocaleTimeString([], {
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    })
+    const speaker = m.role === 'assistant' ? t('transcript.roles.assistant') : t('transcript.roles.user')
+    return `[${time}] ${speaker}:\n${m.content}`
+  })
+  const content = lines.join('\n\n---\n\n')
+  const date = new Date().toISOString().slice(0, 10)
+
+  await window.electronAPI?.exportTranscript(content, `transcript-${date}.txt`)
 }
 </script>
 

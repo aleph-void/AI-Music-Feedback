@@ -1,15 +1,22 @@
-import { app, BrowserWindow, session, desktopCapturer } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { registerIpcHandlers } from './ipc-handlers'
+import { setupMenu } from './menu'
 
 const isDev = !app.isPackaged
 
-function createWindow(): void {
+// Resolve icon relative to project root in dev, or app resources in production
+const iconPath = isDev
+  ? join(__dirname, '../../resources/icon.png')
+  : join(process.resourcesPath, 'icon.png')
+
+function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
     width: 900,
     height: 700,
     minWidth: 700,
     minHeight: 550,
+    icon: iconPath,
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -20,34 +27,21 @@ function createWindow(): void {
     }
   })
 
-  // Required to allow getDisplayMedia() calls from the renderer for audio capture.
-  // The handler provides a loopback audio source for system audio.
-  session.defaultSession.setDisplayMediaRequestHandler((_request, callback) => {
-    desktopCapturer.getSources({ types: ['screen'] }).then(sources => {
-      if (sources.length > 0) {
-        callback({
-          video: sources[0],
-          audio: 'loopback' // captures system/soundcard audio on Windows
-          // On macOS: requires Screen Recording permission
-          // On Linux: requires PipeWire
-        })
-      } else {
-        callback({})
-      }
-    })
-  })
-
   if (isDev && process.env['ELECTRON_RENDERER_URL']) {
     win.loadURL(process.env['ELECTRON_RENDERER_URL'])
     win.webContents.openDevTools({ mode: 'detach' })
   } else {
     win.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  return win
 }
 
 app.whenReady().then(() => {
   registerIpcHandlers()
-  createWindow()
+  let win: BrowserWindow | null = null
+  setupMenu(() => win)
+  win = createWindow()
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

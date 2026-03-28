@@ -1,0 +1,102 @@
+{
+  "language": "Polish",
+  "app": {
+    "name": "AI Streamer"
+  },
+  "sidebar": {
+    "settingsTitle": "Ustawienia",
+    "howItWorks": "Jak to działa",
+    "steps": {
+      "1": "Wprowadź klucz API OpenAI w Ustawieniach",
+      "2": "Wybierz źródło dźwięku (ekran/interfejs audio)",
+      "3": "Kliknij",
+      "3action": "Rozpocznij nasłuch",
+      "4": "AI słucha Twojego utworu lub miksu i przekazuje opinię, gdy wykryje przerwę"
+    },
+    "connectButton": "Połącz z OpenAI",
+    "disconnectButton": "Rozłącz",
+    "apiKeyHint": "Najpierw dodaj klucz API w Ustawieniach"
+  },
+  "settings": {
+    "title": "Ustawienia",
+    "apiKey": {
+      "label": "Klucz API OpenAI",
+      "placeholder": "sk-...",
+      "show": "Pokaż",
+      "hide": "Ukryj",
+      "formatError": "To nie wygląda jak klucz API OpenAI (powinien zaczynać się od sk-)",
+      "encryptionWarning": "Szyfrowanie niedostępne — klucz będzie przechowywany jako zwykły tekst"
+    },
+    "model": {
+      "label": "Model czasu rzeczywistego",
+      "refreshTitle": "Odśwież listę modeli z OpenAI"
+    },
+    "outputMode": {
+      "label": "Tryb wyjścia",
+      "text": "Tekst",
+      "audio": "Audio",
+      "audioWarning": "⚠ Wyjście audio zużywa znacznie więcej tokenów niż tekst (~10–20× w zależności od długości odpowiedzi). Uważnie monitoruj zużycie."
+    },
+    "silenceTimeout": {
+      "label": "Limit ciszy (sekundy)",
+      "hint": "Zatrzymaj nasłuch po tej liczbie sekund ciszy, aby nie marnować tokenów."
+    },
+    "systemPrompt": {
+      "label": "Prompt systemowy",
+      "placeholder": "Opisz, jak AI ma przekazywać opinię o Twojej muzyce..."
+    },
+    "language": {
+      "label": "Język"
+    },
+    "saveButton": "Zapisz ustawienia",
+    "savingButton": "Zapisywanie...",
+    "savedMessage": "Zapisano!"
+  },
+  "audioControls": {
+    "audioSource": {
+      "sectionLabel": "Muzyka / Źródło audio",
+      "refreshTitle": "Odśwież źródła",
+      "placeholder": "Wybierz źródło audio...",
+      "levelLabel": "Poziom"
+    },
+    "voicePrompt": {
+      "sectionLabel": "Wejście głosowe",
+      "noMic": "Brak — wpisuj pytania zamiast tego",
+      "hint": "Mów, aby zadawać AI pytania o Twój utwór, miks lub sound design",
+      "levelLabel": "Poziom"
+    },
+    "errors": {
+      "deviceConflict": "Mikrofon do pytań głosowych i źródło audio muszą być różnymi urządzeniami."
+    },
+    "startButton": "Rozpocznij nasłuch",
+    "stopButton": "Zatrzymaj nasłuch"
+  },
+  "transcript": {
+    "title": "Rozmowa",
+    "copyTitle": "Kopiuj transkrypcję",
+    "copy": "Kopiuj",
+    "copied": "Skopiowano!",
+    "clearTitle": "Wyczyść transkrypcję",
+    "clear": "Wyczyść",
+    "emptyState": "Rozpocznij nasłuch audio, aby otrzymać opinię",
+    "emptyHint": "AI odpowie, gdy wykryje przerwę w Twojej muzyce",
+    "roles": {
+      "assistant": "Opinia AI",
+      "user": "Twój utwór"
+    }
+  },
+  "messageInput": {
+    "placeholder": "Zadaj pytanie o swoją muzykę… (Enter, aby wysłać)",
+    "sendTitle": "Wyślij (Enter)"
+  },
+  "statusBar": {
+    "streaming": "Nasłuch",
+    "reconnect": "Połącz ponownie",
+    "status": {
+      "connected": "Połączono",
+      "connecting": "Łączenie...",
+      "error": "Błąd",
+      "disconnected": "Rozłączono"
+    }
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "language": "French",
+  "app": {
+    "name": "AI Streamer"
+  },
+  "sidebar": {
+    "settingsTitle": "Paramètres",
+    "howItWorks": "Comment ça fonctionne",
+    "steps": {
+      "1": "Entrez votre clé API OpenAI dans les paramètres",
+      "2": "Sélectionnez une source audio (votre écran/carte son)",
+      "3": "Cliquez sur",
+      "3action": "Démarrer le streaming",
+      "4": "L'IA écoute et donne un retour lorsqu'elle détecte une pause"
+    },
+    "connectButton": "Se connecter à OpenAI",
+    "disconnectButton": "Se déconnecter",
+    "apiKeyHint": "Ajoutez d'abord votre clé API dans les paramètres"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "apiKey": {
+      "label": "Clé API OpenAI",
+      "placeholder": "sk-...",
+      "show": "Afficher",
+      "hide": "Masquer",
+      "formatError": "Cela ne ressemble pas à une clé API OpenAI (doit commencer par sk-)",
+      "encryptionWarning": "Chiffrement indisponible — la clé est stockée en clair"
+    },
+    "model": {
+      "label": "Modèle en temps réel",
+      "refreshTitle": "Actualiser la liste des modèles depuis OpenAI"
+    },
+    "outputMode": {
+      "label": "Mode de sortie",
+      "text": "Texte",
+      "audio": "Audio",
+      "audioWarning": "⚠ La sortie audio utilise beaucoup plus de tokens que le texte (~10–20× selon la longueur de la réponse). Surveillez attentivement votre utilisation."
+    },
+    "silenceTimeout": {
+      "label": "Délai de silence (secondes)",
+      "hint": "Arrêter le streaming après ce nombre de secondes de silence pour éviter de gaspiller des tokens."
+    },
+    "systemPrompt": {
+      "label": "Prompt système",
+      "placeholder": "Décrivez comment vous souhaitez que l'IA donne un retour sur votre musique..."
+    },
+    "language": {
+      "label": "Langue"
+    },
+    "saveButton": "Enregistrer les paramètres",
+    "savingButton": "Enregistrement...",
+    "savedMessage": "Enregistré !"
+  },
+  "audioControls": {
+    "audioSource": {
+      "sectionLabel": "Musique / Source audio",
+      "refreshTitle": "Actualiser les sources",
+      "placeholder": "Sélectionnez une source audio...",
+      "levelLabel": "Niveau"
+    },
+    "voicePrompt": {
+      "sectionLabel": "Entrée vocale",
+      "noMic": "Aucun — tapez des questions à la place",
+      "hint": "Parlez pour poser des questions à l'IA sur votre audio",
+      "levelLabel": "Niveau"
+    },
+    "errors": {
+      "deviceConflict": "Le micro de commande vocale et la source audio doivent être des appareils différents."
+    },
+    "startButton": "Démarrer le streaming",
+    "stopButton": "Arrêter le streaming"
+  },
+  "transcript": {
+    "title": "Conversation",
+    "copyTitle": "Copier la transcription",
+    "copy": "Copier",
+    "copied": "Copié !",
+    "clearTitle": "Effacer la transcription",
+    "clear": "Effacer",
+    "emptyState": "Démarrez le streaming audio pour recevoir un retour",
+    "emptyHint": "L'IA répondra lorsqu'elle détectera une pause dans l'audio",
+    "roles": {
+      "assistant": "Retour de l'IA",
+      "user": "Votre audio"
+    }
+  },
+  "messageInput": {
+    "placeholder": "Posez une question sur votre musique… (Entrée pour envoyer)",
+    "sendTitle": "Envoyer (Entrée)"
+  },
+  "statusBar": {
+    "streaming": "En streaming",
+    "reconnect": "Reconnecter",
+    "status": {
+      "connected": "Connecté",
+      "connecting": "Connexion...",
+      "error": "Erreur",
+      "disconnected": "Déconnecté"
+    }
+  }
+}

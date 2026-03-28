@@ -142,6 +142,44 @@ describe('TranscriptView', () => {
     expect(w.find('.action-btn:not(.danger)').text()).toBe('Copied!')
   })
 
+  it('resets "Copied!" and shows "Copied!" again if Copy is clicked a second time', async () => {
+    vi.useFakeTimers()
+    const w = mount0([makeMsg()])
+    const copyBtn = () => w.find('.action-btn:not(.danger)')
+    await copyBtn().trigger('click')
+    await w.vm.$nextTick()
+    expect(copyBtn().text()).toBe('Copied!')
+    // Click again before the 2s timer fires
+    await copyBtn().trigger('click')
+    await w.vm.$nextTick()
+    expect(copyBtn().text()).toBe('Copied!')
+    vi.useRealTimers()
+  })
+
+  it('shows "Copy failed" when clipboard.writeText rejects', async () => {
+    ;(navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('Permission denied'))
+    const w = mount0([makeMsg()])
+    await w.find('.action-btn:not(.danger)').trigger('click')
+    await w.vm.$nextTick()
+    expect(w.find('.action-btn:not(.danger)').text()).toBe('Copy failed')
+  })
+
+  it('adds the "error" class to the Copy button when clipboard fails', async () => {
+    ;(navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('denied'))
+    const w = mount0([makeMsg()])
+    await w.find('.action-btn:not(.danger)').trigger('click')
+    await w.vm.$nextTick()
+    expect(w.find('.action-btn:not(.danger)').classes()).toContain('error')
+  })
+
+  it('formats timestamps correctly for valid dates', () => {
+    const w = mount0([makeMsg({ timestamp: new Date('2024-01-15T14:30:45').getTime() })])
+    const timeEl = w.find('.message-time')
+    expect(timeEl.exists()).toBe(true)
+    expect(timeEl.text()).not.toBe('')
+    expect(timeEl.text()).not.toContain('Invalid')
+  })
+
   // ── Conversation title ─────────────────────────────────────────────────────
 
   it('renders the "Conversation" title in the header', () => {

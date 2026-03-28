@@ -8,23 +8,40 @@ import { ref } from 'vue'
 // so useSettings() (called lazily inside component setup) always gets the
 // current state.
 
+const MOCK_MODELS = [
+  { id: 'gpt-4o-realtime-preview', label: 'gpt-4o-realtime-preview (latest)' },
+  { id: 'gpt-4o-mini-realtime-preview', label: 'gpt-4o-mini-realtime-preview (latest)' }
+]
+
 let mockState: {
   apiKey: ReturnType<typeof ref<string>>
+  model: ReturnType<typeof ref<string>>
+  outputMode: ReturnType<typeof ref<string>>
+  audioTimeoutSeconds: ReturnType<typeof ref<number>>
   systemPrompt: ReturnType<typeof ref<string>>
+  realtimeModels: ReturnType<typeof ref<typeof MOCK_MODELS>>
+  modelsLoading: ReturnType<typeof ref<boolean>>
   storageEncrypted: ReturnType<typeof ref<boolean>>
   isLoaded: ReturnType<typeof ref<boolean>>
   load: ReturnType<typeof vi.fn>
   save: ReturnType<typeof vi.fn>
+  fetchModels: ReturnType<typeof vi.fn>
 }
 
 function createMockState() {
   return {
     apiKey: ref(''),
+    model: ref('gpt-4o-realtime-preview'),
+    outputMode: ref('text'),
+    audioTimeoutSeconds: ref(5),
     systemPrompt: ref('default system prompt'),
+    realtimeModels: ref(MOCK_MODELS),
+    modelsLoading: ref(false),
     storageEncrypted: ref(true),
     isLoaded: ref(true),
     load: vi.fn().mockResolvedValue(undefined),
-    save: vi.fn().mockResolvedValue(undefined)
+    save: vi.fn().mockResolvedValue(undefined),
+    fetchModels: vi.fn().mockResolvedValue(undefined)
   }
 }
 
@@ -112,6 +129,78 @@ describe('SettingsPanel', () => {
     expect(w.find('.icon-btn').attributes('title')).toBe('Show')
     await w.find('.icon-btn').trigger('click')
     expect(w.find('.icon-btn').attributes('title')).toBe('Hide')
+  })
+
+  // ── System prompt character counter ───────────────────────────────────────
+
+  it('renders a character count for the system prompt', () => {
+    const w = mountPanel()
+    expect(w.find('.char-count').exists()).toBe(true)
+  })
+
+  it('character count reflects the current prompt length', () => {
+    mockState.systemPrompt.value = 'hello'
+    const w = mountPanel()
+    expect(w.find('.char-count').text()).toContain('5')
+  })
+
+  it('does not show the over-limit warning when prompt is short', () => {
+    mockState.systemPrompt.value = 'short'
+    const w = mountPanel()
+    expect(w.find('.warning').exists()).toBe(false)
+  })
+
+  it('shows over-limit warning when system prompt exceeds 4000 chars', () => {
+    mockState.systemPrompt.value = 'a'.repeat(4001)
+    const w = mountPanel()
+    expect(w.find('.warning').exists()).toBe(true)
+    expect(w.find('.warning').text()).toContain('4000')
+  })
+
+  it('char-count has "over" class when prompt exceeds 4000 chars', () => {
+    mockState.systemPrompt.value = 'a'.repeat(4001)
+    const w = mountPanel()
+    expect(w.find('.char-count').classes()).toContain('over')
+  })
+
+  it('char-count has "warn" class when prompt is between 3000 and 4000 chars', () => {
+    mockState.systemPrompt.value = 'a'.repeat(3500)
+    const w = mountPanel()
+    expect(w.find('.char-count').classes()).toContain('warn')
+    expect(w.find('.char-count').classes()).not.toContain('over')
+  })
+
+  // ── Language selector ──────────────────────────────────────────────────────
+
+  it('renders a language select dropdown', () => {
+    const w = mountPanel()
+    expect(w.find('#language').exists()).toBe(true)
+  })
+
+  it('language dropdown has at least one option', () => {
+    const w = mountPanel()
+    const options = w.find('#language').findAll('option')
+    expect(options.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('language dropdown contains an English option', () => {
+    const w = mountPanel()
+    const options = w.find('#language').findAll('option')
+    const texts = options.map(o => o.text())
+    expect(texts).toContain('English')
+  })
+
+  it('language dropdown defaults to English', () => {
+    const w = mountPanel()
+    const select = w.find('#language').element as HTMLSelectElement
+    expect(select.value).toBe('en')
+  })
+
+  it('options are driven by available locale files', () => {
+    const w = mountPanel()
+    // Each option value must be a locale code (non-empty string)
+    const options = w.find('#language').findAll('option')
+    options.forEach(o => expect(o.attributes('value')).toBeTruthy())
   })
 
   // ── Save interaction ───────────────────────────────────────────────────────

@@ -1,0 +1,144 @@
+name: Release
+
+# Runs when a version tag (e.g. v1.2.3) is pushed.
+# Tests must pass before any platform build starts.
+# Distributable artifacts are attached to a GitHub Release.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write  # needed to create the GitHub Release
+
+jobs:
+  # ── 1. Run the full test suite first ────────────────────────────────────────
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - run: npm test
+
+  # ── 2. Build on each platform (only if tests pass) ────────────────────────
+  build:
+    name: Build (${{ matrix.platform }})
+    needs: test
+    strategy:
+      fail-fast: false   # keep building other platforms even if one fails
+      matrix:
+        include:
+          - platform: linux
+            os: ubuntu-latest
+            pack_script: pack:linux
+
+          - platform: windows
+            os: windows-latest
+            pack_script: pack:win
+
+          # macos-latest is arm64 (M-series); macos-13 is the last x64 runner.
+          # Both are built so the release contains native binaries for each arch.
+          - platform: mac-arm64
+            os: macos-latest
+            pack_script: pack:mac
+
+          - platform: mac-x64
+            os: macos-13
+            pack_script: pack:mac
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Linux system dependencies
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y fakeroot dpkg
+
+      - run: npm ci
+
+      - name: Build and package
+        run: npm run ${{ matrix.pack_script }}
+        env:
+          # Used by electron-builder to upload to GitHub Releases when publish
+          # is configured; also suppresses "GH_TOKEN not set" warnings.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          # ── macOS code signing (optional) ──────────────────────────────────
+          # Set these secrets in repo Settings → Secrets if you have an Apple
+          # Developer certificate. Leave them unset to build unsigned (users
+          # will need to right-click → Open to bypass Gatekeeper).
+          CSC_LINK: ${{ secrets.MAC_CERT_BASE64 }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
+          # Skip auto-discovery of local keychains on the runner; rely solely
+          # on CSC_LINK if provided.
+          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.MAC_CERT_BASE64 != '' }}
+
+          # ── macOS notarization (optional) ──────────────────────────────────
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+          # ── Windows code signing (optional) ───────────────────────────────
+          # Provide a base64-encoded .p12 certificate and its password.
+          WIN_CSC_LINK: ${{ secrets.WIN_CERT_BASE64 }}
+          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CERT_PASSWORD }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.platform }}
+          # Collect distributable files only — skip the unpacked directory and
+          # builder metadata files.
+          path: |
+            release/*.dmg
+            release/*.zip
+            release/*.exe
+            release/*.AppImage
+            release/*.deb
+            release/*.blockmap
+          if-no-files-found: warn
+          retention-days: 3
+
+  # ── 3. Create the GitHub Release and attach all artifacts ─────────────────
+  release:
+    name: GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all platform artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          merge-multiple: true
+          path: release/
+
+      - name: List collected artifacts
+        run: ls -lh release/
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+          # Auto-generate release notes from merged PRs and commits since last tag.
+          generate_release_notes: true
+          # Mark as pre-release if the tag contains a pre-release identifier
+          # (e.g. v1.0.0-beta.1 → pre-release, v1.0.0 → release).
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          draft: false

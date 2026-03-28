@@ -10,6 +10,9 @@ type Status = 'disconnected' | 'connecting' | 'connected' | 'error'
 
 let settingsMock: {
   apiKey: ReturnType<typeof ref<string>>
+  model: ReturnType<typeof ref<string>>
+  outputMode: ReturnType<typeof ref<string>>
+  audioTimeoutSeconds: ReturnType<typeof ref<number>>
   systemPrompt: ReturnType<typeof ref<string>>
   storageEncrypted: ReturnType<typeof ref<boolean>>
   isLoaded: ReturnType<typeof ref<boolean>>
@@ -24,6 +27,7 @@ let realtimeMock: {
   connect: ReturnType<typeof vi.fn>
   disconnect: ReturnType<typeof vi.fn>
   appendAudio: ReturnType<typeof vi.fn>
+  sendText: ReturnType<typeof vi.fn>
   clearTranscript: ReturnType<typeof vi.fn>
 }
 
@@ -39,6 +43,9 @@ let captureMock: {
 function createMocks() {
   settingsMock = {
     apiKey: ref(''),
+    model: ref('gpt-4o-realtime-preview'),
+    outputMode: ref('text'),
+    audioTimeoutSeconds: ref(5),
     systemPrompt: ref('My prompt'),
     storageEncrypted: ref(true),
     isLoaded: ref(false),
@@ -52,6 +59,7 @@ function createMocks() {
     connect: vi.fn(),
     disconnect: vi.fn(),
     appendAudio: vi.fn(),
+    sendText: vi.fn(),
     clearTranscript: vi.fn()
   }
   captureMock = {
@@ -82,6 +90,7 @@ vi.mock('@/components/AudioControls.vue', () => ({
   default: {
     name: 'AudioControlsStub',
     template: '<div class="audio-controls-stub" />',
+    props: ['connected'],
     emits: ['chunk', 'levelUpdate', 'stopped']
   }
 }))
@@ -101,12 +110,44 @@ vi.mock('@/components/StatusBar.vue', () => ({
     emits: ['reconnect']
   }
 }))
+vi.mock('@/components/MessageInput.vue', () => ({
+  default: {
+    name: 'MessageInputStub',
+    template: '<div class="message-input-stub" />',
+    props: ['connected'],
+    emits: ['send']
+  }
+}))
 
 import App from '@/App.vue'
+
+// ── window.electronAPI mock ────────────────────────────────────────────────
+// Simulates the contextBridge surface exposed by the preload script.
+
+let exportTranscriptMock: ReturnType<typeof vi.fn>
+let onMenuExportTranscriptMock: ReturnType<typeof vi.fn>
+let menuExportCallback: (() => void) | null = null
 
 beforeEach(() => {
   vi.clearAllMocks()
   createMocks()
+  menuExportCallback = null
+  exportTranscriptMock = vi.fn().mockResolvedValue({ success: true, filePath: '/tmp/transcript.txt' })
+  onMenuExportTranscriptMock = vi.fn((cb: () => void) => {
+    menuExportCallback = cb
+    return () => { menuExportCallback = null }
+  })
+  Object.defineProperty(window, 'electronAPI', {
+    value: {
+      loadApiKey: vi.fn().mockResolvedValue({ key: null, encrypted: true }),
+      saveApiKey: vi.fn().mockResolvedValue({ success: true }),
+      openExternal: vi.fn(),
+      exportTranscript: exportTranscriptMock,
+      onMenuExportTranscript: onMenuExportTranscriptMock
+    },
+    writable: true,
+    configurable: true
+  })
 })
 
 describe('App', () => {
@@ -194,7 +235,9 @@ describe('App', () => {
     await w.find('.connection-actions .primary-btn').trigger('click')
     expect(realtimeMock.connect).toHaveBeenCalledWith({
       apiKey: 'sk-abc',
-      systemPrompt: 'Feedback prompt'
+      systemPrompt: 'Feedback prompt',
+      model: 'gpt-4o-realtime-preview',
+      outputMode: 'text'
     })
   })
 
@@ -262,7 +305,9 @@ describe('App', () => {
     await w.findComponent({ name: 'StatusBarStub' }).vm.$emit('reconnect')
     expect(realtimeMock.connect).toHaveBeenCalledWith({
       apiKey: 'sk-test',
-      systemPrompt: 'My prompt'
+      systemPrompt: 'My prompt',
+      model: 'gpt-4o-realtime-preview',
+      outputMode: 'text'
     })
   })
 
@@ -272,5 +317,91 @@ describe('App', () => {
     const w = mountApp()
     await w.findComponent({ name: 'TranscriptViewStub' }).vm.$emit('clear')
     expect(realtimeMock.clearTranscript).toHaveBeenCalledTimes(1)
+  })
+
+  // ── MessageInput wiring ────────────────────────────────────────────────────
+
+  it('calls realtimeApi.sendText when MessageInput emits "send"', async () => {
+    const w = mountApp()
+    await w.findComponent({ name: 'MessageInputStub' }).vm.$emit('send', 'What about the reverb?')
+    expect(realtimeMock.sendText).toHaveBeenCalledWith('What about the reverb?')
+  })
+
+  it('passes connected=true to MessageInput when status is connected', () => {
+    realtimeMock.status.value = 'connected'
+    const w = mountApp()
+    expect(w.findComponent({ name: 'MessageInputStub' }).props('connected')).toBe(true)
+  })
+
+  it('passes connected=false to MessageInput when status is disconnected', () => {
+    realtimeMock.status.value = 'disconnected'
+    const w = mountApp()
+    expect(w.findComponent({ name: 'MessageInputStub' }).props('connected')).toBe(false)
+  })
+
+  it('passes connected=true to AudioControls when status is connected', () => {
+    realtimeMock.status.value = 'connected'
+    const w = mountApp()
+    expect(w.findComponent({ name: 'AudioControlsStub' }).props('connected')).toBe(true)
+  })
+
+  it('passes connected=false to AudioControls when status is disconnected', () => {
+    realtimeMock.status.value = 'disconnected'
+    const w = mountApp()
+    expect(w.findComponent({ name: 'AudioControlsStub' }).props('connected')).toBe(false)
+  })
+
+  it('passes connected=false to AudioControls when status is connecting', () => {
+    realtimeMock.status.value = 'connecting'
+    const w = mountApp()
+    expect(w.findComponent({ name: 'AudioControlsStub' }).props('connected')).toBe(false)
+  })
+
+  // ── Transcript export ──────────────────────────────────────────────────────
+
+  it('registers onMenuExportTranscript listener on mount', async () => {
+    mountApp()
+    await vi.waitFor(() => expect(onMenuExportTranscriptMock).toHaveBeenCalledTimes(1))
+  })
+
+  it('calls exportTranscript when the menu export event fires with transcript content', async () => {
+    realtimeMock.transcript.value = [
+      { id: '1', role: 'user', content: 'Hello', complete: true, timestamp: 1700000000000 }
+    ] as never[]
+    mountApp()
+    await vi.waitFor(() => expect(menuExportCallback).not.toBeNull())
+    await menuExportCallback!()
+    expect(exportTranscriptMock).toHaveBeenCalledTimes(1)
+    const [content, filename] = exportTranscriptMock.mock.calls[0] as [string, string]
+    expect(content).toContain('Hello')
+    expect(content).toContain('You')
+    expect(filename).toMatch(/^transcript-\d{4}-\d{2}-\d{2}\.txt$/)
+  })
+
+  it('does not call exportTranscript when the transcript is empty', async () => {
+    realtimeMock.transcript.value = [] as never[]
+    mountApp()
+    await vi.waitFor(() => expect(menuExportCallback).not.toBeNull())
+    await menuExportCallback!()
+    expect(exportTranscriptMock).not.toHaveBeenCalled()
+  })
+
+  it('formats assistant messages with "AI" speaker label', async () => {
+    realtimeMock.transcript.value = [
+      { id: '1', role: 'assistant', content: 'Great mix!', complete: true, timestamp: 1700000000000 }
+    ] as never[]
+    mountApp()
+    await vi.waitFor(() => expect(menuExportCallback).not.toBeNull())
+    await menuExportCallback!()
+    const [content] = exportTranscriptMock.mock.calls[0] as [string, string]
+    expect(content).toContain('AI')
+    expect(content).toContain('Great mix!')
+  })
+
+  it('removes the export listener on unmount', async () => {
+    const w = mountApp()
+    await vi.waitFor(() => expect(menuExportCallback).not.toBeNull())
+    w.unmount()
+    expect(menuExportCallback).toBeNull()
   })
 })

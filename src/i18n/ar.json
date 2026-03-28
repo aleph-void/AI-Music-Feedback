@@ -1,0 +1,102 @@
+{
+  "language": "Arabic",
+  "app": {
+    "name": "AI Streamer"
+  },
+  "sidebar": {
+    "settingsTitle": "الإعدادات",
+    "howItWorks": "كيف يعمل",
+    "steps": {
+      "1": "أدخل مفتاح OpenAI API الخاص بك في الإعدادات",
+      "2": "اختر مصدرًا صوتيًا (شاشتك/واجهة الصوت)",
+      "3": "انقر على",
+      "3action": "بدء الاستماع",
+      "4": "يستمع الذكاء الاصطناعي إلى مقطوعتك أو الميكس ويقدم ملاحظات عند اكتشاف توقف مؤقت"
+    },
+    "connectButton": "الاتصال بـ OpenAI",
+    "disconnectButton": "قطع الاتصال",
+    "apiKeyHint": "أضف مفتاح API أولاً في الإعدادات"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "apiKey": {
+      "label": "مفتاح OpenAI API",
+      "placeholder": "sk-...",
+      "show": "إظهار",
+      "hide": "إخفاء",
+      "formatError": "لا يبدو هذا كمفتاح OpenAI API (يجب أن يبدأ بـ sk-)",
+      "encryptionWarning": "التشفير غير متاح — سيتم تخزين المفتاح كنص عادي"
+    },
+    "model": {
+      "label": "نموذج الوقت الفعلي",
+      "refreshTitle": "تحديث قائمة النماذج من OpenAI"
+    },
+    "outputMode": {
+      "label": "وضع الإخراج",
+      "text": "نص",
+      "audio": "صوت",
+      "audioWarning": "⚠ يستخدم إخراج الصوت عدداً أكبر بكثير من الرموز مقارنة بالنص (~10–20× حسب طول الاستجابة). راقب استخدامك بعناية."
+    },
+    "silenceTimeout": {
+      "label": "مهلة الصمت (بالثواني)",
+      "hint": "أوقف الاستماع بعد هذا العدد من ثواني الصمت لتجنب إهدار الرموز."
+    },
+    "systemPrompt": {
+      "label": "توجيه النظام",
+      "placeholder": "صف كيف تريد من الذكاء الاصطناعي أن يقدم ملاحظات حول موسيقاك..."
+    },
+    "language": {
+      "label": "اللغة"
+    },
+    "saveButton": "حفظ الإعدادات",
+    "savingButton": "جارٍ الحفظ...",
+    "savedMessage": "تم الحفظ!"
+  },
+  "audioControls": {
+    "audioSource": {
+      "sectionLabel": "الموسيقى / مصدر الصوت",
+      "refreshTitle": "تحديث المصادر",
+      "placeholder": "اختر مصدر الصوت...",
+      "levelLabel": "المستوى"
+    },
+    "voicePrompt": {
+      "sectionLabel": "إدخال الأوامر الصوتية",
+      "noMic": "لا يوجد — اكتب الأسئلة بدلاً من ذلك",
+      "hint": "تحدث لطرح أسئلة على الذكاء الاصطناعي حول مقطوعتك أو الميكس أو تصميم الصوت",
+      "levelLabel": "المستوى"
+    },
+    "errors": {
+      "deviceConflict": "يجب أن يكون ميكروفون الأوامر الصوتية ومصدر الصوت جهازين مختلفين."
+    },
+    "startButton": "بدء الاستماع",
+    "stopButton": "إيقاف الاستماع"
+  },
+  "transcript": {
+    "title": "المحادثة",
+    "copyTitle": "نسخ النص",
+    "copy": "نسخ",
+    "copied": "تم النسخ!",
+    "clearTitle": "مسح النص",
+    "clear": "مسح",
+    "emptyState": "ابدأ الاستماع إلى الصوت للحصول على ملاحظات",
+    "emptyHint": "سيرد الذكاء الاصطناعي عندما يكتشف توقفاً في الموسيقى",
+    "roles": {
+      "assistant": "ملاحظات الذكاء الاصطناعي",
+      "user": "مقطوعتك"
+    }
+  },
+  "messageInput": {
+    "placeholder": "اطرح سؤالاً عن موسيقاك… (Enter للإرسال)",
+    "sendTitle": "إرسال (Enter)"
+  },
+  "statusBar": {
+    "streaming": "جارٍ الاستماع",
+    "reconnect": "إعادة الاتصال",
+    "status": {
+      "connected": "متصل",
+      "connecting": "جارٍ الاتصال...",
+      "error": "خطأ",
+      "disconnected": "غير متصل"
+    }
+  }
+}

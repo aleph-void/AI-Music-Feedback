@@ -128,4 +128,27 @@ describe('StatusBar', () => {
     // (the @click handler still fires in jsdom but the button state is correct)
     expect((w.find('.reconnect-btn').element as HTMLButtonElement).disabled).toBe(true)
   })
+
+  it('emits "reconnect" only once when clicked multiple times rapidly', async () => {
+    const w = mountBar({ status: 'disconnected', canReconnect: true })
+    await w.find('.reconnect-btn').trigger('click')
+    await w.find('.reconnect-btn').trigger('click')
+    await w.find('.reconnect-btn').trigger('click')
+    expect(w.emitted('reconnect')).toHaveLength(1)
+  })
+
+  it('disables the Reconnect button temporarily after it is clicked', async () => {
+    vi.useFakeTimers()
+    const w = mountBar({ status: 'disconnected', canReconnect: true })
+    await w.find('.reconnect-btn').trigger('click')
+    await w.vm.$nextTick()
+    expect((w.find('.reconnect-btn').element as HTMLButtonElement).disabled).toBe(true)
+    vi.useRealTimers()
+  })
+
+  it('shows a long statusMessage without crashing', () => {
+    const longMsg = 'A'.repeat(500)
+    const w = mountBar({ status: 'connected', statusMessage: longMsg })
+    expect(w.find('.status-text').text()).toBe(longMsg)
+  })
 })

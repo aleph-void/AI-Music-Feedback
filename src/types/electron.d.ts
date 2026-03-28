@@ -1,18 +1,22 @@
 export interface AudioSource {
   id: string
   name: string
-  type: 'screen' | 'window'
+  type: 'audioinput'
 }
 
 export interface ElectronAPI {
+  platform: string
   saveApiKey: (key: string) => Promise<{ success: boolean }>
   loadApiKey: () => Promise<{ key: string | null; encrypted: boolean }>
-  getAudioSources: () => Promise<AudioSource[]>
   openExternal: (url: string) => Promise<void>
+  exportTranscript: (content: string, defaultName: string) => Promise<{
+    success: boolean; canceled?: boolean; filePath?: string; error?: string
+  }>
+  onMenuExportTranscript: (callback: () => void) => () => void
 }
 
 declare global {
   interface Window {
-    electronAPI: ElectronAPI
+    electronAPI: ElectronAPI | undefined
   }
 }

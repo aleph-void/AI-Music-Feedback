@@ -1,0 +1,102 @@
+{
+  "language": "Chinese (Traditional, Cantonese)",
+  "app": {
+    "name": "AI Streamer"
+  },
+  "sidebar": {
+    "settingsTitle": "設定",
+    "howItWorks": "使用方式",
+    "steps": {
+      "1": "在設定中輸入你的 OpenAI API 金鑰",
+      "2": "選擇音訊來源（螢幕/音訊介面）",
+      "3": "按一下",
+      "3action": "開始監聽",
+      "4": "AI 會聆聽你的演奏或混音，並在偵測到停頓時提供回饋"
+    },
+    "connectButton": "連接到 OpenAI",
+    "disconnectButton": "中斷連線",
+    "apiKeyHint": "請先在設定中加入 API 金鑰"
+  },
+  "settings": {
+    "title": "設定",
+    "apiKey": {
+      "label": "OpenAI API 金鑰",
+      "placeholder": "sk-...",
+      "show": "顯示",
+      "hide": "隱藏",
+      "formatError": "這看起來不像 OpenAI API 金鑰（應以 sk- 開頭）",
+      "encryptionWarning": "無法加密 — 金鑰將以純文字儲存"
+    },
+    "model": {
+      "label": "即時模型",
+      "refreshTitle": "從 OpenAI 重新整理模型清單"
+    },
+    "outputMode": {
+      "label": "輸出模式",
+      "text": "文字",
+      "audio": "音訊",
+      "audioWarning": "⚠ 音訊輸出使用的 token 數量遠高於文字（約 10–20 倍，視回應長度而定）。請仔細留意你的用量。"
+    },
+    "silenceTimeout": {
+      "label": "靜音逾時（秒）",
+      "hint": "靜音持續達到這個秒數後停止監聽，以避免浪費 token。"
+    },
+    "systemPrompt": {
+      "label": "系統提示",
+      "placeholder": "描述你希望 AI 如何為你的音樂提供回饋..."
+    },
+    "language": {
+      "label": "語言"
+    },
+    "saveButton": "儲存設定",
+    "savingButton": "儲存中...",
+    "savedMessage": "已儲存！"
+  },
+  "audioControls": {
+    "audioSource": {
+      "sectionLabel": "音樂 / 音訊來源",
+      "refreshTitle": "重新整理來源",
+      "placeholder": "選擇音訊來源...",
+      "levelLabel": "電平"
+    },
+    "voicePrompt": {
+      "sectionLabel": "語音提問",
+      "noMic": "無 — 改為輸入問題",
+      "hint": "開口講話即可向 AI 詢問有關你的編曲、混音或音色設計",
+      "levelLabel": "電平"
+    },
+    "errors": {
+      "deviceConflict": "語音提問咪高峰與音訊來源必須是不同裝置。"
+    },
+    "startButton": "開始監聽",
+    "stopButton": "停止監聽"
+  },
+  "transcript": {
+    "title": "對話",
+    "copyTitle": "複製逐字稿",
+    "copy": "複製",
+    "copied": "已複製！",
+    "clearTitle": "清除逐字稿",
+    "clear": "清除",
+    "emptyState": "開始監聽音訊以接收回饋",
+    "emptyHint": "AI 會在偵測到音樂停頓時回應",
+    "roles": {
+      "assistant": "AI 回饋",
+      "user": "你的音軌"
+    }
+  },
+  "messageInput": {
+    "placeholder": "問一個關於你音樂的問題…（按 Enter 傳送）",
+    "sendTitle": "傳送（Enter）"
+  },
+  "statusBar": {
+    "streaming": "監聽中",
+    "reconnect": "重新連線",
+    "status": {
+      "connected": "已連線",
+      "connecting": "連線中...",
+      "error": "錯誤",
+      "disconnected": "已中斷"
+    }
+  }
+}

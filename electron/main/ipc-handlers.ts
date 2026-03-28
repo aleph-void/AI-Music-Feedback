@@ -1,4 +1,5 @@
-import { ipcMain, desktopCapturer, shell } from 'electron'
+import { ipcMain, shell, dialog } from 'electron'
+import { writeFileSync } from 'fs'
 import { saveApiKey, loadApiKey, isEncryptionAvailable } from './store'
 
 export function registerIpcHandlers(): void {
@@ -14,22 +15,31 @@ export function registerIpcHandlers(): void {
     }
   })
 
-  ipcMain.handle('audio:get-sources', async () => {
-    const sources = await desktopCapturer.getSources({
-      types: ['screen', 'window'],
-      thumbnailSize: { width: 0, height: 0 } // skip thumbnails for performance
-    })
-    return sources.map(s => ({
-      id: s.id,
-      name: s.name,
-      type: s.id.startsWith('screen') ? 'screen' : 'window'
-    }))
-  })
-
   ipcMain.handle('shell:open-external', (_event, url: string) => {
     // Only allow http/https URLs
     if (url.startsWith('https://') || url.startsWith('http://')) {
       shell.openExternal(url)
+    }
+  })
+
+  ipcMain.handle('dialog:export-transcript', async (_event, content: string, defaultName: string) => {
+    const { filePath, canceled } = await dialog.showSaveDialog({
+      title: 'Export Transcript',
+      defaultPath: defaultName,
+      filters: [
+        { name: 'Text Files', extensions: ['txt'] },
+        { name: 'Markdown Files', extensions: ['md'] },
+        { name: 'All Files', extensions: ['*'] }
+      ]
+    })
+
+    if (canceled || !filePath) return { success: false, canceled: true }
+
+    try {
+      writeFileSync(filePath, content, 'utf-8')
+      return { success: true, filePath }
+    } catch (err) {
+      return { success: false, error: (err as Error).message }
     }
   })
 }

@@ -1,7 +1,7 @@
 export interface AudioSource {
   id: string
   name: string
-  type: 'audioinput'
+  type: 'audioinput' | 'desktop'
 }
 
 export interface ElectronAPI {
@@ -13,6 +13,7 @@ export interface ElectronAPI {
     success: boolean; canceled?: boolean; filePath?: string; error?: string
   }>
   onMenuExportTranscript: (callback: () => void) => () => void
+  getDesktopSources: () => Promise<AudioSource[]>
 }
 
 declare global {

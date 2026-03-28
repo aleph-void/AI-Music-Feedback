@@ -58,6 +58,8 @@
       "sectionLabel": "Music / Audio Source",
       "refreshTitle": "Refresh sources",
       "placeholder": "Select audio source...",
+      "devicesGroup": "Audio Devices",
+      "desktopGroup": "Desktop Applications",
       "levelLabel": "Level"
     },
     "voicePrompt": {

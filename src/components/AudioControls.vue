@@ -13,9 +13,16 @@
         </button>
         <select v-model="selectedSourceId" :disabled="isCapturing || sources.length === 0">
           <option value="" disabled>{{ t('audioControls.audioSource.placeholder') }}</option>
-          <option v-for="s in sources" :key="s.id" :value="s.id">
-            🎤 {{ s.name }}
-          </option>
+          <optgroup v-if="deviceSources.length" :label="t('audioControls.audioSource.devicesGroup')">
+            <option v-for="s in deviceSources" :key="s.id" :value="s.id">
+              🎤 {{ s.name }}
+            </option>
+          </optgroup>
+          <optgroup v-if="desktopSources.length" :label="t('audioControls.audioSource.desktopGroup')">
+            <option v-for="s in desktopSources" :key="s.id" :value="s.id">
+              🖥️ {{ s.name }}
+            </option>
+          </optgroup>
         </select>
       </div>
       <div class="level-row" v-if="isCapturing">
@@ -29,9 +36,9 @@
     <div class="input-section">
       <p class="section-label">{{ t('audioControls.voicePrompt.sectionLabel') }}</p>
       <div class="source-row">
-        <select v-model="selectedMicId" :disabled="isCapturing || sources.length === 0">
+        <select v-model="selectedMicId" :disabled="isCapturing || deviceSources.length === 0">
           <option value="">{{ t('audioControls.voicePrompt.noMic') }}</option>
-          <option v-for="s in sources" :key="s.id" :value="s.id">
+          <option v-for="s in deviceSources" :key="s.id" :value="s.id">
             🎙 {{ s.name }}
           </option>
         </select>
@@ -96,6 +103,9 @@ const selectedSourceId = ref('')
 const selectedMicId = ref('')
 const audioLevel = ref(0)
 const micLevel = ref(0)
+
+const deviceSources = computed(() => sources.value.filter(s => s.type === 'audioinput'))
+const desktopSources = computed(() => sources.value.filter(s => s.type === 'desktop'))
 
 const micConflict = computed(() =>
   selectedMicId.value !== '' && selectedMicId.value === selectedSourceId.value

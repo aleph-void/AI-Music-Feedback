@@ -3,9 +3,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // Capture handlers as they are registered
 const registeredHandlers: Record<string, (...args: unknown[]) => unknown> = {}
 
-const { mockShowSaveDialog, mockWriteFileSync } = vi.hoisted(() => ({
+const { mockShowSaveDialog, mockWriteFileSync, mockGetSources } = vi.hoisted(() => ({
   mockShowSaveDialog: vi.fn(),
-  mockWriteFileSync: vi.fn()
+  mockWriteFileSync: vi.fn(),
+  mockGetSources: vi.fn()
 }))
 
 vi.mock('electron', () => ({
@@ -19,6 +20,9 @@ vi.mock('electron', () => ({
   },
   dialog: {
     showSaveDialog: mockShowSaveDialog
+  },
+  desktopCapturer: {
+    getSources: mockGetSources
   }
 }))
 
@@ -58,12 +62,13 @@ describe('IPC Handlers', () => {
     )
     storeMock.loadApiKey.mockReturnValue('sk-loaded')
     storeMock.isEncryptionAvailable.mockReturnValue(true)
+    mockGetSources.mockResolvedValue([])
 
     registerIpcHandlers()
   })
 
-  it('registers exactly 4 IPC channels', () => {
-    expect(Object.keys(registeredHandlers)).toHaveLength(4)
+  it('registers exactly 5 IPC channels', () => {
+    expect(Object.keys(registeredHandlers)).toHaveLength(5)
   })
 
   // ── store:save-api-key ─────────────────────────────────────────────────────
@@ -158,6 +163,37 @@ describe('IPC Handlers', () => {
     it('does not throw when passed a non-string argument', async () => {
       await expect(call('shell:open-external', 42)).resolves.toBeUndefined()
       expect(shellMock.openExternal).not.toHaveBeenCalled()
+    })
+  })
+
+  // ── desktop:get-sources ────────────────────────────────────────────────────
+
+  describe('desktop:get-sources', () => {
+    beforeEach(() => {
+      mockGetSources.mockResolvedValue([
+        { id: 'screen:0:0', name: 'Entire Screen', display_id: '', thumbnail: null, appIcon: null },
+        { id: 'window:100:0', name: 'My DAW', display_id: '', thumbnail: null, appIcon: null }
+      ])
+    })
+
+    it('returns mapped desktop sources with type "desktop"', async () => {
+      const result = await call('desktop:get-sources') as { id: string; name: string; type: string }[]
+      expect(result).toHaveLength(2)
+      expect(result[0]).toEqual({ id: 'screen:0:0', name: 'Entire Screen', type: 'desktop' })
+      expect(result[1]).toEqual({ id: 'window:100:0', name: 'My DAW', type: 'desktop' })
+    })
+
+    it('passes window and screen types to desktopCapturer', async () => {
+      await call('desktop:get-sources')
+      expect(mockGetSources).toHaveBeenCalledWith(
+        expect.objectContaining({ types: ['window', 'screen'] })
+      )
+    })
+
+    it('returns an empty array when desktopCapturer throws', async () => {
+      mockGetSources.mockRejectedValue(new Error('permission denied'))
+      const result = await call('desktop:get-sources')
+      expect(result).toEqual([])
     })
   })
 

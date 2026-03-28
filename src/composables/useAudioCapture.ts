@@ -26,13 +26,23 @@ export function useAudioCapture() {
       permStream.getTracks().forEach(t => t.stop())
 
       const devices = await navigator.mediaDevices.enumerateDevices()
-      sources.value = devices
+      const deviceSources = devices
         .filter(d => d.kind === 'audioinput')
         .map(d => ({
           id: d.deviceId,
           name: d.label || `Audio Input ${d.deviceId.slice(0, 8)}`,
           type: 'audioinput' as const
         }))
+
+      // Fetch desktop application/screen sources via Electron IPC
+      let desktopSources: typeof deviceSources = []
+      try {
+        desktopSources = (await window.electronAPI?.getDesktopSources()) ?? []
+      } catch {
+        // Desktop source enumeration failed — silently ignore
+      }
+
+      sources.value = [...deviceSources, ...desktopSources]
     } catch (err) {
       captureError.value = `Failed to enumerate audio sources: ${err}`
     }
@@ -47,14 +57,39 @@ export function useAudioCapture() {
     captureError.value = null
 
     try {
-      mediaStream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          deviceId: sourceId ? { exact: sourceId } : undefined,
-          echoCancellation: false,
-          noiseSuppression: false,
-          autoGainControl: false
+      const isDesktop = sources.value.find(s => s.id === sourceId)?.type === 'desktop'
+
+      if (isDesktop) {
+        // Desktop audio capture via Electron's desktopCapturer.
+        // Chromium requires the source ID to be validated through a video constraint;
+        // we request a minimal 1×1 video track and stop it immediately so only
+        // audio reaches the pipeline.
+        const constraints = {
+          audio: {
+            mandatory: { chromeMediaSource: 'desktop', chromeMediaSourceId: sourceId }
+          },
+          video: {
+            mandatory: {
+              chromeMediaSource: 'desktop',
+              chromeMediaSourceId: sourceId,
+              minWidth: 1, maxWidth: 1, minHeight: 1, maxHeight: 1
+            }
+          }
         }
-      })
+        mediaStream = await navigator.mediaDevices.getUserMedia(
+          constraints as unknown as MediaStreamConstraints
+        )
+        mediaStream.getVideoTracks().forEach(t => t.stop())
+      } else {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            deviceId: sourceId ? { exact: sourceId } : undefined,
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false
+          }
+        })
+      }
 
       // Create AudioContext at target sample rate (24kHz).
       // The worklet handles resampling if the OS doesn't support it natively.

@@ -1,5 +1,7 @@
 # AI Music Feedback
 
+[![Tests](https://github.com/nstarke/AI-Music-Feedback/actions/workflows/ci.yml/badge.svg)](https://github.com/nstarke/AI-Music-Feedback/actions/workflows/ci.yml)
+
 A desktop application that streams audio from your computer to the [OpenAI Realtime API](https://platform.openai.com/docs/guides/realtime) and receives live AI feedback on your music.
 
 > **GitHub:** https://github.com/nstarke/AI-Music-Feedback

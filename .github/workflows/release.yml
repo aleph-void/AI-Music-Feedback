@@ -72,32 +72,53 @@ jobs:
 
       - run: npm ci
 
-      - name: Build and package
-        run: npm run ${{ matrix.pack_script }}
+      # ── macOS code signing (optional) ────────────────────────────────────────
+      # Writes CSC_LINK / CSC_KEY_PASSWORD into $GITHUB_ENV only when the
+      # certificate secret is actually configured.  When the secret is absent
+      # GitHub resolves it to an empty string; passing that empty string
+      # directly as CSC_LINK causes electron-builder to treat the repo root as
+      # a certificate file path and fail with "not a file".
+      # The shell-level check below avoids setting the var at all when empty,
+      # which is the only reliable way to opt out of signing.
+      - name: Configure macOS code signing
+        if: runner.os == 'macOS'
         env:
-          # Used by electron-builder to upload to GitHub Releases when publish
-          # is configured; also suppresses "GH_TOKEN not set" warnings.
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-          # ── macOS code signing (optional) ──────────────────────────────────
-          # Set these secrets in repo Settings → Secrets if you have an Apple
-          # Developer certificate. Leave them unset to build unsigned (users
-          # will need to right-click → Open to bypass Gatekeeper).
-          CSC_LINK: ${{ secrets.MAC_CERT_BASE64 }}
-          CSC_KEY_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
-          # Skip auto-discovery of local keychains on the runner; rely solely
-          # on CSC_LINK if provided.
-          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.MAC_CERT_BASE64 != '' }}
-
-          # ── macOS notarization (optional) ──────────────────────────────────
+          MAC_CERT: ${{ secrets.MAC_CERT_BASE64 }}
+          MAC_CERT_PASS: ${{ secrets.MAC_CERT_PASSWORD }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          if [ -n "$MAC_CERT" ]; then
+            echo "CSC_LINK=$MAC_CERT"                                   >> $GITHUB_ENV
+            echo "CSC_KEY_PASSWORD=$MAC_CERT_PASS"                      >> $GITHUB_ENV
+            echo "CSC_IDENTITY_AUTO_DISCOVERY=true"                     >> $GITHUB_ENV
+            [ -n "$APPLE_ID" ] && echo "APPLE_ID=$APPLE_ID"            >> $GITHUB_ENV
+            [ -n "$APPLE_APP_SPECIFIC_PASSWORD" ] && \
+              echo "APPLE_APP_SPECIFIC_PASSWORD=$APPLE_APP_SPECIFIC_PASSWORD" >> $GITHUB_ENV
+            [ -n "$APPLE_TEAM_ID" ] && echo "APPLE_TEAM_ID=$APPLE_TEAM_ID" >> $GITHUB_ENV
+          else
+            echo "CSC_IDENTITY_AUTO_DISCOVERY=false"                    >> $GITHUB_ENV
+          fi
 
-          # ── Windows code signing (optional) ───────────────────────────────
-          # Provide a base64-encoded .p12 certificate and its password.
-          WIN_CSC_LINK: ${{ secrets.WIN_CERT_BASE64 }}
-          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CERT_PASSWORD }}
+      # ── Windows code signing (optional) ──────────────────────────────────────
+      # Same pattern: only write the var when the secret is non-empty.
+      - name: Configure Windows code signing
+        if: runner.os == 'Windows'
+        env:
+          WIN_CERT: ${{ secrets.WIN_CERT_BASE64 }}
+          WIN_CERT_PASS: ${{ secrets.WIN_CERT_PASSWORD }}
+        shell: bash
+        run: |
+          if [ -n "$WIN_CERT" ]; then
+            echo "WIN_CSC_LINK=$WIN_CERT"             >> $GITHUB_ENV
+            echo "WIN_CSC_KEY_PASSWORD=$WIN_CERT_PASS" >> $GITHUB_ENV
+          fi
+
+      - name: Build and package
+        run: npm run ${{ matrix.pack_script }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

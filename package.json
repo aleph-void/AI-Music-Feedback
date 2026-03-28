@@ -2,6 +2,11 @@
   "name": "ai-streamer",
   "version": "1.0.0",
   "description": "Stream desktop audio to OpenAI for real-time music feedback",
+  "author": {
+    "name": "Nick Starke",
+    "email": "nstarke@users.noreply.github.com",
+    "url": "https://github.com/nstarke"
+  },
   "main": "out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",

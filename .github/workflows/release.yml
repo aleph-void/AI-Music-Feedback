@@ -36,13 +36,23 @@ jobs:
       fail-fast: false   # keep building other platforms even if one fails
       matrix:
         include:
-          - platform: linux
+          - platform: linux-x64
             os: ubuntu-latest
             pack_script: pack:linux
 
-          - platform: windows
+          - platform: linux-arm64
+            os: ubuntu-24.04-arm   # GitHub-hosted native ARM64 runner
+            pack_script: pack:linux:arm64
+
+          - platform: windows-x64
             os: windows-latest
             pack_script: pack:win
+
+          # No native Windows ARM64 runner exists on GitHub Actions; cross-compile
+          # from the x64 runner instead (Electron supports this since v11).
+          - platform: windows-arm64
+            os: windows-latest
+            pack_script: pack:win:arm64
 
           # macos-latest is arm64 (M-series); macos-13 is the last x64 runner.
           # Both are built so the release contains native binaries for each arch.
@@ -65,12 +75,23 @@ jobs:
           cache: 'npm'
 
       - name: Install Linux system dependencies
-        if: matrix.platform == 'linux'
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update -y
           sudo apt-get install -y fakeroot dpkg
 
       - run: npm ci
+
+      # ── Stamp package.json with the tag version ───────────────────────────────
+      # electron-builder reads the version from package.json, not from the git tag.
+      # GITHUB_REF_NAME is the bare tag name (e.g. "v0.0.2"); strip the leading "v"
+      # and write it into package.json before the build so the installer filenames,
+      # About dialog, and GitHub Release all show the correct version.
+      - name: Set version from tag
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          npm version "$VERSION" --no-git-tag-version
 
       # ── macOS code signing (optional) ────────────────────────────────────────
       # Writes CSC_LINK / CSC_KEY_PASSWORD into $GITHUB_ENV only when the

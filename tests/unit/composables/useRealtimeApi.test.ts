@@ -304,6 +304,20 @@ describe('useRealtimeApi', () => {
     expect(api.transcript.value[0].id).toBe('item_2')
   })
 
+  it('clears the itemMap so a delta for an old item_id creates a fresh message', () => {
+    const { api, ws } = connectAndOpen()
+    ws.simulateMessage({
+      type: 'response.output_item.added',
+      item: { type: 'message', role: 'assistant', id: 'item_1' }
+    })
+    ws.simulateMessage({ type: 'response.text.delta', item_id: 'item_1', delta: 'old' })
+    api.clearTranscript()
+    // Same item_id after clear — itemMap is empty so addOrUpdateMessage creates a new entry
+    ws.simulateMessage({ type: 'response.text.delta', item_id: 'item_1', delta: 'new content' })
+    expect(api.transcript.value).toHaveLength(1)
+    expect(api.transcript.value[0].content).toBe('new content')
+  })
+
   // ── Output mode: text ──────────────────────────────────────────────────────
 
   it('text mode sends modalities: ["text"]', () => {
@@ -424,6 +438,17 @@ describe('useRealtimeApi', () => {
     const sentBefore = ws.sent.length
     api.sendText('   ')
     expect(ws.sent.length).toBe(sentBefore)
+  })
+
+  // ── generateId uniqueness ──────────────────────────────────────────────────
+
+  it('generates unique IDs across 100 consecutive sendText calls', () => {
+    const { api } = connectAndOpen()
+    for (let i = 0; i < 100; i++) {
+      api.sendText(`message ${i}`)
+    }
+    const ids = api.transcript.value.map(m => m.id)
+    expect(new Set(ids).size).toBe(100)
   })
 
   it('closes the playback AudioContext on disconnect', () => {

@@ -87,14 +87,14 @@ test('API key input is masked (type=password) by default', async () => {
 
 test('clicking the show/hide button reveals the API key', async () => {
   await page.locator('.tab-toggle').click()
-  await page.locator('.icon-btn').click()
+  await page.locator('.api-key-toggle').click()
   await expect(page.locator('#api-key')).toHaveAttribute('type', 'text')
 })
 
 test('clicking show/hide again masks the API key', async () => {
   await page.locator('.tab-toggle').click()
-  await page.locator('.icon-btn').click()
-  await page.locator('.icon-btn').click()
+  await page.locator('.api-key-toggle').click()
+  await page.locator('.api-key-toggle').click()
   await expect(page.locator('#api-key')).toHaveAttribute('type', 'password')
 })
 

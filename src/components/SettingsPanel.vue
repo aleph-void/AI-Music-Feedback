@@ -13,7 +13,7 @@
           autocomplete="off"
           spellcheck="false"
         />
-        <button class="icon-btn" @click="showKey = !showKey" :title="showKey ? t('settings.apiKey.hide') : t('settings.apiKey.show')">
+        <button class="icon-btn api-key-toggle" @click="showKey = !showKey" :title="showKey ? t('settings.apiKey.hide') : t('settings.apiKey.show')">
           {{ showKey ? '🙈' : '👁' }}
         </button>
       </div>

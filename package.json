@@ -9,18 +9,31 @@
     "pack": "npm run build && electron-builder",
     "pack:mac": "npm run build && electron-builder --mac",
     "pack:win": "npm run build && electron-builder --win",
-    "pack:linux": "npm run build && electron-builder --linux"
+    "pack:linux": "npm run build && electron-builder --linux",
+    "test": "vitest run --workspace vitest.workspace.ts",
+    "test:watch": "vitest --workspace vitest.workspace.ts",
+    "test:ui": "vitest --workspace vitest.workspace.ts --ui",
+    "test:coverage": "vitest run --workspace vitest.workspace.ts --coverage",
+    "test:electron": "vitest run --workspace vitest.workspace.ts --project electron-main",
+    "test:renderer": "vitest run --workspace vitest.workspace.ts --project renderer",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "vue": "^3.4.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@vitejs/plugin-vue": "^5.0.0",
+    "@vitest/coverage-v8": "^2.1.9",
+    "@vitest/ui": "^2.1.9",
+    "@vue/test-utils": "^2.4.6",
     "electron": "^33.0.0",
     "electron-builder": "^25.0.0",
     "electron-vite": "^2.3.0",
+    "happy-dom": "^14.12.3",
     "typescript": "^5.4.0",
     "vite": "^5.0.0",
+    "vitest": "^2.1.9",
     "vue-tsc": "^2.0.0"
   }
 }

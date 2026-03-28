@@ -15,10 +15,15 @@ export function registerIpcHandlers(): void {
     }
   })
 
-  ipcMain.handle('shell:open-external', (_event, url: string) => {
-    // Only allow http/https URLs
-    if (url.startsWith('https://') || url.startsWith('http://')) {
-      shell.openExternal(url)
+  ipcMain.handle('shell:open-external', (_event, url: unknown) => {
+    if (typeof url !== 'string') return
+    try {
+      const { protocol } = new URL(url)
+      if (protocol === 'https:' || protocol === 'http:') {
+        shell.openExternal(url)
+      }
+    } catch {
+      // Invalid URL — silently ignore
     }
   })
 

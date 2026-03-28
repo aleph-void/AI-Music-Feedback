@@ -451,6 +451,14 @@ describe('useRealtimeApi', () => {
     expect(new Set(ids).size).toBe(100)
   })
 
+  it('encodes special characters in model name in the WebSocket URL', () => {
+    const api = useRealtimeApi()
+    api.connect({ ...DEFAULT_CONFIG, model: 'gpt-4o&version=preview=1' })
+    const ws = MockWebSocket.lastInstance!
+    expect(ws.url).toContain(encodeURIComponent('gpt-4o&version=preview=1'))
+    expect(ws.url).not.toContain('gpt-4o&version=preview=1')
+  })
+
   it('closes the playback AudioContext on disconnect', () => {
     const { api, ws } = connectAndOpen({ ...DEFAULT_CONFIG, outputMode: 'audio' })
     const samples = new Int16Array([0])

@@ -25,7 +25,7 @@ export function loadApiKey(): string | null {
     }
     if (existsSync(FALLBACK_PATH)) {
       const data = JSON.parse(readFileSync(FALLBACK_PATH, 'utf-8'))
-      return data.apiKey ?? null
+      return typeof data.apiKey === 'string' ? data.apiKey : null
     }
   } catch {
     // Corrupted store — return null

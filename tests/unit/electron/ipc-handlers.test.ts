@@ -128,6 +128,37 @@ describe('IPC Handlers', () => {
       await call('shell:open-external', 'ftp://example.com')
       expect(shellMock.openExternal).not.toHaveBeenCalled()
     })
+
+    it('blocks data: URLs', async () => {
+      await call('shell:open-external', 'data:text/html,<script>alert(1)</script>')
+      expect(shellMock.openExternal).not.toHaveBeenCalled()
+    })
+
+    it('blocks vbscript: URLs', async () => {
+      await call('shell:open-external', 'vbscript:msgbox(1)')
+      expect(shellMock.openExternal).not.toHaveBeenCalled()
+    })
+
+    it('blocks empty string', async () => {
+      await call('shell:open-external', '')
+      expect(shellMock.openExternal).not.toHaveBeenCalled()
+    })
+
+    it('allows uppercase HTTPS:// URLs (URL constructor normalizes protocol)', async () => {
+      await call('shell:open-external', 'HTTPS://example.com')
+      expect(shellMock.openExternal).toHaveBeenCalledWith('HTTPS://example.com')
+    })
+
+    it('blocks URLs with CRLF injection attempts', async () => {
+      await call('shell:open-external', 'https://example.com\r\nX-Injected: header')
+      // URL constructor throws on CRLF — silently ignored
+      expect(shellMock.openExternal).not.toHaveBeenCalled()
+    })
+
+    it('does not throw when passed a non-string argument', async () => {
+      await expect(call('shell:open-external', 42)).resolves.toBeUndefined()
+      expect(shellMock.openExternal).not.toHaveBeenCalled()
+    })
   })
 
   // ── dialog:export-transcript ───────────────────────────────────────────────

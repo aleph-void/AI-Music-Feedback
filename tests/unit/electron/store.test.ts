@@ -82,6 +82,11 @@ describe('store', () => {
       const [path] = fsMock.writeFileSync.mock.calls[0]
       expect(String(path)).not.toContain('secure-store.bin')
     })
+
+    it('does not throw when saving an empty string key', () => {
+      expect(() => saveApiKey('')).not.toThrow()
+      expect(safeMock.encryptString).toHaveBeenCalledWith('')
+    })
   })
 
   // ── loadApiKey ─────────────────────────────────────────────────────────────
@@ -114,6 +119,22 @@ describe('store', () => {
       safeMock.isEncryptionAvailable.mockReturnValue(false)
       fsMock.existsSync.mockReturnValue(true)
       fsMock.readFileSync.mockReturnValue('{"warning":"unencrypted"}')
+
+      expect(loadApiKey()).toBeNull()
+    })
+
+    it('returns null when fallback JSON apiKey field is not a string', () => {
+      safeMock.isEncryptionAvailable.mockReturnValue(false)
+      fsMock.existsSync.mockReturnValue(true)
+      fsMock.readFileSync.mockReturnValue('{"apiKey":12345,"warning":"unencrypted"}')
+
+      expect(loadApiKey()).toBeNull()
+    })
+
+    it('returns null when fallback JSON apiKey field is an object', () => {
+      safeMock.isEncryptionAvailable.mockReturnValue(false)
+      fsMock.existsSync.mockReturnValue(true)
+      fsMock.readFileSync.mockReturnValue('{"apiKey":{"nested":"value"},"warning":"unencrypted"}')
 
       expect(loadApiKey()).toBeNull()
     })

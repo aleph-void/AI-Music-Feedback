@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, session } from 'electron'
 import { join } from 'path'
 import { registerIpcHandlers } from './ipc-handlers'
 import { setupMenu } from './menu'
@@ -37,7 +37,28 @@ function createWindow(): BrowserWindow {
   return win
 }
 
+// Content-Security-Policy enforced at the session level.
+// Keeping unsafe-eval out of script-src is the key fix for the Electron
+// security warning; Vue 3 + Vite do not need eval in the renderer process.
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'",   // Vue scoped styles inject at runtime
+  "connect-src 'self' wss://api.openai.com https://api.openai.com",
+  "img-src 'self' data:",
+  "media-src 'self' mediastream:"
+].join('; ')
+
 app.whenReady().then(() => {
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': [CSP]
+      }
+    })
+  })
+
   registerIpcHandlers()
   let win: BrowserWindow | null = null
   setupMenu(() => win)

@@ -54,15 +54,15 @@ jobs:
             os: windows-latest
             pack_script: pack:win:arm64
 
-          # macos-latest is arm64 (M-series); macos-13 is the last x64 runner.
-          # Both are built so the release contains native binaries for each arch.
+          # macos-latest is arm64 (M-series). Cross-compile x64 from the same
+          # runner — Electron supports this since v11, same pattern as win-arm64.
           - platform: mac-arm64
             os: macos-latest
             pack_script: pack:mac
 
           - platform: mac-x64
-            os: macos-13
-            pack_script: pack:mac
+            os: macos-latest
+            pack_script: pack:mac:x64
 
     runs-on: ${{ matrix.os }}
 

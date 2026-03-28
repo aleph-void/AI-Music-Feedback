@@ -7,6 +7,8 @@ A desktop application that streams audio from your computer to the [OpenAI Realt
 
 > **GitHub:** https://github.com/nstarke/AI-Music-Feedback
 
+![AI Music Feedback screenshot](images/screenshot.png)
+
 ---
 
 ## What it does

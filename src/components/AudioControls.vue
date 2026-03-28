@@ -13,11 +13,28 @@
         </button>
         <select v-model="selectedSourceId" :disabled="isCapturing || sources.length === 0">
           <option value="" disabled>{{ t('audioControls.audioSource.placeholder') }}</option>
-          <option v-for="s in sources" :key="s.id" :value="s.id">
-            🎤 {{ s.name }}
-          </option>
+          <optgroup v-if="deviceSources.length" :label="t('audioControls.audioSource.devicesGroup')">
+            <option v-for="s in deviceSources" :key="s.id" :value="s.id">
+              🎤 {{ s.name }}
+            </option>
+          </optgroup>
+          <optgroup v-if="desktopSources.length" :label="t('audioControls.audioSource.desktopGroup')">
+            <option v-for="s in desktopSources" :key="s.id" :value="s.id">
+              🖥️ {{ s.name }}
+            </option>
+          </optgroup>
         </select>
       </div>
+      <label class="auto-detect-label">
+        <input
+          type="checkbox"
+          v-model="autoDetect"
+          :disabled="isCapturing || !selectedSourceId || !props.connected"
+          :title="t('audioControls.autoDetect.title')"
+        />
+        {{ t('audioControls.autoDetect.label') }}
+        <span v-if="isMonitoring" class="monitoring-badge">{{ t('audioControls.autoDetect.listening') }}</span>
+      </label>
       <div class="level-row" v-if="isCapturing">
         <div class="level-bar">
           <div class="level-fill" :style="{ width: `${audioLevel * 100}%` }" />
@@ -29,9 +46,9 @@
     <div class="input-section">
       <p class="section-label">{{ t('audioControls.voicePrompt.sectionLabel') }}</p>
       <div class="source-row">
-        <select v-model="selectedMicId" :disabled="isCapturing || sources.length === 0">
+        <select v-model="selectedMicId" :disabled="isCapturing || deviceSources.length === 0">
           <option value="">{{ t('audioControls.voicePrompt.noMic') }}</option>
-          <option v-for="s in sources" :key="s.id" :value="s.id">
+          <option v-for="s in deviceSources" :key="s.id" :value="s.id">
             🎙 {{ s.name }}
           </option>
         </select>
@@ -96,6 +113,73 @@ const selectedSourceId = ref('')
 const selectedMicId = ref('')
 const audioLevel = ref(0)
 const micLevel = ref(0)
+const autoDetect = ref(false)
+const isMonitoring = ref(false)
+
+const DETECT_THRESHOLD = 0.01
+
+let monitorStream: MediaStream | null = null
+let monitorCtx: AudioContext | null = null
+let monitorTimer: ReturnType<typeof setInterval> | null = null
+
+async function startMonitoring() {
+  stopMonitoring()
+  if (!selectedSourceId.value || !props.connected || isCapturing.value) return
+
+  try {
+    const source = sources.value.find(s => s.id === selectedSourceId.value)
+
+    if (source?.type === 'desktop') {
+      const constraints = {
+        audio: { mandatory: { chromeMediaSource: 'desktop', chromeMediaSourceId: selectedSourceId.value } },
+        video: { mandatory: { chromeMediaSource: 'desktop', chromeMediaSourceId: selectedSourceId.value, minWidth: 1, maxWidth: 1, minHeight: 1, maxHeight: 1 } }
+      }
+      monitorStream = await navigator.mediaDevices.getUserMedia(constraints as unknown as MediaStreamConstraints)
+      monitorStream.getVideoTracks().forEach(t => t.stop())
+    } else {
+      monitorStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          deviceId: selectedSourceId.value ? { exact: selectedSourceId.value } : undefined,
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false
+        }
+      })
+    }
+
+    monitorCtx = new AudioContext()
+    const analyser = monitorCtx.createAnalyser()
+    analyser.fftSize = 256
+    monitorCtx.createMediaStreamSource(monitorStream).connect(analyser)
+
+    const data = new Float32Array(analyser.fftSize)
+    isMonitoring.value = true
+
+    monitorTimer = setInterval(() => {
+      analyser.getFloatTimeDomainData(data)
+      let sum = 0
+      for (let i = 0; i < data.length; i++) sum += data[i] * data[i]
+      if (Math.sqrt(sum / data.length) > DETECT_THRESHOLD) {
+        stopMonitoring()
+        handleStart()
+      }
+    }, 200)
+  } catch {
+    isMonitoring.value = false
+  }
+}
+
+function stopMonitoring() {
+  if (monitorTimer !== null) { clearInterval(monitorTimer); monitorTimer = null }
+  monitorStream?.getTracks().forEach(t => t.stop())
+  monitorCtx?.close()
+  monitorStream = null
+  monitorCtx = null
+  isMonitoring.value = false
+}
+
+const deviceSources = computed(() => sources.value.filter(s => s.type === 'audioinput'))
+const desktopSources = computed(() => sources.value.filter(s => s.type === 'desktop'))
 
 const micConflict = computed(() =>
   selectedMicId.value !== '' && selectedMicId.value === selectedSourceId.value
@@ -111,7 +195,22 @@ watch(isCapturing, (capturing) => {
     micLevel.value = 0
     micCapture.stopCapture()
     emit('stopped')
+    if (autoDetect.value && props.connected) startMonitoring()
   }
+})
+
+watch(autoDetect, (enabled) => {
+  if (enabled && props.connected && !isCapturing.value) startMonitoring()
+  else stopMonitoring()
+})
+
+watch(() => props.connected, (connected) => {
+  if (!connected) stopMonitoring()
+  else if (autoDetect.value && !isCapturing.value) startMonitoring()
+})
+
+watch(selectedSourceId, () => {
+  if (isMonitoring.value) startMonitoring()
 })
 
 function onKeyDown(e: KeyboardEvent) {
@@ -136,6 +235,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   document.removeEventListener('keydown', onKeyDown)
+  stopMonitoring()
 })
 
 async function refresh() {
@@ -146,6 +246,7 @@ async function refresh() {
 }
 
 async function handleStart() {
+  stopMonitoring()
   await startCapture(
     selectedSourceId.value,
     (buffer) => emit('chunk', buffer),
@@ -165,6 +266,7 @@ async function handleStart() {
 }
 
 function handleStop() {
+  autoDetect.value = false
   stopCapture()
   // watch(isCapturing) handles mic stop, level reset, and 'stopped' emit
 }
@@ -245,6 +347,35 @@ select:disabled {
   color: var(--text-secondary);
   opacity: 0.75;
   font-style: italic;
+}
+
+.auto-detect-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.auto-detect-label input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.auto-detect-label input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+}
+
+.monitoring-badge {
+  color: var(--accent);
+  font-size: 0.78rem;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
 .mic-fill {

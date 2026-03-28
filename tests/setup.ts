@@ -68,6 +68,11 @@ export const mockSourceNode = {
   disconnect: vi.fn()
 }
 
+export const mockAnalyserNode = {
+  fftSize: 256,
+  getFloatTimeDomainData: vi.fn((array: Float32Array) => array.fill(0))
+}
+
 export const mockAudioContext = {
   sampleRate: 24000,
   currentTime: 0,
@@ -76,6 +81,7 @@ export const mockAudioContext = {
   audioWorklet: {
     addModule: vi.fn().mockResolvedValue(undefined)
   },
+  createAnalyser: vi.fn(() => mockAnalyserNode),
   createMediaStreamSource: vi.fn(() => mockSourceNode),
   createBuffer: vi.fn((channels: number, length: number, sampleRate: number) => ({
     getChannelData: vi.fn(() => new Float32Array(length)),
@@ -128,6 +134,8 @@ beforeEach(() => {
   ;(navigator.mediaDevices.getUserMedia as ReturnType<typeof vi.fn>).mockResolvedValue(mockMediaStream)
   ;(navigator.mediaDevices.enumerateDevices as ReturnType<typeof vi.fn>).mockResolvedValue(mockAudioDevices)
   mockAudioContext.audioWorklet.addModule.mockResolvedValue(undefined)
+  mockAudioContext.createAnalyser.mockReturnValue(mockAnalyserNode)
+  mockAnalyserNode.getFloatTimeDomainData.mockImplementation((array: Float32Array) => array.fill(0))
   ;(window as unknown as Record<string, unknown>).electronAPI = {
     platform: 'linux',
     saveApiKey: vi.fn().mockResolvedValue({ success: true }),

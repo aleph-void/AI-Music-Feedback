@@ -43,7 +43,8 @@
     },
     "systemPrompt": {
       "label": "Prompt systemowy",
-      "placeholder": "Opisz, jak AI ma przekazywać opinię o Twojej muzyce..."
+      "placeholder": "Opisz, jak AI ma przekazywać opinię o Twojej muzyce...",
+      "tooLong": "Prompt systemowy jest bardzo długi i może zostać przycięty przez API. Utrzymaj go poniżej 4000 znaków."
     },
     "language": {
       "label": "Język"
@@ -57,7 +58,14 @@
       "sectionLabel": "Muzyka / Źródło audio",
       "refreshTitle": "Odśwież źródła",
       "placeholder": "Wybierz źródło audio...",
+      "devicesGroup": "Urządzenia audio",
+      "desktopGroup": "Aplikacje desktopowe",
       "levelLabel": "Poziom"
+    },
+    "autoDetect": {
+      "label": "Automatyczne wykrywanie dźwięku",
+      "title": "Automatycznie rozpoczynaj nasłuch po wykryciu dźwięku na wybranym źródle",
+      "listening": "● Nasłuchiwanie..."
     },
     "voicePrompt": {
       "sectionLabel": "Wejście głosowe",
@@ -76,6 +84,7 @@
     "copyTitle": "Kopiuj transkrypcję",
     "copy": "Kopiuj",
     "copied": "Skopiowano!",
+    "copyError": "Kopiowanie nie powiodło się",
     "clearTitle": "Wyczyść transkrypcję",
     "clear": "Wyczyść",
     "emptyState": "Rozpocznij nasłuch audio, aby otrzymać opinię",

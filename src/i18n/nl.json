@@ -43,7 +43,8 @@
     },
     "systemPrompt": {
       "label": "Systeemprompt",
-      "placeholder": "Beschrijf hoe je wilt dat de AI feedback geeft op je muziek..."
+      "placeholder": "Beschrijf hoe je wilt dat de AI feedback geeft op je muziek...",
+      "tooLong": "De systeemprompt is erg lang en kan door de API worden afgekapt. Houd hem onder de 4000 tekens."
     },
     "language": {
       "label": "Taal"
@@ -57,7 +58,14 @@
       "sectionLabel": "Muziek / Audiobron",
       "refreshTitle": "Bronnen vernieuwen",
       "placeholder": "Selecteer audiobron...",
+      "devicesGroup": "Audioapparaten",
+      "desktopGroup": "Desktop-apps",
       "levelLabel": "Niveau"
+    },
+    "autoDetect": {
+      "label": "Geluid automatisch detecteren",
+      "title": "Automatisch beginnen met luisteren wanneer audio op de geselecteerde bron wordt gedetecteerd",
+      "listening": "● Luistert..."
     },
     "voicePrompt": {
       "sectionLabel": "Spraakinvoer",
@@ -76,6 +84,7 @@
     "copyTitle": "Transcript kopiëren",
     "copy": "Kopiëren",
     "copied": "Gekopieerd!",
+    "copyError": "Kopiëren mislukt",
     "clearTitle": "Transcript wissen",
     "clear": "Wissen",
     "emptyState": "Start met luisteren naar audio om feedback te ontvangen",

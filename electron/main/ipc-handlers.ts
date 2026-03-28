@@ -1,4 +1,4 @@
-import { ipcMain, shell, dialog } from 'electron'
+import { ipcMain, shell, dialog, desktopCapturer } from 'electron'
 import { writeFileSync } from 'fs'
 import { saveApiKey, loadApiKey, isEncryptionAvailable } from './store'
 
@@ -24,6 +24,23 @@ export function registerIpcHandlers(): void {
       }
     } catch {
       // Invalid URL — silently ignore
+    }
+  })
+
+  ipcMain.handle('desktop:get-sources', async () => {
+    try {
+      const sources = await desktopCapturer.getSources({
+        types: ['window', 'screen'],
+        thumbnailSize: { width: 0, height: 0 },
+        fetchWindowIcons: false
+      })
+      return sources.map(s => ({
+        id: s.id,
+        name: s.name,
+        type: 'desktop' as const
+      }))
+    } catch {
+      return []
     }
   })
 

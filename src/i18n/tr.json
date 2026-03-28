@@ -43,7 +43,8 @@
     },
     "systemPrompt": {
       "label": "Sistem istemi",
-      "placeholder": "Yapay zekanın müziğiniz hakkında nasıl geri bildirim vermesini istediğinizi açıklayın..."
+      "placeholder": "Yapay zekanın müziğiniz hakkında nasıl geri bildirim vermesini istediğinizi açıklayın...",
+      "tooLong": "Sistem istemi çok uzun ve API tarafından kesilebilir. 4000 karakterin altında tutun."
     },
     "language": {
       "label": "Dil"
@@ -57,7 +58,14 @@
       "sectionLabel": "Müzik / Ses kaynağı",
       "refreshTitle": "Kaynakları yenile",
       "placeholder": "Ses kaynağı seçin...",
+      "devicesGroup": "Ses cihazları",
+      "desktopGroup": "Masaüstü uygulamaları",
       "levelLabel": "Seviye"
+    },
+    "autoDetect": {
+      "label": "Sesi otomatik algıla",
+      "title": "Seçilen kaynakta ses algılandığında dinlemeyi otomatik başlat",
+      "listening": "● Dinleniyor..."
     },
     "voicePrompt": {
       "sectionLabel": "Sesli soru girişi",
@@ -76,6 +84,7 @@
     "copyTitle": "Dökümü kopyala",
     "copy": "Kopyala",
     "copied": "Kopyalandı!",
+    "copyError": "Kopyalama başarısız",
     "clearTitle": "Dökümü temizle",
     "clear": "Temizle",
     "emptyState": "Geri bildirim almak için ses dinlemeyi başlatın",

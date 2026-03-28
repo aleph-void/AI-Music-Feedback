@@ -43,7 +43,8 @@
     },
     "systemPrompt": {
       "label": "Prompt di sistema",
-      "placeholder": "Descrivi come vuoi che l'IA fornisca feedback sulla tua musica..."
+      "placeholder": "Descrivi come vuoi che l'IA fornisca feedback sulla tua musica...",
+      "tooLong": "Il prompt di sistema è molto lungo e potrebbe essere troncato dall'API. Mantienilo sotto i 4000 caratteri."
     },
     "language": {
       "label": "Lingua"
@@ -57,7 +58,14 @@
       "sectionLabel": "Musica / Sorgente audio",
       "refreshTitle": "Aggiorna sorgenti",
       "placeholder": "Seleziona una sorgente audio...",
+      "devicesGroup": "Dispositivi audio",
+      "desktopGroup": "Applicazioni desktop",
       "levelLabel": "Livello"
+    },
+    "autoDetect": {
+      "label": "Rilevamento automatico del suono",
+      "title": "Avvia automaticamente l'ascolto quando viene rilevato audio sulla sorgente selezionata",
+      "listening": "● In ascolto..."
     },
     "voicePrompt": {
       "sectionLabel": "Input vocale",
@@ -76,6 +84,7 @@
     "copyTitle": "Copia trascrizione",
     "copy": "Copia",
     "copied": "Copiato!",
+    "copyError": "Copia non riuscita",
     "clearTitle": "Cancella trascrizione",
     "clear": "Cancella",
     "emptyState": "Avvia lo streaming audio per ricevere feedback",

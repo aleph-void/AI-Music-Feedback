@@ -20,5 +20,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onMenuExportTranscript: (callback: () => void) => {
     ipcRenderer.on('menu:export-transcript', callback)
     return () => ipcRenderer.removeListener('menu:export-transcript', callback)
-  }
+  },
+
+  getDesktopSources: () =>
+    ipcRenderer.invoke('desktop:get-sources') as Promise<
+      { id: string; name: string; type: 'desktop' }[]
+    >
 })

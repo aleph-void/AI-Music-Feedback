@@ -103,6 +103,7 @@ let cleanupExportListener: (() => void) | undefined
 onMounted(async () => {
   await settings.load()
   cleanupExportListener = window.electronAPI?.onMenuExportTranscript(handleExportTranscript)
+  if (settings.apiKey.value) connectToApi()
 })
 
 onUnmounted(() => {

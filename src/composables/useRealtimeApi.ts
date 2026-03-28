@@ -1,4 +1,4 @@
-import { ref, readonly } from 'vue'
+import { ref, reactive, readonly } from 'vue'
 import type { ConnectionStatus, TranscriptMessage, RealtimeSessionConfig } from '@/types/realtime'
 
 const status = ref<ConnectionStatus>('disconnected')
@@ -64,7 +64,7 @@ function addOrUpdateMessage(
 ): TranscriptMessage {
   let msg = itemMap.get(id)
   if (!msg) {
-    msg = { id, role, content, complete, timestamp: Date.now() }
+    msg = reactive({ id, role, content, complete, timestamp: Date.now() })
     transcript.value.push(msg)
     itemMap.set(id, msg)
   } else {

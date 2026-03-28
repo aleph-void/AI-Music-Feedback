@@ -78,7 +78,8 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y fakeroot dpkg
+          sudo apt-get install -y fakeroot dpkg ruby ruby-dev build-essential
+          sudo gem install fpm --no-document
 
       - run: npm ci
 
@@ -140,6 +141,9 @@ jobs:
         run: npm run ${{ matrix.pack_script }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # electron-builder bundles an x86 fpm binary; on ARM64 we install fpm
+          # natively above and tell electron-builder to use the system one instead.
+          USE_SYSTEM_FPM: ${{ matrix.platform == 'linux-arm64' && 'true' || 'false' }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

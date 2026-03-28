@@ -1,0 +1,87 @@
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  # Run the full suite weekly so new CVEs in unchanged code are caught promptly
+  schedule:
+    - cron: '0 8 * * 1'   # every Monday at 08:00 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  # ── CodeQL static analysis ───────────────────────────────────────────────────
+  # Analyses JavaScript/TypeScript for security vulnerabilities — injection,
+  # prototype pollution, path traversal, insecure use of eval, etc.
+  codeql:
+    name: CodeQL
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write   # upload SARIF results to the Security tab
+      actions: read
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          # Use the security-extended query suite for broader coverage beyond
+          # the default set (includes more experimental / medium-confidence rules)
+          queries: security-extended
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:javascript-typescript'
+
+  # ── npm audit ────────────────────────────────────────────────────────────────
+  # Fails the job when any dependency has a known vulnerability rated high or
+  # critical. Moderate/low are reported but do not block the build (they are
+  # tracked by Dependabot instead).
+  audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Audit production dependencies
+        # --omit=dev keeps the signal focused on what ships to users;
+        # dev-only vulnerabilities (test tooling etc.) are still tracked by
+        # Dependabot but won't block CI here.
+        run: npm audit --audit-level=high --omit=dev
+
+      - name: Audit all dependencies (report only)
+        # Full audit including devDependencies — informational, never fails the job.
+        run: npm audit --audit-level=critical || true
+
+  # ── Gitleaks secret scanning ─────────────────────────────────────────────────
+  # Scans the full git history for accidentally committed secrets: API keys,
+  # tokens, private keys, connection strings, etc.
+  gitleaks:
+    name: Gitleaks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Fetch the full history so secrets committed in older commits are caught
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

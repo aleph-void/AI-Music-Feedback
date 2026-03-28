@@ -1,0 +1,44 @@
+version: 2
+
+updates:
+  # ── npm dependencies ──────────────────────────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '08:00'
+      timezone: UTC
+    # Group all non-security updates into a single PR to reduce noise.
+    # Security updates always get their own PRs regardless of grouping.
+    groups:
+      dev-dependencies:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+      production-dependencies:
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
+    # Keep the PR list manageable
+    open-pull-requests-limit: 10
+    # Useful context in PR descriptions
+    commit-message:
+      prefix: 'chore(deps)'
+      prefix-development: 'chore(deps-dev)'
+
+  # ── GitHub Actions ────────────────────────────────────────────────────────────
+  # Keeps action versions (checkout, setup-node, etc.) up to date.
+  # Pinning to a SHA is more secure than a tag; Dependabot handles the rotation.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '08:00'
+      timezone: UTC
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'chore(actions)'

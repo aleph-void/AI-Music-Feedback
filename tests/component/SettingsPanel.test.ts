@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
 import { ref } from 'vue'
 
 // ── Mock composable ────────────────────────────────────────────────────────
@@ -247,7 +247,7 @@ describe('SettingsPanel', () => {
     await w.vm.$nextTick()
     expect((w.find('.primary-btn').element as HTMLButtonElement).disabled).toBe(true)
     resolve()
-    await w.vm.$nextTick()
+    await flushPromises()
     expect((w.find('.primary-btn').element as HTMLButtonElement).disabled).toBe(false)
   })
 

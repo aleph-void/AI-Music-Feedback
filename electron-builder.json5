@@ -1,0 +1,40 @@
+{
+  appId: "com.aistreamer.app",
+  productName: "AI Streamer",
+  asar: true,
+  directories: {
+    output: "release"
+  },
+  files: [
+    "dist/**/*",
+    "dist-electron/**/*"
+  ],
+  extraResources: [
+    {
+      from: "src/public",
+      to: "public",
+      filter: ["**/*"]
+    }
+  ],
+  mac: {
+    target: ["dmg", "zip"],
+    category: "public.app-category.music",
+    extendInfo: {
+      NSAudioCaptureUsageDescription: "AI Streamer needs access to audio to stream your music to OpenAI for feedback.",
+      NSMicrophoneUsageDescription: "AI Streamer needs microphone access to capture audio for AI feedback.",
+      NSScreenCaptureDescription: "AI Streamer needs screen recording access to capture system audio."
+    }
+  },
+  win: {
+    target: ["nsis"],
+    icon: "resources/icon.ico"
+  },
+  linux: {
+    target: ["AppImage", "deb"],
+    category: "Audio"
+  },
+  nsis: {
+    oneClick: false,
+    allowToChangeInstallationDirectory: true
+  }
+}

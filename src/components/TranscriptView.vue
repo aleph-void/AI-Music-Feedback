@@ -1,0 +1,264 @@
+<template>
+  <div class="transcript-view">
+    <div class="transcript-header">
+      <span class="title">Conversation</span>
+      <div class="header-actions">
+        <button
+          v-if="transcript.length > 0"
+          class="action-btn"
+          @click="copyTranscript"
+          title="Copy transcript"
+        >
+          {{ copied ? 'Copied!' : 'Copy' }}
+        </button>
+        <button
+          v-if="transcript.length > 0"
+          class="action-btn danger"
+          @click="emit('clear')"
+          title="Clear transcript"
+        >
+          Clear
+        </button>
+      </div>
+    </div>
+
+    <div class="messages" ref="messagesEl">
+      <div
+        v-if="transcript.length === 0"
+        class="empty-state"
+      >
+        <p>Start streaming audio to receive feedback</p>
+        <p class="hint">The AI will respond when it detects a pause in the audio</p>
+      </div>
+
+      <div
+        v-for="msg in transcript"
+        :key="msg.id"
+        class="message"
+        :class="[msg.role, { pending: !msg.complete }]"
+      >
+        <div class="message-role">
+          {{ msg.role === 'assistant' ? 'AI Feedback' : 'Your Audio' }}
+        </div>
+        <div class="message-content">{{ msg.content }}<span v-if="!msg.complete" class="cursor" /></div>
+        <div class="message-time">{{ formatTime(msg.timestamp) }}</div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, watch, nextTick } from 'vue'
+import type { TranscriptMessage } from '@/types/realtime'
+
+const props = defineProps<{
+  transcript: readonly TranscriptMessage[]
+}>()
+
+const emit = defineEmits<{
+  clear: []
+}>()
+
+const messagesEl = ref<HTMLElement | null>(null)
+const copied = ref(false)
+
+// Auto-scroll to bottom when transcript changes
+watch(
+  () => props.transcript.length,
+  async () => {
+    await nextTick()
+    if (messagesEl.value) {
+      messagesEl.value.scrollTop = messagesEl.value.scrollHeight
+    }
+  }
+)
+
+// Also scroll on content delta (incomplete messages growing)
+watch(
+  () => props.transcript.map(m => m.content).join('').length,
+  async () => {
+    await nextTick()
+    if (messagesEl.value) {
+      const el = messagesEl.value
+      const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100
+      if (isNearBottom) {
+        el.scrollTop = el.scrollHeight
+      }
+    }
+  }
+)
+
+function formatTime(ts: number): string {
+  return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+}
+
+async function copyTranscript() {
+  const text = props.transcript
+    .map(m => `[${m.role === 'assistant' ? 'AI' : 'You'}] ${m.content}`)
+    .join('\n\n')
+  await navigator.clipboard.writeText(text)
+  copied.value = true
+  setTimeout(() => { copied.value = false }, 2000)
+}
+</script>
+
+<style scoped>
+.transcript-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.transcript-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem 0.5rem;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.action-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.action-btn.danger:hover {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  scroll-behavior: smooth;
+}
+
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--text-secondary);
+  gap: 0.5rem;
+  padding: 3rem 1rem;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.empty-state .hint {
+  font-size: 0.82rem;
+  opacity: 0.65;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  max-width: 85%;
+  animation: fadeIn 0.2s ease;
+}
+
+.message.user {
+  align-self: flex-start;
+}
+
+.message.assistant {
+  align-self: flex-end;
+}
+
+.message-role {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.message.assistant .message-role {
+  text-align: right;
+}
+
+.message-content {
+  background: var(--bg-message-user);
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: var(--text-primary);
+}
+
+.message.assistant .message-content {
+  background: var(--bg-message-assistant);
+}
+
+.message.pending .message-content {
+  opacity: 0.85;
+}
+
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--accent);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: blink 0.8s step-end infinite;
+}
+
+.message-time {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+.message.assistant .message-time {
+  text-align: right;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+</style>

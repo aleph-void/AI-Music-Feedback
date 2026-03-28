@@ -1,0 +1,13 @@
+/* Additional global styles beyond what's in App.vue */
+
+/* Ensure electron-specific adjustments */
+body {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Allow text selection in message content and inputs */
+input, textarea, .message-content {
+  user-select: text;
+  -webkit-user-select: text;
+}

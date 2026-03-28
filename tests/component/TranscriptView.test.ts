@@ -180,6 +180,24 @@ describe('TranscriptView', () => {
     expect(timeEl.text()).not.toContain('Invalid')
   })
 
+  // ── XSS safety ────────────────────────────────────────────────────────────
+
+  it('renders message content as text, not HTML (XSS prevention)', () => {
+    const xss = '<script>window.__xss = true<\/script>'
+    const w = mount0([makeMsg({ content: xss })])
+    // Vue's mustache binding auto-escapes — the script tag must not be injected
+    expect((window as unknown as Record<string, unknown>).__xss).toBeUndefined()
+    // The raw tag text should be visible as literal characters in the element
+    expect(w.find('.message-content').text()).toContain('<script>')
+  })
+
+  it('does not inject HTML from message content', () => {
+    const html = '<img src=x onerror="window.__img_xss=1">'
+    const w = mount0([makeMsg({ content: html })])
+    expect((window as unknown as Record<string, unknown>).__img_xss).toBeUndefined()
+    expect(w.find('.message-content').element.querySelector('img')).toBeNull()
+  })
+
   // ── Conversation title ─────────────────────────────────────────────────────
 
   it('renders the "Conversation" title in the header', () => {

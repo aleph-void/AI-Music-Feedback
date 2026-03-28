@@ -91,10 +91,10 @@ export const mockAudioContext = {
 }
 
 ;(globalThis as unknown as Record<string, unknown>).AudioContext = vi.fn(
-  () => mockAudioContext
+  function () { return mockAudioContext }
 )
 ;(globalThis as unknown as Record<string, unknown>).AudioWorkletNode = vi.fn(
-  () => mockAudioWorkletNode
+  function () { return mockAudioWorkletNode }
 )
 
 // ── window.electronAPI ───────────────────────────────────────────────────────
@@ -115,6 +115,14 @@ Object.defineProperty(globalThis, 'electronAPI', {
 beforeEach(() => {
   vi.clearAllMocks()
   MockWebSocket.reset()
+
+  // Re-establish constructor implementations (vi.clearAllMocks resets them in Vitest 4)
+  ;(globalThis as unknown as Record<string, unknown>).AudioContext = vi.fn(
+    function () { return mockAudioContext }
+  )
+  ;(globalThis as unknown as Record<string, unknown>).AudioWorkletNode = vi.fn(
+    function () { return mockAudioWorkletNode }
+  )
 
   // Restore default resolved values after clearAllMocks
   ;(navigator.mediaDevices.getUserMedia as ReturnType<typeof vi.fn>).mockResolvedValue(mockMediaStream)

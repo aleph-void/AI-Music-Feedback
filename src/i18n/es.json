@@ -43,7 +43,8 @@
     },
     "systemPrompt": {
       "label": "Prompt del sistema",
-      "placeholder": "Describe cómo quieres que la IA dé retroalimentación sobre tu música..."
+      "placeholder": "Describe cómo quieres que la IA dé retroalimentación sobre tu música...",
+      "tooLong": "El prompt del sistema es muy largo y la API podría truncarlo. Mantenlo por debajo de 4000 caracteres."
     },
     "language": {
       "label": "Idioma"
@@ -57,7 +58,14 @@
       "sectionLabel": "Música / Fuente de audio",
       "refreshTitle": "Actualizar fuentes",
       "placeholder": "Selecciona una fuente de audio...",
+      "devicesGroup": "Dispositivos de audio",
+      "desktopGroup": "Aplicaciones de escritorio",
       "levelLabel": "Nivel"
+    },
+    "autoDetect": {
+      "label": "Detección automática de sonido",
+      "title": "Iniciar la escucha automáticamente cuando se detecte audio en la fuente seleccionada",
+      "listening": "● Escuchando..."
     },
     "voicePrompt": {
       "sectionLabel": "Entrada de voz",
@@ -76,6 +84,7 @@
     "copyTitle": "Copiar transcripción",
     "copy": "Copiar",
     "copied": "¡Copiado!",
+    "copyError": "Error al copiar",
     "clearTitle": "Borrar transcripción",
     "clear": "Borrar",
     "emptyState": "Inicia la transmisión de audio para recibir retroalimentación",

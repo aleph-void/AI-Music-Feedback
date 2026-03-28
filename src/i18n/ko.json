@@ -43,7 +43,8 @@
     },
     "systemPrompt": {
       "label": "시스템 프롬프트",
-      "placeholder": "AI가 당신의 음악에 대해 어떤 방식으로 피드백하길 원하는지 설명하세요..."
+      "placeholder": "AI가 당신의 음악에 대해 어떤 방식으로 피드백하길 원하는지 설명하세요...",
+      "tooLong": "시스템 프롬프트가 너무 길어 API에서 잘릴 수 있습니다. 4000자 이하로 유지하세요."
     },
     "language": {
       "label": "언어"
@@ -57,7 +58,14 @@
       "sectionLabel": "음악 / 오디오 소스",
       "refreshTitle": "소스 새로고침",
       "placeholder": "오디오 소스를 선택하세요...",
+      "devicesGroup": "오디오 장치",
+      "desktopGroup": "데스크톱 앱",
       "levelLabel": "레벨"
+    },
+    "autoDetect": {
+      "label": "자동 소리 감지",
+      "title": "선택한 소스에서 오디오가 감지되면 자동으로 모니터링을 시작합니다",
+      "listening": "● 모니터링 중..."
     },
     "voicePrompt": {
       "sectionLabel": "음성 질문 입력",
@@ -76,6 +84,7 @@
     "copyTitle": "대화 내용 복사",
     "copy": "복사",
     "copied": "복사됨!",
+    "copyError": "복사 실패",
     "clearTitle": "대화 내용 지우기",
     "clear": "지우기",
     "emptyState": "피드백을 받으려면 오디오 모니터링을 시작하세요",

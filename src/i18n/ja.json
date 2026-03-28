@@ -43,7 +43,8 @@
     },
     "systemPrompt": {
       "label": "システムプロンプト",
-      "placeholder": "音楽へのフィードバックを AI にどう返してほしいか説明してください..."
+      "placeholder": "音楽へのフィードバックを AI にどう返してほしいか説明してください...",
+      "tooLong": "システムプロンプトが長すぎるため、API によって切り詰められる可能性があります。4000文字未満にしてください。"
     },
     "language": {
       "label": "言語"
@@ -57,7 +58,14 @@
       "sectionLabel": "音楽 / 音声ソース",
       "refreshTitle": "ソースを更新",
       "placeholder": "音声ソースを選択...",
+      "devicesGroup": "オーディオデバイス",
+      "desktopGroup": "デスクトップアプリ",
       "levelLabel": "レベル"
+    },
+    "autoDetect": {
+      "label": "音を自動検出",
+      "title": "選択したソースで音声を検出したら自動で解析を開始します",
+      "listening": "● 解析待機中..."
     },
     "voicePrompt": {
       "sectionLabel": "音声質問入力",
@@ -76,6 +84,7 @@
     "copyTitle": "文字起こしをコピー",
     "copy": "コピー",
     "copied": "コピーしました！",
+    "copyError": "コピーに失敗しました",
     "clearTitle": "文字起こしを消去",
     "clear": "消去",
     "emptyState": "音声解析を開始するとフィードバックを受け取れます",

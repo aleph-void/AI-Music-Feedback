@@ -43,7 +43,8 @@
     },
     "systemPrompt": {
       "label": "System-Prompt",
-      "placeholder": "Beschreibe, wie die KI Feedback zu deiner Musik geben soll..."
+      "placeholder": "Beschreibe, wie die KI Feedback zu deiner Musik geben soll...",
+      "tooLong": "Der System-Prompt ist sehr lang und könnte von der API abgeschnitten werden. Halte ihn unter 4000 Zeichen."
     },
     "language": {
       "label": "Sprache"
@@ -57,7 +58,14 @@
       "sectionLabel": "Musik / Audioquelle",
       "refreshTitle": "Quellen aktualisieren",
       "placeholder": "Audioquelle auswählen...",
+      "devicesGroup": "Audiogeräte",
+      "desktopGroup": "Desktop-Anwendungen",
       "levelLabel": "Pegel"
+    },
+    "autoDetect": {
+      "label": "Ton automatisch erkennen",
+      "title": "Das Zuhören automatisch starten, wenn auf der ausgewählten Quelle Audio erkannt wird",
+      "listening": "● Hört zu..."
     },
     "voicePrompt": {
       "sectionLabel": "Spracheingabe",
@@ -76,6 +84,7 @@
     "copyTitle": "Transkript kopieren",
     "copy": "Kopieren",
     "copied": "Kopiert!",
+    "copyError": "Kopieren fehlgeschlagen",
     "clearTitle": "Transkript löschen",
     "clear": "Löschen",
     "emptyState": "Starte das Audio-Streaming, um Feedback zu erhalten",

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
 import { ref } from 'vue'
+import { mockAnalyserNode } from '../setup'
 
 // ── Mock composable ────────────────────────────────────────────────────────
 // State is created fresh in beforeEach so every test gets a clean slate.
@@ -443,6 +444,228 @@ describe('AudioControls', () => {
     await w.findAll('select')[0].setValue(SCREEN_SOURCE.id)
     await w.findAll('select')[1].setValue(SCREEN_SOURCE.id)
     expect((w.find('.start-btn').element as HTMLButtonElement).disabled).toBe(true)
+  })
+
+  // ── Auto-detect ────────────────────────────────────────────────────────────
+
+  describe('auto-detect', () => {
+    it('renders the auto-detect checkbox', () => {
+      const w = mountControls()
+      expect(w.find('input[type="checkbox"]').exists()).toBe(true)
+    })
+
+    it('monitoring badge is hidden when not monitoring', () => {
+      const w = mountControls()
+      expect(w.find('.monitoring-badge').exists()).toBe(false)
+    })
+
+    it('checkbox is disabled when no source is selected', () => {
+      const w = mountControls()
+      expect((w.find('input[type="checkbox"]').element as HTMLInputElement).disabled).toBe(true)
+    })
+
+    it('checkbox is disabled when not connected', async () => {
+      audioMock.sources.value = [SCREEN_SOURCE]
+      const w = mountControls({ connected: false })
+      await flushPromises()
+      await w.vm.$nextTick()
+      expect((w.find('input[type="checkbox"]').element as HTMLInputElement).disabled).toBe(true)
+    })
+
+    it('checkbox is disabled while capturing', async () => {
+      audioMock.sources.value = [SCREEN_SOURCE]
+      audioMock.isCapturing.value = true
+      const w = mountControls()
+      await flushPromises()
+      await w.vm.$nextTick()
+      expect((w.find('input[type="checkbox"]').element as HTMLInputElement).disabled).toBe(true)
+    })
+
+    it('starts monitoring when checkbox is checked with a source selected', async () => {
+      audioMock.sources.value = [SCREEN_SOURCE]
+      const w = mountControls()
+      await flushPromises()
+      await w.vm.$nextTick()
+
+      await w.find('input[type="checkbox"]').setValue(true)
+      await flushPromises()
+      await w.vm.$nextTick()
+
+      expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalled()
+      expect(w.find('.monitoring-badge').exists()).toBe(true)
+    })
+
+    it('hides monitoring badge when checkbox is unchecked', async () => {
+      audioMock.sources.value = [SCREEN_SOURCE]
+      const w = mountControls()
+      await flushPromises()
+      await w.vm.$nextTick()
+
+      await w.find('input[type="checkbox"]').setValue(true)
+      await flushPromises()
+      await w.vm.$nextTick()
+      expect(w.find('.monitoring-badge').exists()).toBe(true)
+
+      await w.find('input[type="checkbox"]').setValue(false)
+      await w.vm.$nextTick()
+      expect(w.find('.monitoring-badge').exists()).toBe(false)
+    })
+
+    it('stops monitoring when disconnected', async () => {
+      audioMock.sources.value = [SCREEN_SOURCE]
+      const w = mountControls({ connected: true })
+      await flushPromises()
+      await w.vm.$nextTick()
+
+      await w.find('input[type="checkbox"]').setValue(true)
+      await flushPromises()
+      await w.vm.$nextTick()
+      expect(w.find('.monitoring-badge').exists()).toBe(true)
+
+      await w.setProps({ connected: false })
+      await w.vm.$nextTick()
+      expect(w.find('.monitoring-badge').exists()).toBe(false)
+    })
+
+    it('resumes monitoring when reconnected with auto-detect on', async () => {
+      audioMock.sources.value = [SCREEN_SOURCE]
+      const w = mountControls({ connected: true })
+      await flushPromises()
+      await w.vm.$nextTick()
+
+      // Enable auto-detect while connected — monitoring starts
+      await w.find('input[type="checkbox"]').setValue(true)
+      await flushPromises()
+      await w.vm.$nextTick()
+      expect(w.find('.monitoring-badge').exists()).toBe(true)
+
+      // Disconnect — monitoring stops
+      await w.setProps({ connected: false })
+      await w.vm.$nextTick()
+      expect(w.find('.monitoring-badge').exists()).toBe(false)
+
+      // Reconnect — monitoring resumes
+      await w.setProps({ connected: true })
+      await flushPromises()
+      await flushPromises()
+      await w.vm.$nextTick()
+      expect(w.find('.monitoring-badge').exists()).toBe(true)
+    })
+
+    it('calls startCapture when RMS exceeds the detection threshold', async () => {
+      vi.useFakeTimers()
+      mockAnalyserNode.getFloatTimeDomainData.mockImplementation((data: Float32Array) => {
+        data.fill(0.5) // RMS = 0.5 >> DETECT_THRESHOLD = 0.01
+      })
+
+      audioMock.sources.value = [SCREEN_SOURCE]
+      const w = mountControls()
+      await flushPromises()
+      await w.vm.$nextTick()
+
+      await w.find('input[type="checkbox"]').setValue(true)
+      await flushPromises()
+      await w.vm.$nextTick()
+
+      vi.advanceTimersByTime(200)
+      await w.vm.$nextTick()
+
+      expect(audioMock.startCapture).toHaveBeenCalled()
+      vi.useRealTimers()
+    })
+
+    it('does not call startCapture when RMS stays below threshold', async () => {
+      vi.useFakeTimers()
+      // default mock fills with 0 (silence)
+
+      audioMock.sources.value = [SCREEN_SOURCE]
+      const w = mountControls()
+      await flushPromises()
+      await w.vm.$nextTick()
+
+      await w.find('input[type="checkbox"]').setValue(true)
+      await flushPromises()
+      await w.vm.$nextTick()
+
+      vi.advanceTimersByTime(2000) // many intervals — still silence
+      await w.vm.$nextTick()
+
+      expect(audioMock.startCapture).not.toHaveBeenCalled()
+      vi.useRealTimers()
+    })
+
+    it('resumes monitoring after capture stops when auto-detect is on', async () => {
+      audioMock.sources.value = [SCREEN_SOURCE]
+      const w = mountControls()
+      await flushPromises()
+      await w.vm.$nextTick()
+
+      // Enable auto-detect while not capturing (checkbox is enabled)
+      await w.find('input[type="checkbox"]').setValue(true)
+      await flushPromises()
+      await w.vm.$nextTick()
+
+      // Simulate capture starting then stopping
+      audioMock.isCapturing.value = true
+      await w.vm.$nextTick()
+      audioMock.isCapturing.value = false
+      await flushPromises() // runs watcher → calls startMonitoring()
+      await flushPromises() // resolves getUserMedia → sets isMonitoring = true
+      await w.vm.$nextTick()
+
+      // Monitoring should have resumed
+      expect(w.find('.monitoring-badge').exists()).toBe(true)
+    })
+
+    it('disables auto-detect when Stop Streaming is clicked', async () => {
+      audioMock.sources.value = [SCREEN_SOURCE]
+      audioMock.isCapturing.value = true
+      const w = mountControls()
+      await flushPromises()
+      await w.vm.$nextTick()
+
+      // Simulate auto-detect being on while capturing
+      audioMock.isCapturing.value = false
+      await flushPromises()
+      await w.vm.$nextTick()
+      await w.find('input[type="checkbox"]').setValue(true)
+      await flushPromises()
+      await w.vm.$nextTick()
+      expect(w.find('.monitoring-badge').exists()).toBe(true)
+
+      // Start capturing again
+      audioMock.isCapturing.value = true
+      await w.vm.$nextTick()
+
+      // Press Stop Streaming
+      await w.find('.stop-btn').trigger('click')
+      await flushPromises()
+      await w.vm.$nextTick()
+
+      // Auto-detect checkbox should be unchecked and monitoring stopped
+      expect((w.find('input[type="checkbox"]').element as HTMLInputElement).checked).toBe(false)
+      expect(w.find('.monitoring-badge').exists()).toBe(false)
+    })
+
+    it('restarts monitoring on source change while monitoring', async () => {
+      audioMock.sources.value = [SCREEN_SOURCE, WINDOW_SOURCE]
+      const w = mountControls()
+      await flushPromises()
+      await w.vm.$nextTick()
+
+      await w.find('input[type="checkbox"]').setValue(true)
+      await flushPromises()
+      await w.vm.$nextTick()
+
+      const callsBefore = (navigator.mediaDevices.getUserMedia as ReturnType<typeof vi.fn>).mock.calls.length
+
+      await w.findAll('select')[0].setValue(WINDOW_SOURCE.id)
+      await flushPromises()
+      await w.vm.$nextTick()
+
+      const callsAfter = (navigator.mediaDevices.getUserMedia as ReturnType<typeof vi.fn>).mock.calls.length
+      expect(callsAfter).toBeGreaterThan(callsBefore)
+    })
   })
 
   it('does not call startCapture when mic conflicts with source', async () => {

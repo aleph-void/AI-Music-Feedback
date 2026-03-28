@@ -43,7 +43,8 @@
     },
     "systemPrompt": {
       "label": "系统提示词",
-      "placeholder": "描述你希望 AI 如何对你的音乐提供反馈..."
+      "placeholder": "描述你希望 AI 如何对你的音乐提供反馈...",
+      "tooLong": "系统提示词过长，可能会被 API 截断。请尽量控制在 4000 个字符以内。"
     },
     "language": {
       "label": "语言"
@@ -57,7 +58,14 @@
       "sectionLabel": "音乐 / 音频来源",
       "refreshTitle": "刷新来源",
       "placeholder": "选择音频来源...",
+      "devicesGroup": "音频设备",
+      "desktopGroup": "桌面应用",
       "levelLabel": "电平"
+    },
+    "autoDetect": {
+      "label": "自动检测声音",
+      "title": "当在所选来源上检测到音频时自动开始监听",
+      "listening": "● 正在监听..."
     },
     "voicePrompt": {
       "sectionLabel": "语音提问",
@@ -76,6 +84,7 @@
     "copyTitle": "复制转录",
     "copy": "复制",
     "copied": "已复制！",
+    "copyError": "复制失败",
     "clearTitle": "清除转录",
     "clear": "清除",
     "emptyState": "开始监听音频以接收反馈",

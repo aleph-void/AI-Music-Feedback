@@ -62,6 +62,11 @@
       "desktopGroup": "Desktop Applications",
       "levelLabel": "Level"
     },
+    "autoDetect": {
+      "label": "Auto-detect sound",
+      "title": "Automatically start streaming when audio is detected on the selected source",
+      "listening": "● Listening..."
+    },
     "voicePrompt": {
       "sectionLabel": "Voice Prompt Input",
       "noMic": "None — type questions instead",

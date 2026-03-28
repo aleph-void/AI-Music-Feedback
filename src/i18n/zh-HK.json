@@ -43,7 +43,8 @@
     },
     "systemPrompt": {
       "label": "系統提示",
-      "placeholder": "描述你希望 AI 如何為你的音樂提供回饋..."
+      "placeholder": "描述你希望 AI 如何為你的音樂提供回饋...",
+      "tooLong": "系統提示過長，可能會被 API 截斷。請盡量控制在 4000 個字元以內。"
     },
     "language": {
       "label": "語言"
@@ -57,7 +58,14 @@
       "sectionLabel": "音樂 / 音訊來源",
       "refreshTitle": "重新整理來源",
       "placeholder": "選擇音訊來源...",
+      "devicesGroup": "音訊裝置",
+      "desktopGroup": "桌面應用程式",
       "levelLabel": "電平"
+    },
+    "autoDetect": {
+      "label": "自動偵測聲音",
+      "title": "當在所選來源偵測到音訊時自動開始監聽",
+      "listening": "● 監聽中..."
     },
     "voicePrompt": {
       "sectionLabel": "語音提問",
@@ -76,6 +84,7 @@
     "copyTitle": "複製逐字稿",
     "copy": "複製",
     "copied": "已複製！",
+    "copyError": "複製失敗",
     "clearTitle": "清除逐字稿",
     "clear": "清除",
     "emptyState": "開始監聽音訊以接收回饋",

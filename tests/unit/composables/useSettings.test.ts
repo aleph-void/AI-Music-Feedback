@@ -123,13 +123,14 @@ describe('useSettings', () => {
 
   // ── save() ─────────────────────────────────────────────────────────────────
 
-  it('calls window.electronAPI.saveApiKey with the current apiKey', async () => {
+  it('calls window.electronAPI.saveApiKey with the current apiKey in the credentials blob', async () => {
     globalThis.fetch = mockFetch([])
     window.electronAPI.saveApiKey = vi.fn().mockResolvedValue({ success: true })
     const { apiKey, save } = useSettings()
     apiKey.value = 'sk-tobeSaved'
     await save()
-    expect(window.electronAPI.saveApiKey).toHaveBeenCalledWith('sk-tobeSaved')
+    const raw = (window.electronAPI.saveApiKey as ReturnType<typeof vi.fn>).mock.calls[0][0] as string
+    expect(JSON.parse(raw).openaiKey).toBe('sk-tobeSaved')
   })
 
   it('trims the apiKey before saving', async () => {
@@ -138,18 +139,20 @@ describe('useSettings', () => {
     const { apiKey, save } = useSettings()
     apiKey.value = '  sk-padded  '
     await save()
-    expect(window.electronAPI.saveApiKey).toHaveBeenCalledWith('sk-padded')
+    const raw = (window.electronAPI.saveApiKey as ReturnType<typeof vi.fn>).mock.calls[0][0] as string
+    expect(JSON.parse(raw).openaiKey).toBe('sk-padded')
     expect(apiKey.value).toBe('sk-padded')
   })
 
-  it('calls saveApiKey with an empty string when apiKey is empty', async () => {
+  it('calls saveApiKey with an empty openaiKey when apiKey is empty', async () => {
     window.electronAPI.saveApiKey = vi.fn().mockResolvedValue({ success: true })
     const { save } = useSettings()
     await save()
-    expect(window.electronAPI.saveApiKey).toHaveBeenCalledWith('')
+    const raw = (window.electronAPI.saveApiKey as ReturnType<typeof vi.fn>).mock.calls[0][0] as string
+    expect(JSON.parse(raw).openaiKey).toBe('')
   })
 
-  it('fetches models after saving', async () => {
+  it('fetches models after saving (when provider is openai)', async () => {
     globalThis.fetch = mockFetch([{ id: 'gpt-4o-realtime-preview' }])
     window.electronAPI.saveApiKey = vi.fn().mockResolvedValue({ success: true })
     const { apiKey, save } = useSettings()
@@ -260,5 +263,130 @@ describe('useSettings', () => {
     model.value = 'gpt-4o-realtime-preview' // not in fetched list
     await fetchModels()
     expect(model.value).toBe('gpt-4o-mini-realtime-preview')
+  })
+
+  // ── Provider selection ─────────────────────────────────────────────────────
+
+  it('starts with provider = "openai"', () => {
+    const { provider } = useSettings()
+    expect(provider.value).toBe('openai')
+  })
+
+  it('starts with empty geminiApiKey', () => {
+    const { geminiApiKey } = useSettings()
+    expect(geminiApiKey.value).toBe('')
+  })
+
+  it('starts with empty awsAccessKeyId', () => {
+    const { awsAccessKeyId } = useSettings()
+    expect(awsAccessKeyId.value).toBe('')
+  })
+
+  it('starts with awsRegion = "us-east-1"', () => {
+    const { awsRegion } = useSettings()
+    expect(awsRegion.value).toBe('us-east-1')
+  })
+
+  // ── save() credentials blob ────────────────────────────────────────────────
+
+  it('save() serialises credentials as a v1 JSON blob', async () => {
+    window.electronAPI.saveApiKey = vi.fn().mockResolvedValue({ success: true })
+    const { save } = useSettings()
+    await save()
+    const raw = (window.electronAPI.saveApiKey as ReturnType<typeof vi.fn>).mock.calls[0][0] as string
+    const blob = JSON.parse(raw)
+    expect(blob.v).toBe(1)
+    expect(blob).toHaveProperty('provider')
+    expect(blob).toHaveProperty('openaiKey')
+  })
+
+  it('save() includes geminiKey in the blob', async () => {
+    window.electronAPI.saveApiKey = vi.fn().mockResolvedValue({ success: true })
+    const { geminiApiKey, save } = useSettings()
+    geminiApiKey.value = 'AIza-test'
+    await save()
+    const raw = (window.electronAPI.saveApiKey as ReturnType<typeof vi.fn>).mock.calls[0][0] as string
+    expect(JSON.parse(raw).geminiKey).toBe('AIza-test')
+  })
+
+  it('save() includes awsAccessKeyId, awsSecretAccessKey, awsRegion in the blob', async () => {
+    window.electronAPI.saveApiKey = vi.fn().mockResolvedValue({ success: true })
+    const { awsAccessKeyId, awsSecretAccessKey, awsRegion, save } = useSettings()
+    awsAccessKeyId.value = 'AKIATEST'
+    awsSecretAccessKey.value = 'secret'
+    awsRegion.value = 'eu-west-1'
+    await save()
+    const raw = (window.electronAPI.saveApiKey as ReturnType<typeof vi.fn>).mock.calls[0][0] as string
+    const blob = JSON.parse(raw)
+    expect(blob.awsAccessKeyId).toBe('AKIATEST')
+    expect(blob.awsSecretAccessKey).toBe('secret')
+    expect(blob.awsRegion).toBe('eu-west-1')
+  })
+
+  it('save() includes the active provider in the blob', async () => {
+    window.electronAPI.saveApiKey = vi.fn().mockResolvedValue({ success: true })
+    const { provider, save } = useSettings()
+    provider.value = 'gemini'
+    await save()
+    const raw = (window.electronAPI.saveApiKey as ReturnType<typeof vi.fn>).mock.calls[0][0] as string
+    expect(JSON.parse(raw).provider).toBe('gemini')
+  })
+
+  // ── load() with v1 credentials blob ────────────────────────────────────────
+
+  it('load() hydrates all credential fields from a v1 blob', async () => {
+    const blob = {
+      v: 1, provider: 'gemini',
+      openaiKey: 'sk-x', geminiKey: 'AIza-x',
+      awsAccessKeyId: 'AKI', awsSecretAccessKey: 'sec',
+      awsSessionToken: 'tok', awsRegion: 'ap-southeast-1',
+      model: 'gpt-4o-realtime-preview', outputMode: 'audio',
+      audioTimeoutSeconds: 10, systemPrompt: 'Test prompt'
+    }
+    window.electronAPI.loadApiKey = vi.fn().mockResolvedValue({ key: JSON.stringify(blob), encrypted: true })
+    const { load, provider, apiKey, geminiApiKey, awsAccessKeyId, awsRegion, outputMode } = useSettings()
+    await load()
+    expect(provider.value).toBe('gemini')
+    expect(apiKey.value).toBe('sk-x')
+    expect(geminiApiKey.value).toBe('AIza-x')
+    expect(awsAccessKeyId.value).toBe('AKI')
+    expect(awsRegion.value).toBe('ap-southeast-1')
+    expect(outputMode.value).toBe('audio')
+  })
+
+  it('load() treats a non-JSON stored value as a legacy OpenAI key', async () => {
+    window.electronAPI.loadApiKey = vi.fn().mockResolvedValue({ key: 'sk-legacy', encrypted: true })
+    const { load, provider, apiKey } = useSettings()
+    await load()
+    expect(provider.value).toBe('openai')
+    expect(apiKey.value).toBe('sk-legacy')
+  })
+
+  it('load() does not call OpenAI models API when provider is gemini', async () => {
+    globalThis.fetch = vi.fn()
+    const blob = { v: 1, provider: 'gemini', openaiKey: '', geminiKey: 'AIza-x',
+      awsAccessKeyId: '', awsSecretAccessKey: '', awsSessionToken: '', awsRegion: 'us-east-1',
+      model: 'gpt-4o-realtime-preview', outputMode: 'text', audioTimeoutSeconds: 5, systemPrompt: '' }
+    window.electronAPI.loadApiKey = vi.fn().mockResolvedValue({ key: JSON.stringify(blob), encrypted: true })
+    const { load } = useSettings()
+    await load()
+    expect(globalThis.fetch).not.toHaveBeenCalled()
+  })
+
+  it('fetchModels() does nothing when provider is gemini', async () => {
+    globalThis.fetch = vi.fn()
+    const { provider, apiKey, fetchModels } = useSettings()
+    provider.value = 'gemini'
+    apiKey.value = 'AIza-x'
+    await fetchModels()
+    expect(globalThis.fetch).not.toHaveBeenCalled()
+  })
+
+  it('fetchModels() does nothing when provider is nova-sonic', async () => {
+    globalThis.fetch = vi.fn()
+    const { provider, fetchModels } = useSettings()
+    provider.value = 'nova-sonic'
+    await fetchModels()
+    expect(globalThis.fetch).not.toHaveBeenCalled()
   })
 })

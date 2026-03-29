@@ -7,18 +7,24 @@
     "settingsTitle": "Configurações",
     "howItWorks": "Como funciona",
     "steps": {
-      "1": "Insira sua chave da API da OpenAI em Configurações",
+      "1": "Insira as credenciais do seu provedor em Configurações",
       "2": "Selecione uma fonte de áudio (sua tela/interface de áudio)",
       "3": "Clique em",
       "3action": "Iniciar escuta",
       "4": "A IA escuta sua mix e dá feedback quando detecta uma pausa"
     },
-    "connectButton": "Conectar à OpenAI",
+    "connectButton": "Conectar",
     "disconnectButton": "Desconectar",
-    "apiKeyHint": "Adicione primeiro sua chave de API em Configurações"
+    "apiKeyHint": "Adicione primeiro as credenciais do seu provedor em Configurações"
   },
   "settings": {
     "title": "Configurações",
+    "provider": {
+      "label": "Provedor de IA",
+      "openai": "OpenAI Realtime",
+      "gemini": "Google Gemini Live",
+      "novaSonic": "Amazon Nova Sonic"
+    },
     "apiKey": {
       "label": "Chave da API da OpenAI",
       "placeholder": "sk-...",
@@ -26,6 +32,30 @@
       "hide": "Ocultar",
       "formatError": "Isso não parece uma chave da API da OpenAI (deve começar com sk-)",
       "encryptionWarning": "Criptografia indisponível — a chave será armazenada em texto simples"
+    },
+    "geminiKey": {
+      "label": "Chave da API do Google AI Studio",
+      "placeholder": "AIza...",
+      "show": "Mostrar",
+      "hide": "Ocultar"
+    },
+    "aws": {
+      "accessKeyId": {
+        "label": "ID da chave de acesso da AWS",
+        "placeholder": "AKIA..."
+      },
+      "secretAccessKey": {
+        "label": "Chave de acesso secreta da AWS"
+      },
+      "sessionToken": {
+        "label": "Token de sessão da AWS",
+        "placeholder": "Opcional — obrigatório para credenciais temporárias",
+        "hint": "Deixe em branco ao usar credenciais IAM de longo prazo."
+      },
+      "region": {
+        "label": "Região da AWS",
+        "placeholder": "us-east-1"
+      }
     },
     "model": {
       "label": "Modelo em tempo real",

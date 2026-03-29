@@ -7,18 +7,24 @@
     "settingsTitle": "Einstellungen",
     "howItWorks": "So funktioniert es",
     "steps": {
-      "1": "Gib deinen OpenAI-API-Schlüssel in den Einstellungen ein",
+      "1": "Gib deine Anbieter-Zugangsdaten in den Einstellungen ein",
       "2": "Wähle eine Audioquelle (dein Bildschirm/deine Soundkarte)",
       "3": "Klicke auf",
       "3action": "Streaming starten",
       "4": "Die KI hört zu und gibt Feedback, wenn sie eine Pause erkennt"
     },
-    "connectButton": "Mit OpenAI verbinden",
+    "connectButton": "Verbinden",
     "disconnectButton": "Trennen",
-    "apiKeyHint": "Füge zuerst deinen API-Schlüssel in den Einstellungen hinzu"
+    "apiKeyHint": "Füge zuerst deine Anbieter-Zugangsdaten in den Einstellungen hinzu"
   },
   "settings": {
     "title": "Einstellungen",
+    "provider": {
+      "label": "KI-Anbieter",
+      "openai": "OpenAI Realtime",
+      "gemini": "Google Gemini Live",
+      "novaSonic": "Amazon Nova Sonic"
+    },
     "apiKey": {
       "label": "OpenAI-API-Schlüssel",
       "placeholder": "sk-...",
@@ -26,6 +32,30 @@
       "hide": "Ausblenden",
       "formatError": "Das sieht nicht wie ein OpenAI-API-Schlüssel aus (sollte mit sk- beginnen)",
       "encryptionWarning": "Verschlüsselung nicht verfügbar — Schlüssel wird im Klartext gespeichert"
+    },
+    "geminiKey": {
+      "label": "Google AI Studio API-Schlüssel",
+      "placeholder": "AIza...",
+      "show": "Anzeigen",
+      "hide": "Ausblenden"
+    },
+    "aws": {
+      "accessKeyId": {
+        "label": "AWS Access Key ID",
+        "placeholder": "AKIA..."
+      },
+      "secretAccessKey": {
+        "label": "AWS Secret Access Key"
+      },
+      "sessionToken": {
+        "label": "AWS Session Token",
+        "placeholder": "Optional — erforderlich für temporäre Zugangsdaten",
+        "hint": "Leer lassen, wenn du langfristige IAM-Zugangsdaten verwendest."
+      },
+      "region": {
+        "label": "AWS-Region",
+        "placeholder": "us-east-1"
+      }
     },
     "model": {
       "label": "Echtzeitmodell",

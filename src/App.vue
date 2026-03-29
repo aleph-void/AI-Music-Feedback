@@ -34,7 +34,7 @@
             v-if="realtimeApi.status.value === 'disconnected' || realtimeApi.status.value === 'error'"
             class="primary-btn"
             @click="connectToApi"
-            :disabled="!settings.apiKey.value"
+            :disabled="!hasCredentials()"
           >
             {{ t('sidebar.connectButton') }}
           </button>
@@ -45,7 +45,7 @@
           >
             {{ t('sidebar.disconnectButton') }}
           </button>
-          <p v-if="!settings.apiKey.value" class="key-hint">
+          <p v-if="!hasCredentials()" class="key-hint">
             {{ t('sidebar.apiKeyHint') }}
           </p>
         </div>
@@ -103,21 +103,38 @@ let cleanupExportListener: (() => void) | undefined
 onMounted(async () => {
   await settings.load()
   cleanupExportListener = window.electronAPI?.onMenuExportTranscript(handleExportTranscript)
-  if (settings.apiKey.value) connectToApi()
+  if (hasCredentials()) connectToApi()
 })
 
 onUnmounted(() => {
   cleanupExportListener?.()
 })
 
+function hasCredentials(): boolean {
+  const p = settings.provider.value
+  if (p === 'openai') return !!settings.apiKey.value
+  if (p === 'gemini') return !!settings.geminiApiKey.value
+  return !!(settings.awsAccessKeyId.value && settings.awsSecretAccessKey.value)
+}
+
 function connectToApi() {
-  if (!settings.apiKey.value) return
-  realtimeApi.connect({
-    apiKey: settings.apiKey.value,
-    systemPrompt: settings.systemPrompt.value,
-    model: settings.model.value,
-    outputMode: settings.outputMode.value
-  })
+  if (!hasCredentials()) return
+  const common = { systemPrompt: settings.systemPrompt.value, outputMode: settings.outputMode.value }
+  const p = settings.provider.value
+  if (p === 'openai') {
+    realtimeApi.connect({ provider: 'openai', apiKey: settings.apiKey.value, model: settings.model.value, ...common })
+  } else if (p === 'gemini') {
+    realtimeApi.connect({ provider: 'gemini', geminiApiKey: settings.geminiApiKey.value, ...common })
+  } else {
+    realtimeApi.connect({
+      provider: 'nova-sonic',
+      awsAccessKeyId: settings.awsAccessKeyId.value,
+      awsSecretAccessKey: settings.awsSecretAccessKey.value,
+      awsSessionToken: settings.awsSessionToken.value,
+      awsRegion: settings.awsRegion.value,
+      ...common
+    })
+  }
 }
 
 function onAudioChunk(buffer: ArrayBuffer) {

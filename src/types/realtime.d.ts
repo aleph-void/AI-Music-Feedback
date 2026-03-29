@@ -9,11 +9,22 @@ export interface TranscriptMessage {
 }
 
 export type OutputMode = 'text' | 'audio'
+export type Provider = 'openai' | 'gemini' | 'nova-sonic'
 
 export interface RealtimeSessionConfig {
-  apiKey: string
+  provider: Provider
+  // OpenAI credentials
+  apiKey?: string
+  model?: string
+  // Gemini credentials
+  geminiApiKey?: string
+  // Amazon Nova Sonic credentials
+  awsAccessKeyId?: string
+  awsSecretAccessKey?: string
+  awsSessionToken?: string
+  awsRegion?: string
+  // Common
   systemPrompt: string
-  model: string
   outputMode: OutputMode
 }
 

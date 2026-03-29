@@ -7,18 +7,24 @@
     "settingsTitle": "Configuración",
     "howItWorks": "Cómo funciona",
     "steps": {
-      "1": "Ingresa tu clave API de OpenAI en Configuración",
+      "1": "Ingresa las credenciales de tu proveedor en Configuración",
       "2": "Selecciona una fuente de audio (tu pantalla/tarjeta de sonido)",
       "3": "Haz clic en",
       "3action": "Iniciar transmisión",
       "4": "La IA escucha y da retroalimentación cuando detecta una pausa"
     },
-    "connectButton": "Conectar a OpenAI",
+    "connectButton": "Conectar",
     "disconnectButton": "Desconectar",
-    "apiKeyHint": "Agrega primero tu clave API en Configuración"
+    "apiKeyHint": "Agrega primero las credenciales de tu proveedor en Configuración"
   },
   "settings": {
     "title": "Configuración",
+    "provider": {
+      "label": "Proveedor de IA",
+      "openai": "OpenAI Realtime",
+      "gemini": "Google Gemini Live",
+      "novaSonic": "Amazon Nova Sonic"
+    },
     "apiKey": {
       "label": "Clave API de OpenAI",
       "placeholder": "sk-...",
@@ -26,6 +32,30 @@
       "hide": "Ocultar",
       "formatError": "Esto no parece una clave API de OpenAI (debe comenzar con sk-)",
       "encryptionWarning": "Cifrado no disponible — la clave se almacena en texto plano"
+    },
+    "geminiKey": {
+      "label": "Clave API de Google AI Studio",
+      "placeholder": "AIza...",
+      "show": "Mostrar",
+      "hide": "Ocultar"
+    },
+    "aws": {
+      "accessKeyId": {
+        "label": "ID de clave de acceso de AWS",
+        "placeholder": "AKIA..."
+      },
+      "secretAccessKey": {
+        "label": "Clave de acceso secreta de AWS"
+      },
+      "sessionToken": {
+        "label": "Token de sesión de AWS",
+        "placeholder": "Opcional — obligatorio para credenciales temporales",
+        "hint": "Déjalo en blanco cuando uses credenciales IAM de largo plazo."
+      },
+      "region": {
+        "label": "Región de AWS",
+        "placeholder": "us-east-1"
+      }
     },
     "model": {
       "label": "Modelo en tiempo real",

@@ -7,18 +7,24 @@
     "settingsTitle": "설정",
     "howItWorks": "작동 방식",
     "steps": {
-      "1": "설정에서 OpenAI API 키를 입력하세요",
+      "1": "설정에서 공급자 자격 증명을 입력하세요",
       "2": "오디오 소스(화면/오디오 인터페이스)를 선택하세요",
       "3": "클릭",
       "3action": "모니터링 시작",
       "4": "AI가 당신의 트랙이나 믹스를 듣고, 멈춤이 감지되면 피드백을 제공합니다"
     },
-    "connectButton": "OpenAI에 연결",
+    "connectButton": "연결",
     "disconnectButton": "연결 해제",
-    "apiKeyHint": "먼저 설정에서 API 키를 추가하세요"
+    "apiKeyHint": "먼저 설정에서 공급자 자격 증명을 추가하세요"
   },
   "settings": {
     "title": "설정",
+    "provider": {
+      "label": "AI 공급자",
+      "openai": "OpenAI Realtime",
+      "gemini": "Google Gemini Live",
+      "novaSonic": "Amazon Nova Sonic"
+    },
     "apiKey": {
       "label": "OpenAI API 키",
       "placeholder": "sk-...",
@@ -26,6 +32,30 @@
       "hide": "숨기기",
       "formatError": "OpenAI API 키 형식이 아닌 것 같습니다 (sk-로 시작해야 합니다)",
       "encryptionWarning": "암호화를 사용할 수 없음 — 키가 평문으로 저장됩니다"
+    },
+    "geminiKey": {
+      "label": "Google AI Studio API 키",
+      "placeholder": "AIza...",
+      "show": "표시",
+      "hide": "숨기기"
+    },
+    "aws": {
+      "accessKeyId": {
+        "label": "AWS 액세스 키 ID",
+        "placeholder": "AKIA..."
+      },
+      "secretAccessKey": {
+        "label": "AWS 비밀 액세스 키"
+      },
+      "sessionToken": {
+        "label": "AWS 세션 토큰",
+        "placeholder": "선택 사항 — 임시 자격 증명에는 필수",
+        "hint": "장기 IAM 자격 증명을 사용할 때는 비워 두세요."
+      },
+      "region": {
+        "label": "AWS 리전",
+        "placeholder": "us-east-1"
+      }
     },
     "model": {
       "label": "실시간 모델",

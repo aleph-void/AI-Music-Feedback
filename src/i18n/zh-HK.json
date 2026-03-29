@@ -7,18 +7,24 @@
     "settingsTitle": "設定",
     "howItWorks": "使用方式",
     "steps": {
-      "1": "在設定中輸入你的 OpenAI API 金鑰",
+      "1": "在設定中輸入你的供應商憑證",
       "2": "選擇音訊來源（螢幕/音訊介面）",
       "3": "按一下",
       "3action": "開始監聽",
       "4": "AI 會聆聽你的演奏或混音，並在偵測到停頓時提供回饋"
     },
-    "connectButton": "連接到 OpenAI",
+    "connectButton": "連接",
     "disconnectButton": "中斷連線",
-    "apiKeyHint": "請先在設定中加入 API 金鑰"
+    "apiKeyHint": "請先在設定中加入供應商憑證"
   },
   "settings": {
     "title": "設定",
+    "provider": {
+      "label": "AI 供應商",
+      "openai": "OpenAI Realtime",
+      "gemini": "Google Gemini Live",
+      "novaSonic": "Amazon Nova Sonic"
+    },
     "apiKey": {
       "label": "OpenAI API 金鑰",
       "placeholder": "sk-...",
@@ -26,6 +32,30 @@
       "hide": "隱藏",
       "formatError": "這看起來不像 OpenAI API 金鑰（應以 sk- 開頭）",
       "encryptionWarning": "無法加密 — 金鑰將以純文字儲存"
+    },
+    "geminiKey": {
+      "label": "Google AI Studio API 金鑰",
+      "placeholder": "AIza...",
+      "show": "顯示",
+      "hide": "隱藏"
+    },
+    "aws": {
+      "accessKeyId": {
+        "label": "AWS 存取金鑰 ID",
+        "placeholder": "AKIA..."
+      },
+      "secretAccessKey": {
+        "label": "AWS 秘密存取金鑰"
+      },
+      "sessionToken": {
+        "label": "AWS 工作階段權杖",
+        "placeholder": "選填 — 臨時憑證時必填",
+        "hint": "使用長期 IAM 憑證時請留空。"
+      },
+      "region": {
+        "label": "AWS 區域",
+        "placeholder": "us-east-1"
+      }
     },
     "model": {
       "label": "即時模型",

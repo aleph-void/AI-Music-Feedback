@@ -7,18 +7,24 @@
     "settingsTitle": "सेटिंग्स",
     "howItWorks": "यह कैसे काम करता है",
     "steps": {
-      "1": "सेटिंग्स में अपनी OpenAI API key दर्ज करें",
+      "1": "सेटिंग्स में अपने प्रोवाइडर की क्रेडेंशियल्स दर्ज करें",
       "2": "एक ऑडियो स्रोत चुनें (आपकी स्क्रीन/ऑडियो इंटरफेस)",
       "3": "क्लिक करें",
       "3action": "सुनना शुरू करें",
       "4": "AI आपकी ट्रैक या मिक्स को सुनता है और विराम मिलने पर फीडबैक देता है"
     },
-    "connectButton": "OpenAI से कनेक्ट करें",
+    "connectButton": "कनेक्ट करें",
     "disconnectButton": "डिस्कनेक्ट करें",
-    "apiKeyHint": "पहले सेटिंग्स में अपनी API key जोड़ें"
+    "apiKeyHint": "पहले सेटिंग्स में अपने प्रोवाइडर की क्रेडेंशियल्स जोड़ें"
   },
   "settings": {
     "title": "सेटिंग्स",
+    "provider": {
+      "label": "AI प्रोवाइडर",
+      "openai": "OpenAI Realtime",
+      "gemini": "Google Gemini Live",
+      "novaSonic": "Amazon Nova Sonic"
+    },
     "apiKey": {
       "label": "OpenAI API Key",
       "placeholder": "sk-...",
@@ -26,6 +32,30 @@
       "hide": "छिपाएँ",
       "formatError": "यह OpenAI API key जैसी नहीं लगती (यह sk- से शुरू होनी चाहिए)",
       "encryptionWarning": "एन्क्रिप्शन उपलब्ध नहीं है — key साधारण टेक्स्ट में संग्रहीत होगी"
+    },
+    "geminiKey": {
+      "label": "Google AI Studio API Key",
+      "placeholder": "AIza...",
+      "show": "दिखाएँ",
+      "hide": "छिपाएँ"
+    },
+    "aws": {
+      "accessKeyId": {
+        "label": "AWS Access Key ID",
+        "placeholder": "AKIA..."
+      },
+      "secretAccessKey": {
+        "label": "AWS Secret Access Key"
+      },
+      "sessionToken": {
+        "label": "AWS Session Token",
+        "placeholder": "वैकल्पिक — अस्थायी क्रेडेंशियल्स के लिए आवश्यक",
+        "hint": "लंबी अवधि वाले IAM क्रेडेंशियल्स का उपयोग करते समय इसे खाली छोड़ें।"
+      },
+      "region": {
+        "label": "AWS Region",
+        "placeholder": "us-east-1"
+      }
     },
     "model": {
       "label": "रीयलटाइम मॉडल",

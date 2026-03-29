@@ -7,18 +7,24 @@
     "settingsTitle": "Settings",
     "howItWorks": "How it works",
     "steps": {
-      "1": "Enter your OpenAI API key in Settings",
+      "1": "Enter your provider credentials in Settings",
       "2": "Select an audio source (your screen/soundcard)",
       "3": "Click",
       "3action": "Start Streaming",
       "4": "The AI listens and gives feedback when it detects a pause"
     },
-    "connectButton": "Connect to OpenAI",
+    "connectButton": "Connect",
     "disconnectButton": "Disconnect",
-    "apiKeyHint": "Add your API key in Settings first"
+    "apiKeyHint": "Add your provider credentials in Settings first"
   },
   "settings": {
     "title": "Settings",
+    "provider": {
+      "label": "AI Provider",
+      "openai": "OpenAI Realtime",
+      "gemini": "Google Gemini Live",
+      "novaSonic": "Amazon Nova Sonic"
+    },
     "apiKey": {
       "label": "OpenAI API Key",
       "placeholder": "sk-...",
@@ -26,6 +32,30 @@
       "hide": "Hide",
       "formatError": "This doesn't look like an OpenAI API key (should start with sk-)",
       "encryptionWarning": "Encryption unavailable — key stored in plain text"
+    },
+    "geminiKey": {
+      "label": "Google AI Studio API Key",
+      "placeholder": "AIza...",
+      "show": "Show",
+      "hide": "Hide"
+    },
+    "aws": {
+      "accessKeyId": {
+        "label": "AWS Access Key ID",
+        "placeholder": "AKIA..."
+      },
+      "secretAccessKey": {
+        "label": "AWS Secret Access Key"
+      },
+      "sessionToken": {
+        "label": "AWS Session Token",
+        "placeholder": "Optional — required for temporary credentials",
+        "hint": "Leave blank when using long-term IAM credentials."
+      },
+      "region": {
+        "label": "AWS Region",
+        "placeholder": "us-east-1"
+      }
     },
     "model": {
       "label": "Realtime Model",

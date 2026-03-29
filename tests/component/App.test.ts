@@ -9,7 +9,13 @@ import { ref } from 'vue'
 type Status = 'disconnected' | 'connecting' | 'connected' | 'error'
 
 let settingsMock: {
+  provider: ReturnType<typeof ref<string>>
   apiKey: ReturnType<typeof ref<string>>
+  geminiApiKey: ReturnType<typeof ref<string>>
+  awsAccessKeyId: ReturnType<typeof ref<string>>
+  awsSecretAccessKey: ReturnType<typeof ref<string>>
+  awsSessionToken: ReturnType<typeof ref<string>>
+  awsRegion: ReturnType<typeof ref<string>>
   model: ReturnType<typeof ref<string>>
   outputMode: ReturnType<typeof ref<string>>
   audioTimeoutSeconds: ReturnType<typeof ref<number>>
@@ -42,7 +48,13 @@ let captureMock: {
 
 function createMocks() {
   settingsMock = {
+    provider: ref('openai'),
     apiKey: ref(''),
+    geminiApiKey: ref(''),
+    awsAccessKeyId: ref(''),
+    awsSecretAccessKey: ref(''),
+    awsSessionToken: ref(''),
+    awsRegion: ref('us-east-1'),
     model: ref('gpt-4o-realtime-preview'),
     outputMode: ref('text'),
     audioTimeoutSeconds: ref(5),
@@ -213,7 +225,7 @@ describe('App', () => {
     const w = mountApp()
     const btn = w.find('.connection-actions .primary-btn')
     expect(btn.exists()).toBe(true)
-    expect(btn.text()).toBe('Connect to OpenAI')
+    expect(btn.text()).toBe('Connect')
   })
 
   it('Connect button is disabled when apiKey is empty', () => {
@@ -234,6 +246,7 @@ describe('App', () => {
     const w = mountApp()
     await w.find('.connection-actions .primary-btn').trigger('click')
     expect(realtimeMock.connect).toHaveBeenCalledWith({
+      provider: 'openai',
       apiKey: 'sk-abc',
       systemPrompt: 'Feedback prompt',
       model: 'gpt-4o-realtime-preview',
@@ -304,6 +317,7 @@ describe('App', () => {
     const w = mountApp()
     await w.findComponent({ name: 'StatusBarStub' }).vm.$emit('reconnect')
     expect(realtimeMock.connect).toHaveBeenCalledWith({
+      provider: 'openai',
       apiKey: 'sk-test',
       systemPrompt: 'My prompt',
       model: 'gpt-4o-realtime-preview',

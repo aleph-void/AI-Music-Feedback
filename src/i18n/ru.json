@@ -7,18 +7,24 @@
     "settingsTitle": "Настройки",
     "howItWorks": "Как это работает",
     "steps": {
-      "1": "Введите свой ключ API OpenAI в настройках",
+      "1": "Введите учетные данные провайдера в настройках",
       "2": "Выберите источник аудио (экран/аудиоинтерфейс)",
       "3": "Нажмите",
       "3action": "Начать прослушивание",
       "4": "ИИ слушает ваш трек или микс и дает обратную связь, когда обнаруживает паузу"
     },
-    "connectButton": "Подключиться к OpenAI",
+    "connectButton": "Подключиться",
     "disconnectButton": "Отключиться",
-    "apiKeyHint": "Сначала добавьте ключ API в настройках"
+    "apiKeyHint": "Сначала добавьте учетные данные провайдера в настройках"
   },
   "settings": {
     "title": "Настройки",
+    "provider": {
+      "label": "Провайдер ИИ",
+      "openai": "OpenAI Realtime",
+      "gemini": "Google Gemini Live",
+      "novaSonic": "Amazon Nova Sonic"
+    },
     "apiKey": {
       "label": "Ключ API OpenAI",
       "placeholder": "sk-...",
@@ -26,6 +32,30 @@
       "hide": "Скрыть",
       "formatError": "Это не похоже на ключ API OpenAI (должен начинаться с sk-)",
       "encryptionWarning": "Шифрование недоступно — ключ будет храниться в открытом виде"
+    },
+    "geminiKey": {
+      "label": "Ключ API Google AI Studio",
+      "placeholder": "AIza...",
+      "show": "Показать",
+      "hide": "Скрыть"
+    },
+    "aws": {
+      "accessKeyId": {
+        "label": "AWS Access Key ID",
+        "placeholder": "AKIA..."
+      },
+      "secretAccessKey": {
+        "label": "AWS Secret Access Key"
+      },
+      "sessionToken": {
+        "label": "AWS Session Token",
+        "placeholder": "Необязательно — требуется для временных учетных данных",
+        "hint": "Оставьте пустым при использовании долгосрочных IAM-учетных данных."
+      },
+      "region": {
+        "label": "Регион AWS",
+        "placeholder": "us-east-1"
+      }
     },
     "model": {
       "label": "Модель реального времени",

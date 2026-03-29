@@ -14,7 +14,13 @@ const MOCK_MODELS = [
 ]
 
 let mockState: {
+  provider: ReturnType<typeof ref<string>>
   apiKey: ReturnType<typeof ref<string>>
+  geminiApiKey: ReturnType<typeof ref<string>>
+  awsAccessKeyId: ReturnType<typeof ref<string>>
+  awsSecretAccessKey: ReturnType<typeof ref<string>>
+  awsSessionToken: ReturnType<typeof ref<string>>
+  awsRegion: ReturnType<typeof ref<string>>
   model: ReturnType<typeof ref<string>>
   outputMode: ReturnType<typeof ref<string>>
   audioTimeoutSeconds: ReturnType<typeof ref<number>>
@@ -30,7 +36,13 @@ let mockState: {
 
 function createMockState() {
   return {
+    provider: ref('openai'),
     apiKey: ref(''),
+    geminiApiKey: ref(''),
+    awsAccessKeyId: ref(''),
+    awsSecretAccessKey: ref(''),
+    awsSessionToken: ref(''),
+    awsRegion: ref('us-east-1'),
     model: ref('gpt-4o-realtime-preview'),
     outputMode: ref('text'),
     audioTimeoutSeconds: ref(5),
@@ -385,5 +397,134 @@ describe('SettingsPanel', () => {
     const w = mountPanel()
     await w.find('[title="Refresh model list from OpenAI"]').trigger('click')
     expect(mockState.fetchModels).toHaveBeenCalledTimes(1)
+  })
+
+  // ── Provider selector ──────────────────────────────────────────────────────
+
+  it('renders a #provider select dropdown', () => {
+    const w = mountPanel()
+    expect(w.find('#provider').exists()).toBe(true)
+  })
+
+  it('#provider dropdown has 3 options (openai, gemini, nova-sonic)', () => {
+    const w = mountPanel()
+    const options = w.find('#provider').findAll('option')
+    const values = options.map(o => o.attributes('value'))
+    expect(values).toContain('openai')
+    expect(values).toContain('gemini')
+    expect(values).toContain('nova-sonic')
+    expect(options.length).toBe(3)
+  })
+
+  it('#provider defaults to "openai"', () => {
+    const w = mountPanel()
+    expect((w.find('#provider').element as HTMLSelectElement).value).toBe('openai')
+  })
+
+  // ── OpenAI conditional section ─────────────────────────────────────────────
+
+  it('renders #api-key when provider is openai', () => {
+    mockState.provider.value = 'openai'
+    const w = mountPanel()
+    expect(w.find('#api-key').exists()).toBe(true)
+  })
+
+  it('hides #api-key when provider is gemini', () => {
+    mockState.provider.value = 'gemini'
+    const w = mountPanel()
+    expect(w.find('#api-key').exists()).toBe(false)
+  })
+
+  it('hides #api-key when provider is nova-sonic', () => {
+    mockState.provider.value = 'nova-sonic'
+    const w = mountPanel()
+    expect(w.find('#api-key').exists()).toBe(false)
+  })
+
+  it('renders #model select when provider is openai', () => {
+    mockState.provider.value = 'openai'
+    const w = mountPanel()
+    expect(w.find('#model').exists()).toBe(true)
+  })
+
+  it('hides #model select when provider is gemini', () => {
+    mockState.provider.value = 'gemini'
+    const w = mountPanel()
+    expect(w.find('#model').exists()).toBe(false)
+  })
+
+  it('shows format error for invalid openai key when provider is openai', () => {
+    mockState.provider.value = 'openai'
+    mockState.apiKey.value = 'not-a-valid-key'
+    const w = mountPanel()
+    expect(w.find('.warning').exists()).toBe(true)
+    expect(w.find('.warning').text()).toContain('sk-')
+  })
+
+  it('does NOT show openai format error when provider is gemini', () => {
+    mockState.provider.value = 'gemini'
+    mockState.apiKey.value = 'not-a-valid-key'
+    const w = mountPanel()
+    // No format error from openaiKeyFormatError; encryption warning may appear
+    const warnings = w.findAll('.warning').map(w => w.text())
+    expect(warnings.some(t => t.includes('sk-'))).toBe(false)
+  })
+
+  // ── Gemini conditional section ─────────────────────────────────────────────
+
+  it('renders #gemini-key when provider is gemini', () => {
+    mockState.provider.value = 'gemini'
+    const w = mountPanel()
+    expect(w.find('#gemini-key').exists()).toBe(true)
+  })
+
+  it('hides #gemini-key when provider is openai', () => {
+    mockState.provider.value = 'openai'
+    const w = mountPanel()
+    expect(w.find('#gemini-key').exists()).toBe(false)
+  })
+
+  it('#gemini-key input defaults to type="password"', () => {
+    mockState.provider.value = 'gemini'
+    const w = mountPanel()
+    expect(w.find('#gemini-key').attributes('type')).toBe('password')
+  })
+
+  it('gemini eye button toggles #gemini-key to type="text"', async () => {
+    mockState.provider.value = 'gemini'
+    const w = mountPanel()
+    await w.find('.gemini-key-toggle').trigger('click')
+    expect(w.find('#gemini-key').attributes('type')).toBe('text')
+  })
+
+  // ── Nova Sonic conditional section ─────────────────────────────────────────
+
+  it('renders AWS credential fields when provider is nova-sonic', () => {
+    mockState.provider.value = 'nova-sonic'
+    const w = mountPanel()
+    expect(w.find('#aws-access-key-id').exists()).toBe(true)
+    expect(w.find('#aws-secret-key').exists()).toBe(true)
+    expect(w.find('#aws-session-token').exists()).toBe(true)
+    expect(w.find('#aws-region').exists()).toBe(true)
+  })
+
+  it('hides AWS credential fields when provider is openai', () => {
+    mockState.provider.value = 'openai'
+    const w = mountPanel()
+    expect(w.find('#aws-access-key-id').exists()).toBe(false)
+    expect(w.find('#aws-secret-key').exists()).toBe(false)
+  })
+
+  it('session token hint is visible when provider is nova-sonic', () => {
+    mockState.provider.value = 'nova-sonic'
+    const w = mountPanel()
+    const hints = w.findAll('.hint')
+    expect(hints.some(h => h.text().toLowerCase().includes('blank'))).toBe(true)
+  })
+
+  it('#aws-region is type="text" (not secret)', () => {
+    mockState.provider.value = 'nova-sonic'
+    const w = mountPanel()
+    expect(w.find('#aws-region').attributes('type')).toBe('text')
   })
 })

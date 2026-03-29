@@ -15,6 +15,7 @@ beforeEach(async () => {
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 const DEFAULT_CONFIG = {
+  provider: 'openai' as const,
   apiKey: 'sk-test',
   systemPrompt: 'Be helpful with music feedback',
   model: 'gpt-4o-realtime-preview',
@@ -72,7 +73,7 @@ describe('useRealtimeApi', () => {
 
   it('passes the API key as a subprotocol', () => {
     const api = useRealtimeApi()
-    api.connect({ apiKey: 'sk-mykey', systemPrompt: '', model: 'gpt-4o-realtime-preview', outputMode: 'text' })
+    api.connect({ provider: 'openai', apiKey: 'sk-mykey', systemPrompt: '', model: 'gpt-4o-realtime-preview', outputMode: 'text' })
     const protocols = MockWebSocket.lastInstance!.protocols
     expect(protocols.some(p => p.includes('sk-mykey'))).toBe(true)
   })
@@ -89,7 +90,7 @@ describe('useRealtimeApi', () => {
   })
 
   it('session.update includes the system prompt as instructions', () => {
-    const { ws } = connectAndOpen({ apiKey: 'sk-test', systemPrompt: 'Give jazz feedback', model: 'gpt-4o-realtime-preview', outputMode: 'text' })
+    const { ws } = connectAndOpen({ provider: 'openai', apiKey: 'sk-test', systemPrompt: 'Give jazz feedback', model: 'gpt-4o-realtime-preview', outputMode: 'text' })
     const update = ws.sent.find((m: unknown) => (m as { type: string }).type === 'session.update') as {
       session: { instructions: string }
     }
@@ -466,5 +467,175 @@ describe('useRealtimeApi', () => {
     ws.simulateMessage({ type: 'response.audio.delta', delta: base64 })
     api.disconnect()
     expect(mockAudioContext.close).toHaveBeenCalled()
+  })
+
+  // ── Gemini Live provider ───────────────────────────────────────────────────
+
+  const GEMINI_CONFIG = {
+    provider: 'gemini' as const,
+    geminiApiKey: 'AIza-test-key',
+    systemPrompt: 'Feedback on my music',
+    outputMode: 'text' as const
+  }
+
+  function connectGeminiAndOpen(config = GEMINI_CONFIG) {
+    const api = useRealtimeApi()
+    api.connect(config)
+    const ws = MockWebSocket.lastInstance!
+    ws.simulateOpen()
+    return { api, ws }
+  }
+
+  it('connect() with gemini creates a WebSocket to the Gemini Live endpoint', () => {
+    const api = useRealtimeApi()
+    api.connect(GEMINI_CONFIG)
+    expect(MockWebSocket.lastInstance!.url).toContain('generativelanguage.googleapis.com')
+  })
+
+  it('connect() with gemini includes the API key as a query param', () => {
+    const api = useRealtimeApi()
+    api.connect(GEMINI_CONFIG)
+    expect(MockWebSocket.lastInstance!.url).toContain('key=AIza-test-key')
+  })
+
+  it('connect() with gemini sets status to "connecting"', () => {
+    const api = useRealtimeApi()
+    api.connect(GEMINI_CONFIG)
+    expect(api.status.value).toBe('connecting')
+  })
+
+  it('connect() with gemini sets status to "connected" on ws open', () => {
+    const { api } = connectGeminiAndOpen()
+    expect(api.status.value).toBe('connected')
+  })
+
+  it('sends a setup message with systemInstruction after Gemini connection opens', () => {
+    const { ws } = connectGeminiAndOpen()
+    const msg = ws.sent.find((m: unknown) => !!(m as { setup?: unknown }).setup) as {
+      setup: { systemInstruction: { parts: [{ text: string }] } }
+    }
+    expect(msg).toBeDefined()
+    expect(msg.setup.systemInstruction.parts[0].text).toBe('Feedback on my music')
+  })
+
+  it('sets statusMessage to ready on Gemini setupComplete event', () => {
+    const { api, ws } = connectGeminiAndOpen()
+    ws.simulateMessage({ setupComplete: {} })
+    expect(api.statusMessage.value).toContain('ready')
+  })
+
+  it('adds an assistant message on Gemini serverContent with text', () => {
+    const { api, ws } = connectGeminiAndOpen()
+    ws.simulateMessage({
+      serverContent: {
+        modelTurn: { parts: [{ text: 'Great bass line!' }] }
+      }
+    })
+    expect(api.transcript.value).toHaveLength(1)
+    expect(api.transcript.value[0].content).toBe('Great bass line!')
+    expect(api.transcript.value[0].role).toBe('assistant')
+  })
+
+  it('accumulates text across multiple Gemini serverContent events in the same turn', () => {
+    const { api, ws } = connectGeminiAndOpen()
+    ws.simulateMessage({ serverContent: { modelTurn: { parts: [{ text: 'Nice ' }] } } })
+    ws.simulateMessage({ serverContent: { modelTurn: { parts: [{ text: 'groove.' }] } } })
+    expect(api.transcript.value).toHaveLength(1)
+    expect(api.transcript.value[0].content).toBe('Nice groove.')
+  })
+
+  it('marks the message complete on Gemini turnComplete', () => {
+    const { api, ws } = connectGeminiAndOpen()
+    ws.simulateMessage({ serverContent: { modelTurn: { parts: [{ text: 'Done.' }] }, turnComplete: true } })
+    expect(api.transcript.value[0].complete).toBe(true)
+  })
+
+  it('starts a new message after Gemini turnComplete on the next serverContent', () => {
+    const { api, ws } = connectGeminiAndOpen()
+    ws.simulateMessage({ serverContent: { modelTurn: { parts: [{ text: 'First.' }] }, turnComplete: true } })
+    ws.simulateMessage({ serverContent: { modelTurn: { parts: [{ text: 'Second.' }] } } })
+    expect(api.transcript.value).toHaveLength(2)
+    expect(api.transcript.value[1].content).toBe('Second.')
+  })
+
+  it('appendAudio() sends realtimeInput.mediaChunks to Gemini', () => {
+    const { api, ws } = connectGeminiAndOpen()
+    api.appendAudio(new ArrayBuffer(4))
+    const msg = ws.sent.find((m: unknown) => !!(m as { realtimeInput?: unknown }).realtimeInput)
+    expect(msg).toBeDefined()
+  })
+
+  it('sendText() sends clientContent to Gemini', () => {
+    const { api, ws } = connectGeminiAndOpen()
+    api.sendText('How is the reverb?')
+    const msg = ws.sent.find((m: unknown) => !!(m as { clientContent?: unknown }).clientContent) as {
+      clientContent: { turns: [{ parts: [{ text: string }] }] }
+    }
+    expect(msg).toBeDefined()
+    expect(msg.clientContent.turns[0].parts[0].text).toBe('How is the reverb?')
+  })
+
+  it('connect() with gemini sets error status when geminiApiKey is empty', () => {
+    const api = useRealtimeApi()
+    api.connect({ provider: 'gemini', geminiApiKey: '', systemPrompt: '', outputMode: 'text' })
+    expect(api.status.value).toBe('error')
+    expect(MockWebSocket.lastInstance).toBeNull()
+  })
+
+  it('switching from openai to gemini disconnects the openai WebSocket', () => {
+    const api = useRealtimeApi()
+    api.connect(DEFAULT_CONFIG)
+    const openaiWs = MockWebSocket.lastInstance!
+    api.connect(GEMINI_CONFIG)
+    expect(openaiWs.readyState).toBe(WebSocket.CLOSED)
+  })
+
+  // ── Nova Sonic provider ────────────────────────────────────────────────────
+
+  const NOVA_SONIC_CONFIG = {
+    provider: 'nova-sonic' as const,
+    awsAccessKeyId: 'AKIAIOSFODNN7EXAMPLE',
+    awsSecretAccessKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+    awsSessionToken: '',
+    awsRegion: 'us-east-1',
+    systemPrompt: 'Help with music',
+    outputMode: 'text' as const
+  }
+
+  it('connect() with nova-sonic sets status to "connecting" immediately', () => {
+    const api = useRealtimeApi()
+    api.connect(NOVA_SONIC_CONFIG)
+    expect(api.status.value).toBe('connecting')
+  })
+
+  it('connect() with nova-sonic sets error status when credentials are missing', () => {
+    const api = useRealtimeApi()
+    api.connect({ ...NOVA_SONIC_CONFIG, awsAccessKeyId: '', awsSecretAccessKey: '' })
+    expect(api.status.value).toBe('error')
+    expect(api.statusMessage.value).toContain('AWS credentials')
+  })
+
+  it('connect() with nova-sonic connects to the Bedrock endpoint after SigV4 signing', async () => {
+    const api = useRealtimeApi()
+    api.connect(NOVA_SONIC_CONFIG)
+    // Wait for async SigV4 URL signing and WebSocket creation
+    await new Promise(r => setTimeout(r, 20))
+    expect(MockWebSocket.lastInstance?.url).toContain('bedrock-runtime.us-east-1.amazonaws.com')
+    expect(MockWebSocket.lastInstance?.url).toContain('X-Amz-Algorithm=AWS4-HMAC-SHA256')
+    expect(MockWebSocket.lastInstance?.url).toContain('X-Amz-Credential=AKIAIOSFODNN7EXAMPLE')
+  })
+
+  it('connect() with nova-sonic signed URL contains X-Amz-Signature', async () => {
+    const api = useRealtimeApi()
+    api.connect(NOVA_SONIC_CONFIG)
+    await new Promise(r => setTimeout(r, 20))
+    expect(MockWebSocket.lastInstance?.url).toContain('X-Amz-Signature=')
+  })
+
+  it('connect() with nova-sonic respects the configured region', async () => {
+    const api = useRealtimeApi()
+    api.connect({ ...NOVA_SONIC_CONFIG, awsRegion: 'eu-west-1' })
+    await new Promise(r => setTimeout(r, 20))
+    expect(MockWebSocket.lastInstance?.url).toContain('bedrock-runtime.eu-west-1.amazonaws.com')
   })
 })

@@ -1,5 +1,5 @@
 import { ref, readonly } from 'vue'
-import type { OutputMode } from '@/types/realtime'
+import type { OutputMode, Provider } from '@/types/realtime'
 
 export interface RealtimeModel {
   id: string
@@ -15,11 +15,22 @@ const FALLBACK_MODELS: RealtimeModel[] = [
 ]
 
 function modelLabel(id: string): string {
-  // IDs ending with a date are pinned versions; all others are "latest" aliases
   return /\d{4}-\d{2}-\d{2}$/.test(id) ? id : `${id} (latest)`
 }
 
-const apiKey = ref('')
+// ── Module-level state ────────────────────────────────────────────────────────
+
+const provider = ref<Provider>('openai')
+
+// Per-provider credentials
+const apiKey = ref('')              // OpenAI API key
+const geminiApiKey = ref('')        // Google AI Studio key
+const awsAccessKeyId = ref('')
+const awsSecretAccessKey = ref('')
+const awsSessionToken = ref('')     // optional — for STS/assumed roles
+const awsRegion = ref('us-east-1')
+
+// Shared settings
 const model = ref(FALLBACK_MODELS[0].id)
 const outputMode = ref<OutputMode>('text')
 const audioTimeoutSeconds = ref(5)
@@ -33,8 +44,29 @@ const isLoaded = ref(false)
 const realtimeModels = ref<RealtimeModel[]>(FALLBACK_MODELS)
 const modelsLoading = ref(false)
 
+// ── Credentials blob (v1) ─────────────────────────────────────────────────────
+
+interface CredentialsBlob {
+  v: 1
+  provider: Provider
+  openaiKey: string
+  geminiKey: string
+  awsAccessKeyId: string
+  awsSecretAccessKey: string
+  awsSessionToken: string
+  awsRegion: string
+  model: string
+  outputMode: OutputMode
+  audioTimeoutSeconds: number
+  systemPrompt: string
+}
+
+// ── Composable ────────────────────────────────────────────────────────────────
+
 export function useSettings() {
   async function fetchModels() {
+    // Only OpenAI exposes a model list endpoint
+    if (provider.value !== 'openai') return
     const key = apiKey.value.replace(/\s+/g, '')
     if (!key) return
     modelsLoading.value = true
@@ -52,7 +84,6 @@ export function useSettings() {
         .map(id => ({ id, label: modelLabel(id) }))
       if (found.length > 0) {
         realtimeModels.value = found
-        // If the currently selected model is no longer in the list, reset to first
         if (!found.some(m => m.id === model.value)) {
           model.value = found[0].id
         }
@@ -69,7 +100,27 @@ export function useSettings() {
     if (!window.electronAPI) return
     const result = await window.electronAPI.loadApiKey()
     if (result.key) {
-      apiKey.value = result.key.replace(/\s+/g, '')
+      try {
+        const parsed = JSON.parse(result.key)
+        if (parsed && typeof parsed === 'object' && parsed.v === 1) {
+          const blob = parsed as CredentialsBlob
+          provider.value = blob.provider ?? 'openai'
+          apiKey.value = (blob.openaiKey ?? '').replace(/\s+/g, '')
+          geminiApiKey.value = (blob.geminiKey ?? '').replace(/\s+/g, '')
+          awsAccessKeyId.value = (blob.awsAccessKeyId ?? '').replace(/\s+/g, '')
+          awsSecretAccessKey.value = (blob.awsSecretAccessKey ?? '').replace(/\s+/g, '')
+          awsSessionToken.value = blob.awsSessionToken ?? ''
+          awsRegion.value = blob.awsRegion ?? 'us-east-1'
+          model.value = blob.model ?? FALLBACK_MODELS[0].id
+          outputMode.value = blob.outputMode ?? 'text'
+          audioTimeoutSeconds.value = blob.audioTimeoutSeconds ?? 5
+          systemPrompt.value = blob.systemPrompt ?? systemPrompt.value
+        }
+      } catch {
+        // Legacy: plain OpenAI key stored as raw string
+        apiKey.value = result.key.replace(/\s+/g, '')
+        provider.value = 'openai'
+      }
     }
     storageEncrypted.value = result.encrypted
     isLoaded.value = true
@@ -78,13 +129,36 @@ export function useSettings() {
 
   async function save() {
     apiKey.value = apiKey.value.replace(/\s+/g, '')
+    geminiApiKey.value = geminiApiKey.value.replace(/\s+/g, '')
+    awsAccessKeyId.value = awsAccessKeyId.value.replace(/\s+/g, '')
+    awsSecretAccessKey.value = awsSecretAccessKey.value.replace(/\s+/g, '')
     if (!window.electronAPI) return
-    await window.electronAPI.saveApiKey(apiKey.value)
+    const blob: CredentialsBlob = {
+      v: 1,
+      provider: provider.value,
+      openaiKey: apiKey.value,
+      geminiKey: geminiApiKey.value,
+      awsAccessKeyId: awsAccessKeyId.value,
+      awsSecretAccessKey: awsSecretAccessKey.value,
+      awsSessionToken: awsSessionToken.value,
+      awsRegion: awsRegion.value,
+      model: model.value,
+      outputMode: outputMode.value,
+      audioTimeoutSeconds: audioTimeoutSeconds.value,
+      systemPrompt: systemPrompt.value
+    }
+    await window.electronAPI.saveApiKey(JSON.stringify(blob))
     await fetchModels()
   }
 
   return {
+    provider,
     apiKey,
+    geminiApiKey,
+    awsAccessKeyId,
+    awsSecretAccessKey,
+    awsSessionToken,
+    awsRegion,
     model,
     outputMode,
     audioTimeoutSeconds,

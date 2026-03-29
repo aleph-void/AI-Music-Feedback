@@ -2,44 +2,135 @@
   <div class="settings-panel">
     <h2>{{ t('settings.title') }}</h2>
 
+    <!-- Provider selector -->
     <div class="field">
-      <label for="api-key">{{ t('settings.apiKey.label') }}</label>
-      <div class="input-row">
-        <input
-          id="api-key"
-          v-model="settings.apiKey.value"
-          :type="showKey ? 'text' : 'password'"
-          :placeholder="t('settings.apiKey.placeholder')"
-          autocomplete="off"
-          spellcheck="false"
-        />
-        <button class="icon-btn api-key-toggle" @click="showKey = !showKey" :title="showKey ? t('settings.apiKey.hide') : t('settings.apiKey.show')">
-          {{ showKey ? '🙈' : '👁' }}
-        </button>
-      </div>
-      <span v-if="keyFormatError" class="warning">⚠ {{ keyFormatError }}</span>
-      <span v-else-if="!settings.storageEncrypted.value" class="warning">
-        ⚠ {{ t('settings.apiKey.encryptionWarning') }}
-      </span>
-    </div>
-
-    <div class="field">
-      <div class="label-row">
-        <label for="model">{{ t('settings.model.label') }}</label>
-        <button
-          class="icon-btn"
-          @click="settings.fetchModels()"
-          :disabled="settings.modelsLoading.value || !settings.apiKey.value"
-          :title="t('settings.model.refreshTitle')"
-        >{{ settings.modelsLoading.value ? '…' : '↻' }}</button>
-      </div>
-      <select id="model" v-model="settings.model.value" :disabled="settings.modelsLoading.value">
-        <option v-for="m in settings.realtimeModels.value" :key="m.id" :value="m.id">
-          {{ m.label }}
-        </option>
+      <label for="provider">{{ t('settings.provider.label') }}</label>
+      <select id="provider" v-model="settings.provider.value">
+        <option value="openai">{{ t('settings.provider.openai') }}</option>
+        <option value="gemini">{{ t('settings.provider.gemini') }}</option>
+        <option value="nova-sonic">{{ t('settings.provider.novaSonic') }}</option>
       </select>
     </div>
 
+    <!-- OpenAI credentials -->
+    <template v-if="settings.provider.value === 'openai'">
+      <div class="field">
+        <label for="api-key">{{ t('settings.apiKey.label') }}</label>
+        <div class="input-row">
+          <input
+            id="api-key"
+            v-model="settings.apiKey.value"
+            :type="showApiKey ? 'text' : 'password'"
+            :placeholder="t('settings.apiKey.placeholder')"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button
+            class="icon-btn api-key-toggle"
+            @click="showApiKey = !showApiKey"
+            :title="showApiKey ? t('settings.apiKey.hide') : t('settings.apiKey.show')"
+          >
+            {{ showApiKey ? '🙈' : '👁' }}
+          </button>
+        </div>
+        <span v-if="openaiKeyFormatError" class="warning">⚠ {{ openaiKeyFormatError }}</span>
+        <span v-else-if="!settings.storageEncrypted.value" class="warning">
+          ⚠ {{ t('settings.apiKey.encryptionWarning') }}
+        </span>
+      </div>
+
+      <div class="field">
+        <div class="label-row">
+          <label for="model">{{ t('settings.model.label') }}</label>
+          <button
+            class="icon-btn"
+            @click="settings.fetchModels()"
+            :disabled="settings.modelsLoading.value || !settings.apiKey.value"
+            :title="t('settings.model.refreshTitle')"
+          >{{ settings.modelsLoading.value ? '…' : '↻' }}</button>
+        </div>
+        <select id="model" v-model="settings.model.value" :disabled="settings.modelsLoading.value">
+          <option v-for="m in settings.realtimeModels.value" :key="m.id" :value="m.id">
+            {{ m.label }}
+          </option>
+        </select>
+      </div>
+    </template>
+
+    <!-- Gemini credentials -->
+    <template v-else-if="settings.provider.value === 'gemini'">
+      <div class="field">
+        <label for="gemini-key">{{ t('settings.geminiKey.label') }}</label>
+        <div class="input-row">
+          <input
+            id="gemini-key"
+            v-model="settings.geminiApiKey.value"
+            :type="showGeminiKey ? 'text' : 'password'"
+            :placeholder="t('settings.geminiKey.placeholder')"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button
+            class="icon-btn gemini-key-toggle"
+            @click="showGeminiKey = !showGeminiKey"
+            :title="showGeminiKey ? t('settings.geminiKey.hide') : t('settings.geminiKey.show')"
+          >
+            {{ showGeminiKey ? '🙈' : '👁' }}
+          </button>
+        </div>
+        <span v-if="!settings.storageEncrypted.value" class="warning">
+          ⚠ {{ t('settings.apiKey.encryptionWarning') }}
+        </span>
+      </div>
+    </template>
+
+    <!-- Amazon Nova Sonic credentials -->
+    <template v-else-if="settings.provider.value === 'nova-sonic'">
+      <div class="field">
+        <label for="aws-access-key-id">{{ t('settings.aws.accessKeyId.label') }}</label>
+        <input
+          id="aws-access-key-id"
+          v-model="settings.awsAccessKeyId.value"
+          type="password"
+          :placeholder="t('settings.aws.accessKeyId.placeholder')"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </div>
+      <div class="field">
+        <label for="aws-secret-key">{{ t('settings.aws.secretAccessKey.label') }}</label>
+        <input
+          id="aws-secret-key"
+          v-model="settings.awsSecretAccessKey.value"
+          type="password"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </div>
+      <div class="field">
+        <label for="aws-session-token">{{ t('settings.aws.sessionToken.label') }}</label>
+        <input
+          id="aws-session-token"
+          v-model="settings.awsSessionToken.value"
+          type="password"
+          :placeholder="t('settings.aws.sessionToken.placeholder')"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <span class="hint">{{ t('settings.aws.sessionToken.hint') }}</span>
+      </div>
+      <div class="field">
+        <label for="aws-region">{{ t('settings.aws.region.label') }}</label>
+        <input
+          id="aws-region"
+          v-model="settings.awsRegion.value"
+          type="text"
+          :placeholder="t('settings.aws.region.placeholder')"
+        />
+      </div>
+    </template>
+
+    <!-- Output mode — all providers -->
     <div class="field">
       <label>{{ t('settings.outputMode.label') }}</label>
       <div class="mode-toggle">
@@ -116,11 +207,13 @@ import { availableLocales } from '@/i18n'
 
 const { t, locale } = useI18n({ useScope: 'global' })
 const settings = useSettings()
-const showKey = ref(false)
+const showApiKey = ref(false)
+const showGeminiKey = ref(false)
 const saving = ref(false)
 const saved = ref(false)
 
-const keyFormatError = computed(() => {
+const openaiKeyFormatError = computed(() => {
+  if (settings.provider.value !== 'openai') return null
   const k = settings.apiKey.value.replace(/\s+/g, '')
   if (!k) return null
   if (!k.startsWith('sk-')) return t('settings.apiKey.formatError')

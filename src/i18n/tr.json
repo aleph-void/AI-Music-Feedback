@@ -7,18 +7,24 @@
     "settingsTitle": "Ayarlar",
     "howItWorks": "Nasıl çalışır",
     "steps": {
-      "1": "Ayarlar bölümüne OpenAI API anahtarınızı girin",
+      "1": "Ayarlar bölümüne sağlayıcı kimlik bilgilerinizi girin",
       "2": "Bir ses kaynağı seçin (ekranınız/audio interface'iniz)",
       "3": "Şuna tıklayın:",
       "3action": "Dinlemeyi Başlat",
       "4": "Yapay zeka parçanızı veya miksinizi dinler ve bir duraklama algıladığında geri bildirim verir"
     },
-    "connectButton": "OpenAI'ye bağlan",
+    "connectButton": "Bağlan",
     "disconnectButton": "Bağlantıyı kes",
-    "apiKeyHint": "Önce Ayarlar bölümüne API anahtarınızı ekleyin"
+    "apiKeyHint": "Önce Ayarlar bölümüne sağlayıcı kimlik bilgilerinizi ekleyin"
   },
   "settings": {
     "title": "Ayarlar",
+    "provider": {
+      "label": "Yapay zeka sağlayıcısı",
+      "openai": "OpenAI Realtime",
+      "gemini": "Google Gemini Live",
+      "novaSonic": "Amazon Nova Sonic"
+    },
     "apiKey": {
       "label": "OpenAI API Anahtarı",
       "placeholder": "sk-...",
@@ -26,6 +32,30 @@
       "hide": "Gizle",
       "formatError": "Bu bir OpenAI API anahtarı gibi görünmüyor (sk- ile başlamalıdır)",
       "encryptionWarning": "Şifreleme kullanılamıyor — anahtar düz metin olarak saklanacak"
+    },
+    "geminiKey": {
+      "label": "Google AI Studio API Anahtarı",
+      "placeholder": "AIza...",
+      "show": "Göster",
+      "hide": "Gizle"
+    },
+    "aws": {
+      "accessKeyId": {
+        "label": "AWS Access Key ID",
+        "placeholder": "AKIA..."
+      },
+      "secretAccessKey": {
+        "label": "AWS Secret Access Key"
+      },
+      "sessionToken": {
+        "label": "AWS Session Token",
+        "placeholder": "İsteğe bağlı — geçici kimlik bilgileri için gereklidir",
+        "hint": "Uzun süreli IAM kimlik bilgileri kullanırken boş bırakın."
+      },
+      "region": {
+        "label": "AWS Bölgesi",
+        "placeholder": "us-east-1"
+      }
     },
     "model": {
       "label": "Gerçek zamanlı model",

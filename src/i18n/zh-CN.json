@@ -7,18 +7,24 @@
     "settingsTitle": "设置",
     "howItWorks": "使用方式",
     "steps": {
-      "1": "在设置中输入你的 OpenAI API 密钥",
+      "1": "在设置中输入你的提供商凭据",
       "2": "选择音频来源（屏幕/音频接口）",
       "3": "点击",
       "3action": "开始监听",
       "4": "AI 会监听你的演奏或混音，并在检测到停顿时提供反馈"
     },
-    "connectButton": "连接到 OpenAI",
+    "connectButton": "连接",
     "disconnectButton": "断开连接",
-    "apiKeyHint": "请先在设置中添加 API 密钥"
+    "apiKeyHint": "请先在设置中添加提供商凭据"
   },
   "settings": {
     "title": "设置",
+    "provider": {
+      "label": "AI 提供商",
+      "openai": "OpenAI Realtime",
+      "gemini": "Google Gemini Live",
+      "novaSonic": "Amazon Nova Sonic"
+    },
     "apiKey": {
       "label": "OpenAI API 密钥",
       "placeholder": "sk-...",
@@ -26,6 +32,30 @@
       "hide": "隐藏",
       "formatError": "这看起来不像 OpenAI API 密钥（应以 sk- 开头）",
       "encryptionWarning": "无法加密 — 密钥将以明文存储"
+    },
+    "geminiKey": {
+      "label": "Google AI Studio API 密钥",
+      "placeholder": "AIza...",
+      "show": "显示",
+      "hide": "隐藏"
+    },
+    "aws": {
+      "accessKeyId": {
+        "label": "AWS 访问密钥 ID",
+        "placeholder": "AKIA..."
+      },
+      "secretAccessKey": {
+        "label": "AWS 私密访问密钥"
+      },
+      "sessionToken": {
+        "label": "AWS 会话令牌",
+        "placeholder": "可选 — 临时凭据时必填",
+        "hint": "使用长期 IAM 凭据时请留空。"
+      },
+      "region": {
+        "label": "AWS 区域",
+        "placeholder": "us-east-1"
+      }
     },
     "model": {
       "label": "实时模型",

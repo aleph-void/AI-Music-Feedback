@@ -7,18 +7,24 @@
     "settingsTitle": "Instellingen",
     "howItWorks": "Hoe het werkt",
     "steps": {
-      "1": "Voer je OpenAI API-sleutel in bij Instellingen",
+      "1": "Voer je providergegevens in bij Instellingen",
       "2": "Selecteer een audiobron (je scherm/audio-interface)",
       "3": "Klik op",
       "3action": "Luisteren starten",
       "4": "De AI luistert naar je track of mix en geeft feedback wanneer er een pauze wordt gedetecteerd"
     },
-    "connectButton": "Verbinden met OpenAI",
+    "connectButton": "Verbinden",
     "disconnectButton": "Verbinding verbreken",
-    "apiKeyHint": "Voeg eerst je API-sleutel toe in Instellingen"
+    "apiKeyHint": "Voeg eerst je providergegevens toe in Instellingen"
   },
   "settings": {
     "title": "Instellingen",
+    "provider": {
+      "label": "AI-provider",
+      "openai": "OpenAI Realtime",
+      "gemini": "Google Gemini Live",
+      "novaSonic": "Amazon Nova Sonic"
+    },
     "apiKey": {
       "label": "OpenAI API-sleutel",
       "placeholder": "sk-...",
@@ -26,6 +32,30 @@
       "hide": "Verbergen",
       "formatError": "Dit lijkt geen OpenAI API-sleutel te zijn (moet met sk- beginnen)",
       "encryptionWarning": "Versleuteling niet beschikbaar — sleutel wordt als platte tekst opgeslagen"
+    },
+    "geminiKey": {
+      "label": "Google AI Studio API-sleutel",
+      "placeholder": "AIza...",
+      "show": "Tonen",
+      "hide": "Verbergen"
+    },
+    "aws": {
+      "accessKeyId": {
+        "label": "AWS Access Key ID",
+        "placeholder": "AKIA..."
+      },
+      "secretAccessKey": {
+        "label": "AWS Secret Access Key"
+      },
+      "sessionToken": {
+        "label": "AWS Session Token",
+        "placeholder": "Optioneel — vereist voor tijdelijke inloggegevens",
+        "hint": "Laat leeg wanneer je langetermijn-IAM-inloggegevens gebruikt."
+      },
+      "region": {
+        "label": "AWS-regio",
+        "placeholder": "us-east-1"
+      }
     },
     "model": {
       "label": "Realtime-model",

@@ -7,18 +7,24 @@
     "settingsTitle": "Impostazioni",
     "howItWorks": "Come funziona",
     "steps": {
-      "1": "Inserisci la tua chiave API OpenAI nelle Impostazioni",
+      "1": "Inserisci le credenziali del tuo provider nelle Impostazioni",
       "2": "Seleziona una sorgente audio (schermo/scheda audio)",
       "3": "Fai clic su",
       "3action": "Avvia streaming",
       "4": "L'IA ascolta e fornisce feedback quando rileva una pausa"
     },
-    "connectButton": "Connetti a OpenAI",
+    "connectButton": "Connetti",
     "disconnectButton": "Disconnetti",
-    "apiKeyHint": "Aggiungi prima la tua chiave API nelle Impostazioni"
+    "apiKeyHint": "Aggiungi prima le credenziali del tuo provider nelle Impostazioni"
   },
   "settings": {
     "title": "Impostazioni",
+    "provider": {
+      "label": "Provider AI",
+      "openai": "OpenAI Realtime",
+      "gemini": "Google Gemini Live",
+      "novaSonic": "Amazon Nova Sonic"
+    },
     "apiKey": {
       "label": "Chiave API OpenAI",
       "placeholder": "sk-...",
@@ -26,6 +32,30 @@
       "hide": "Nascondi",
       "formatError": "Questa non sembra una chiave API OpenAI (deve iniziare con sk-)",
       "encryptionWarning": "Crittografia non disponibile — la chiave è salvata in chiaro"
+    },
+    "geminiKey": {
+      "label": "Chiave API di Google AI Studio",
+      "placeholder": "AIza...",
+      "show": "Mostra",
+      "hide": "Nascondi"
+    },
+    "aws": {
+      "accessKeyId": {
+        "label": "ID chiave di accesso AWS",
+        "placeholder": "AKIA..."
+      },
+      "secretAccessKey": {
+        "label": "Chiave di accesso segreta AWS"
+      },
+      "sessionToken": {
+        "label": "Token di sessione AWS",
+        "placeholder": "Opzionale — richiesto per credenziali temporanee",
+        "hint": "Lascia vuoto se usi credenziali IAM a lungo termine."
+      },
+      "region": {
+        "label": "Regione AWS",
+        "placeholder": "us-east-1"
+      }
     },
     "model": {
       "label": "Modello in tempo reale",

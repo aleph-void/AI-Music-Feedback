@@ -7,18 +7,24 @@
     "settingsTitle": "Ustawienia",
     "howItWorks": "Jak to działa",
     "steps": {
-      "1": "Wprowadź klucz API OpenAI w Ustawieniach",
+      "1": "Wprowadź dane uwierzytelniające dostawcy w Ustawieniach",
       "2": "Wybierz źródło dźwięku (ekran/interfejs audio)",
       "3": "Kliknij",
       "3action": "Rozpocznij nasłuch",
       "4": "AI słucha Twojego utworu lub miksu i przekazuje opinię, gdy wykryje przerwę"
     },
-    "connectButton": "Połącz z OpenAI",
+    "connectButton": "Połącz",
     "disconnectButton": "Rozłącz",
-    "apiKeyHint": "Najpierw dodaj klucz API w Ustawieniach"
+    "apiKeyHint": "Najpierw dodaj dane uwierzytelniające dostawcy w Ustawieniach"
   },
   "settings": {
     "title": "Ustawienia",
+    "provider": {
+      "label": "Dostawca AI",
+      "openai": "OpenAI Realtime",
+      "gemini": "Google Gemini Live",
+      "novaSonic": "Amazon Nova Sonic"
+    },
     "apiKey": {
       "label": "Klucz API OpenAI",
       "placeholder": "sk-...",
@@ -26,6 +32,30 @@
       "hide": "Ukryj",
       "formatError": "To nie wygląda jak klucz API OpenAI (powinien zaczynać się od sk-)",
       "encryptionWarning": "Szyfrowanie niedostępne — klucz będzie przechowywany jako zwykły tekst"
+    },
+    "geminiKey": {
+      "label": "Klucz API Google AI Studio",
+      "placeholder": "AIza...",
+      "show": "Pokaż",
+      "hide": "Ukryj"
+    },
+    "aws": {
+      "accessKeyId": {
+        "label": "AWS Access Key ID",
+        "placeholder": "AKIA..."
+      },
+      "secretAccessKey": {
+        "label": "AWS Secret Access Key"
+      },
+      "sessionToken": {
+        "label": "AWS Session Token",
+        "placeholder": "Opcjonalne — wymagane dla tymczasowych poświadczeń",
+        "hint": "Pozostaw puste przy korzystaniu z długoterminowych poświadczeń IAM."
+      },
+      "region": {
+        "label": "Region AWS",
+        "placeholder": "us-east-1"
+      }
     },
     "model": {
       "label": "Model czasu rzeczywistego",

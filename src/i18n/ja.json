@@ -7,18 +7,24 @@
     "settingsTitle": "設定",
     "howItWorks": "使い方",
     "steps": {
-      "1": "設定で OpenAI API キーを入力します",
+      "1": "設定でプロバイダーの認証情報を入力します",
       "2": "音声ソースを選択します（画面/オーディオインターフェース）",
       "3": "次をクリック",
       "3action": "解析開始",
       "4": "AI は演奏やミックスを聴き取り、間を検出するとフィードバックします"
     },
-    "connectButton": "OpenAI に接続",
+    "connectButton": "接続",
     "disconnectButton": "切断",
-    "apiKeyHint": "先に設定で API キーを追加してください"
+    "apiKeyHint": "先に設定でプロバイダーの認証情報を追加してください"
   },
   "settings": {
     "title": "設定",
+    "provider": {
+      "label": "AI プロバイダー",
+      "openai": "OpenAI Realtime",
+      "gemini": "Google Gemini Live",
+      "novaSonic": "Amazon Nova Sonic"
+    },
     "apiKey": {
       "label": "OpenAI API キー",
       "placeholder": "sk-...",
@@ -26,6 +32,30 @@
       "hide": "非表示",
       "formatError": "OpenAI API キーの形式ではないようです（sk- で始まる必要があります）",
       "encryptionWarning": "暗号化を利用できません — キーは平文で保存されます"
+    },
+    "geminiKey": {
+      "label": "Google AI Studio API キー",
+      "placeholder": "AIza...",
+      "show": "表示",
+      "hide": "非表示"
+    },
+    "aws": {
+      "accessKeyId": {
+        "label": "AWS Access Key ID",
+        "placeholder": "AKIA..."
+      },
+      "secretAccessKey": {
+        "label": "AWS Secret Access Key"
+      },
+      "sessionToken": {
+        "label": "AWS セッショントークン",
+        "placeholder": "任意 — 一時的な認証情報では必須",
+        "hint": "長期 IAM 認証情報を使用する場合は空欄のままにしてください。"
+      },
+      "region": {
+        "label": "AWS リージョン",
+        "placeholder": "us-east-1"
+      }
     },
     "model": {
       "label": "リアルタイムモデル",

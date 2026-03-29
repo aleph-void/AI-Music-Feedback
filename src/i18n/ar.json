@@ -7,18 +7,24 @@
     "settingsTitle": "الإعدادات",
     "howItWorks": "كيف يعمل",
     "steps": {
-      "1": "أدخل مفتاح OpenAI API الخاص بك في الإعدادات",
+      "1": "أدخل بيانات اعتماد المزوّد في الإعدادات",
       "2": "اختر مصدرًا صوتيًا (شاشتك/واجهة الصوت)",
       "3": "انقر على",
       "3action": "بدء الاستماع",
       "4": "يستمع الذكاء الاصطناعي إلى مقطوعتك أو الميكس ويقدم ملاحظات عند اكتشاف توقف مؤقت"
     },
-    "connectButton": "الاتصال بـ OpenAI",
+    "connectButton": "اتصال",
     "disconnectButton": "قطع الاتصال",
-    "apiKeyHint": "أضف مفتاح API أولاً في الإعدادات"
+    "apiKeyHint": "أضف بيانات اعتماد المزوّد أولاً في الإعدادات"
   },
   "settings": {
     "title": "الإعدادات",
+    "provider": {
+      "label": "مزوّد الذكاء الاصطناعي",
+      "openai": "OpenAI Realtime",
+      "gemini": "Google Gemini Live",
+      "novaSonic": "Amazon Nova Sonic"
+    },
     "apiKey": {
       "label": "مفتاح OpenAI API",
       "placeholder": "sk-...",
@@ -26,6 +32,30 @@
       "hide": "إخفاء",
       "formatError": "لا يبدو هذا كمفتاح OpenAI API (يجب أن يبدأ بـ sk-)",
       "encryptionWarning": "التشفير غير متاح — سيتم تخزين المفتاح كنص عادي"
+    },
+    "geminiKey": {
+      "label": "مفتاح Google AI Studio API",
+      "placeholder": "AIza...",
+      "show": "إظهار",
+      "hide": "إخفاء"
+    },
+    "aws": {
+      "accessKeyId": {
+        "label": "معرّف مفتاح الوصول AWS",
+        "placeholder": "AKIA..."
+      },
+      "secretAccessKey": {
+        "label": "مفتاح الوصول السري AWS"
+      },
+      "sessionToken": {
+        "label": "رمز جلسة AWS",
+        "placeholder": "اختياري — مطلوب لبيانات الاعتماد المؤقتة",
+        "hint": "اتركه فارغًا عند استخدام بيانات اعتماد IAM طويلة الأجل."
+      },
+      "region": {
+        "label": "منطقة AWS",
+        "placeholder": "us-east-1"
+      }
     },
     "model": {
       "label": "نموذج الوقت الفعلي",

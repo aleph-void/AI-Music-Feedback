@@ -618,24 +618,23 @@ describe('useRealtimeApi', () => {
   it('connect() with nova-sonic connects to the Bedrock endpoint after SigV4 signing', async () => {
     const api = useRealtimeApi()
     api.connect(NOVA_SONIC_CONFIG)
-    // Wait for async SigV4 URL signing and WebSocket creation
-    await new Promise(r => setTimeout(r, 20))
-    expect(MockWebSocket.lastInstance?.url).toContain('bedrock-runtime.us-east-1.amazonaws.com')
-    expect(MockWebSocket.lastInstance?.url).toContain('X-Amz-Algorithm=AWS4-HMAC-SHA256')
-    expect(MockWebSocket.lastInstance?.url).toContain('X-Amz-Credential=AKIAIOSFODNN7EXAMPLE')
+    await vi.waitFor(() => expect(MockWebSocket.lastInstance).not.toBeNull(), { timeout: 2000 })
+    expect(MockWebSocket.lastInstance!.url).toContain('bedrock-runtime.us-east-1.amazonaws.com')
+    expect(MockWebSocket.lastInstance!.url).toContain('X-Amz-Algorithm=AWS4-HMAC-SHA256')
+    expect(MockWebSocket.lastInstance!.url).toContain('X-Amz-Credential=AKIAIOSFODNN7EXAMPLE')
   })
 
   it('connect() with nova-sonic signed URL contains X-Amz-Signature', async () => {
     const api = useRealtimeApi()
     api.connect(NOVA_SONIC_CONFIG)
-    await new Promise(r => setTimeout(r, 20))
-    expect(MockWebSocket.lastInstance?.url).toContain('X-Amz-Signature=')
+    await vi.waitFor(() => expect(MockWebSocket.lastInstance).not.toBeNull(), { timeout: 2000 })
+    expect(MockWebSocket.lastInstance!.url).toContain('X-Amz-Signature=')
   })
 
   it('connect() with nova-sonic respects the configured region', async () => {
     const api = useRealtimeApi()
     api.connect({ ...NOVA_SONIC_CONFIG, awsRegion: 'eu-west-1' })
-    await new Promise(r => setTimeout(r, 20))
-    expect(MockWebSocket.lastInstance?.url).toContain('bedrock-runtime.eu-west-1.amazonaws.com')
+    await vi.waitFor(() => expect(MockWebSocket.lastInstance).not.toBeNull(), { timeout: 2000 })
+    expect(MockWebSocket.lastInstance!.url).toContain('bedrock-runtime.eu-west-1.amazonaws.com')
   })
 })

@@ -17,7 +17,7 @@ jobs:
     name: Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v4
         with:
@@ -67,7 +67,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v4
         with:
@@ -146,7 +146,7 @@ jobs:
           USE_SYSTEM_FPM: ${{ matrix.platform == 'linux-arm64' && 'true' || 'false' }}
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-${{ matrix.platform }}
           # Collect distributable files only — skip the unpacked directory and
@@ -169,7 +169,7 @@ jobs:
 
     steps:
       - name: Download all platform artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: release-*
           merge-multiple: true

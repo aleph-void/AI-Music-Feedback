@@ -195,7 +195,7 @@ function decodeEventStreamFrame(data: ArrayBuffer): { headers: Record<string, st
     const bytes = new Uint8Array(data)
     const headersLength = view.getUint32(4)
     let offset = 12
-    const headers: Record<string, string> = {}
+    const headers: Record<string, string> = Object.create(null) as Record<string, string>
     const headersEnd = offset + headersLength
     while (offset < headersEnd) {
       const nameLen = bytes[offset++]

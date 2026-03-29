@@ -61,6 +61,14 @@
       "label": "Modelo em tempo real",
       "refreshTitle": "Atualizar lista de modelos da OpenAI"
     },
+    "analysisModel": {
+      "label": "Modelo de análise em segundo plano",
+      "hint": "Usado para a etapa periódica de análise da composição (OpenAI Responses API)."
+    },
+    "analysisWindow": {
+      "label": "Janela de análise (segundos)",
+      "hint": "Com que frequência executar uma análise profunda da composição. Mín. 20 s, máx. 60 s."
+    },
     "outputMode": {
       "label": "Modo de saída",
       "text": "Texto",
@@ -121,8 +129,10 @@
     "emptyHint": "A IA responderá quando detectar uma pausa na sua música",
     "roles": {
       "assistant": "Feedback da IA",
-      "user": "Seu áudio"
-    }
+      "user": "Seu áudio",
+      "analysis": "Análise de 30 s"
+    },
+    "analysisWorking": "Analisando…"
   },
   "messageInput": {
     "placeholder": "Faça uma pergunta sobre sua música… (Enter para enviar)",

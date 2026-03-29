@@ -14,6 +14,12 @@ const FALLBACK_MODELS: RealtimeModel[] = [
   { id: 'gpt-4o-mini-realtime-preview-2024-12-17', label: 'gpt-4o-mini-realtime-preview-2024-12-17' }
 ]
 
+const FALLBACK_ANALYSIS_MODELS: RealtimeModel[] = [
+  { id: 'gpt-4.1', label: 'gpt-4.1' },
+  { id: 'gpt-4o', label: 'gpt-4o (latest)' },
+  { id: 'gpt-4o-mini', label: 'gpt-4o-mini' }
+]
+
 function modelLabel(id: string): string {
   return /\d{4}-\d{2}-\d{2}$/.test(id) ? id : `${id} (latest)`
 }
@@ -32,6 +38,8 @@ const awsRegion = ref('us-east-1')
 
 // Shared settings
 const model = ref(FALLBACK_MODELS[0].id)
+const analysisModel = ref(FALLBACK_ANALYSIS_MODELS[0].id)
+const analysisWindowSeconds = ref(30)
 const outputMode = ref<OutputMode>('text')
 const audioTimeoutSeconds = ref(5)
 const systemPrompt = ref(
@@ -42,6 +50,7 @@ const systemPrompt = ref(
 const storageEncrypted = ref(true)
 const isLoaded = ref(false)
 const realtimeModels = ref<RealtimeModel[]>(FALLBACK_MODELS)
+const analysisModels = ref<RealtimeModel[]>(FALLBACK_ANALYSIS_MODELS)
 const modelsLoading = ref(false)
 
 // ── Credentials blob (v1) ─────────────────────────────────────────────────────
@@ -56,6 +65,8 @@ interface CredentialsBlob {
   awsSessionToken: string
   awsRegion: string
   model: string
+  analysisModel: string
+  analysisWindowSeconds: number
   outputMode: OutputMode
   audioTimeoutSeconds: number
   systemPrompt: string
@@ -77,15 +88,25 @@ export function useSettings() {
       if (!res.ok) return
       const data = await res.json() as { data?: { id: string }[] }
       if (!Array.isArray(data.data)) return
-      const found = data.data
-        .map(m => m.id)
+      const allIds = data.data.map(m => m.id).sort()
+
+      const foundRealtime = allIds
         .filter(id => id.includes('realtime'))
-        .sort()
         .map(id => ({ id, label: modelLabel(id) }))
-      if (found.length > 0) {
-        realtimeModels.value = found
-        if (!found.some(m => m.id === model.value)) {
-          model.value = found[0].id
+      if (foundRealtime.length > 0) {
+        realtimeModels.value = foundRealtime
+        if (!foundRealtime.some(m => m.id === model.value)) {
+          model.value = foundRealtime[0].id
+        }
+      }
+
+      const foundAnalysis = allIds
+        .filter(id => id.startsWith('gpt-') && !id.includes('realtime') && !id.includes('instruct'))
+        .map(id => ({ id, label: modelLabel(id) }))
+      if (foundAnalysis.length > 0) {
+        analysisModels.value = foundAnalysis
+        if (!foundAnalysis.some(m => m.id === analysisModel.value)) {
+          analysisModel.value = foundAnalysis[0].id
         }
       }
     } catch {
@@ -112,6 +133,8 @@ export function useSettings() {
           awsSessionToken.value = blob.awsSessionToken ?? ''
           awsRegion.value = blob.awsRegion ?? 'us-east-1'
           model.value = blob.model ?? FALLBACK_MODELS[0].id
+          analysisModel.value = blob.analysisModel ?? FALLBACK_ANALYSIS_MODELS[0].id
+          analysisWindowSeconds.value = Math.min(60, Math.max(20, blob.analysisWindowSeconds ?? 30))
           outputMode.value = blob.outputMode ?? 'text'
           audioTimeoutSeconds.value = blob.audioTimeoutSeconds ?? 5
           systemPrompt.value = blob.systemPrompt ?? systemPrompt.value
@@ -143,6 +166,8 @@ export function useSettings() {
       awsSessionToken: awsSessionToken.value,
       awsRegion: awsRegion.value,
       model: model.value,
+      analysisModel: analysisModel.value,
+      analysisWindowSeconds: analysisWindowSeconds.value,
       outputMode: outputMode.value,
       audioTimeoutSeconds: audioTimeoutSeconds.value,
       systemPrompt: systemPrompt.value
@@ -160,10 +185,13 @@ export function useSettings() {
     awsSessionToken,
     awsRegion,
     model,
+    analysisModel,
+    analysisWindowSeconds,
     outputMode,
     audioTimeoutSeconds,
     systemPrompt,
     realtimeModels: readonly(realtimeModels),
+    analysisModels: readonly(analysisModels),
     modelsLoading: readonly(modelsLoading),
     storageEncrypted: readonly(storageEncrypted),
     isLoaded: readonly(isLoaded),

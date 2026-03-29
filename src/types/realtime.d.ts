@@ -2,7 +2,7 @@ export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'er
 
 export interface TranscriptMessage {
   id: string
-  role: 'user' | 'assistant'
+  role: 'user' | 'assistant' | 'analysis'
   content: string
   complete: boolean
   timestamp: number

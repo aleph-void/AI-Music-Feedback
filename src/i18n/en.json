@@ -61,6 +61,14 @@
       "label": "Realtime Model",
       "refreshTitle": "Refresh model list from OpenAI"
     },
+    "analysisModel": {
+      "label": "Background Analysis Model",
+      "hint": "Used for the periodic composition analysis pass (OpenAI Responses API)."
+    },
+    "analysisWindow": {
+      "label": "Analysis Window (seconds)",
+      "hint": "How often to run a deep composition analysis. Min 20s, max 60s."
+    },
     "outputMode": {
       "label": "Output Mode",
       "text": "Text",
@@ -121,8 +129,10 @@
     "emptyHint": "The AI will respond when it detects a pause in the audio",
     "roles": {
       "assistant": "AI Feedback",
-      "user": "Your Audio"
-    }
+      "user": "Your Audio",
+      "analysis": "30s Analysis"
+    },
+    "analysisWorking": "Analyzing…"
   },
   "messageInput": {
     "placeholder": "Ask a question about your music… (Enter to send)",

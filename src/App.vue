@@ -56,14 +56,15 @@
         :connected="realtimeApi.status.value === 'connected'"
         @chunk="onAudioChunk"
         @stopped="onCaptureStopped"
+        @level-update="onLevelUpdate"
       />
     </aside>
 
     <!-- Main content -->
     <main class="main-content">
       <TranscriptView
-        :transcript="realtimeApi.transcript.value"
-        @clear="realtimeApi.clearTranscript()"
+        :transcript="mergedTranscript"
+        @clear="clearAll"
       />
       <MessageInput
         :connected="realtimeApi.status.value === 'connected'"
@@ -81,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SettingsPanel from '@/components/SettingsPanel.vue'
 import AudioControls from '@/components/AudioControls.vue'
@@ -91,12 +92,50 @@ import StatusBar from '@/components/StatusBar.vue'
 import { useSettings } from '@/composables/useSettings'
 import { useAudioCapture } from '@/composables/useAudioCapture'
 import { useRealtimeApi } from '@/composables/useRealtimeApi'
+import { useAnalysisEngine } from '@/composables/useAnalysisEngine'
 
 const { t } = useI18n()
 const showSettings = ref(false)
 const settings = useSettings()
 const audioCapture = useAudioCapture()
 const realtimeApi = useRealtimeApi()
+const analysisEngine = useAnalysisEngine()
+
+// Track recent audio energy levels for the analysis packet
+const recentLevels = ref<number[]>([])
+function onLevelUpdate(level: number) {
+  recentLevels.value.push(level)
+  if (recentLevels.value.length > 10) recentLevels.value.shift()
+}
+function energyDescriptor(): string {
+  if (recentLevels.value.length === 0) return 'quiet'
+  const avg = recentLevels.value.reduce((a, b) => a + b, 0) / recentLevels.value.length
+  if (avg < 0.3) return 'quiet'
+  if (avg < 0.7) return 'moderate'
+  return 'loud'
+}
+
+// Merge realtime transcript + analysis entries, sorted chronologically
+const mergedTranscript = computed(() =>
+  [...realtimeApi.transcript.value, ...analysisEngine.entries.value]
+    .sort((a, b) => a.timestamp - b.timestamp)
+)
+
+// Start/stop the analysis engine as the connection state changes
+watch(realtimeApi.status, status => {
+  if (status === 'connected' && settings.provider.value === 'openai') {
+    analysisEngine.start({
+      apiKey: settings.apiKey.value,
+      model: settings.analysisModel.value,
+      windowSeconds: settings.analysisWindowSeconds.value,
+      systemPrompt: settings.systemPrompt.value,
+      getTranscript: () => realtimeApi.transcript.value,
+      getEnergyLevel: energyDescriptor
+    })
+  } else if (status === 'disconnected' || status === 'error') {
+    analysisEngine.stop()
+  }
+})
 
 let cleanupExportListener: (() => void) | undefined
 
@@ -108,7 +147,13 @@ onMounted(async () => {
 
 onUnmounted(() => {
   cleanupExportListener?.()
+  analysisEngine.stop()
 })
+
+function clearAll() {
+  realtimeApi.clearTranscript()
+  analysisEngine.clear()
+}
 
 function hasCredentials(): boolean {
   const p = settings.provider.value
@@ -147,14 +192,17 @@ function onCaptureStopped() {
 }
 
 async function handleExportTranscript() {
-  const msgs = realtimeApi.transcript.value
+  const msgs = mergedTranscript.value
   if (msgs.length === 0) return
 
   const lines = msgs.map(m => {
     const time = new Date(m.timestamp).toLocaleTimeString([], {
       hour: '2-digit', minute: '2-digit', second: '2-digit'
     })
-    const speaker = m.role === 'assistant' ? t('transcript.roles.assistant') : t('transcript.roles.user')
+    const speaker =
+      m.role === 'assistant' ? t('transcript.roles.assistant') :
+      m.role === 'analysis'  ? t('transcript.roles.analysis') :
+                               t('transcript.roles.user')
     return `[${time}] ${speaker}:\n${m.content}`
   })
   const content = lines.join('\n\n---\n\n')
@@ -174,6 +222,7 @@ async function handleExportTranscript() {
   --bg-hover: #1e2f52;
   --bg-message-user: #1e3a5f;
   --bg-message-assistant: #2d1b4e;
+  --bg-analysis: #0a2828;
   --bg-statusbar: #121229;
   --border: #2a3a5c;
   --accent: #6366f1;

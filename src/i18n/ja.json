@@ -61,6 +61,14 @@
       "label": "リアルタイムモデル",
       "refreshTitle": "OpenAI からモデル一覧を更新"
     },
+    "analysisModel": {
+      "label": "バックグラウンド解析モデル",
+      "hint": "定期的な楽曲解析パスに使用します（OpenAI Responses API）。"
+    },
+    "analysisWindow": {
+      "label": "解析ウィンドウ（秒）",
+      "hint": "詳細な楽曲解析を実行する頻度です。最小20秒、最大60秒。"
+    },
     "outputMode": {
       "label": "出力モード",
       "text": "テキスト",
@@ -121,8 +129,10 @@
     "emptyHint": "AI は音の切れ目を検出すると応答します",
     "roles": {
       "assistant": "AI フィードバック",
-      "user": "あなたのトラック"
-    }
+      "user": "あなたのトラック",
+      "analysis": "30秒解析"
+    },
+    "analysisWorking": "解析中…"
   },
   "messageInput": {
     "placeholder": "音楽について質問する…（Enter で送信）",

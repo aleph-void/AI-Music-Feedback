@@ -61,6 +61,14 @@
       "label": "Echtzeitmodell",
       "refreshTitle": "Modellliste von OpenAI aktualisieren"
     },
+    "analysisModel": {
+      "label": "Hintergrund-Analysemodell",
+      "hint": "Wird für die regelmäßige Kompositionsanalyse verwendet (OpenAI Responses API)."
+    },
+    "analysisWindow": {
+      "label": "Analysefenster (Sekunden)",
+      "hint": "Wie oft eine tiefere Kompositionsanalyse ausgeführt werden soll. Min. 20 s, max. 60 s."
+    },
     "outputMode": {
       "label": "Ausgabemodus",
       "text": "Text",
@@ -121,8 +129,10 @@
     "emptyHint": "Die KI antwortet, wenn sie eine Pause im Audio erkennt",
     "roles": {
       "assistant": "KI-Feedback",
-      "user": "Dein Audio"
-    }
+      "user": "Dein Audio",
+      "analysis": "30-Sek.-Analyse"
+    },
+    "analysisWorking": "Analyse läuft…"
   },
   "messageInput": {
     "placeholder": "Stelle eine Frage zu deiner Musik… (Enter zum Senden)",

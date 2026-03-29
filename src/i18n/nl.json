@@ -61,6 +61,14 @@
       "label": "Realtime-model",
       "refreshTitle": "Modellijst vernieuwen vanuit OpenAI"
     },
+    "analysisModel": {
+      "label": "Achtergrond-analysemodel",
+      "hint": "Gebruikt voor de periodieke compositie-analyse (OpenAI Responses API)."
+    },
+    "analysisWindow": {
+      "label": "Analysevenster (seconden)",
+      "hint": "Hoe vaak een diepgaande compositie-analyse moet worden uitgevoerd. Min. 20 s, max. 60 s."
+    },
     "outputMode": {
       "label": "Uitvoermodus",
       "text": "Tekst",
@@ -121,8 +129,10 @@
     "emptyHint": "De AI reageert wanneer er een pauze in je muziek wordt gedetecteerd",
     "roles": {
       "assistant": "AI-feedback",
-      "user": "Jouw track"
-    }
+      "user": "Jouw track",
+      "analysis": "Analyse van 30 s"
+    },
+    "analysisWorking": "Analyseren…"
   },
   "messageInput": {
     "placeholder": "Stel een vraag over je muziek… (Enter om te verzenden)",

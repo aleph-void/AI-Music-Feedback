@@ -13,6 +13,12 @@ const MOCK_MODELS = [
   { id: 'gpt-4o-mini-realtime-preview', label: 'gpt-4o-mini-realtime-preview (latest)' }
 ]
 
+const MOCK_ANALYSIS_MODELS = [
+  { id: 'gpt-4.1', label: 'gpt-4.1' },
+  { id: 'gpt-4o', label: 'gpt-4o (latest)' },
+  { id: 'gpt-4o-mini', label: 'gpt-4o-mini' }
+]
+
 let mockState: {
   provider: ReturnType<typeof ref<string>>
   apiKey: ReturnType<typeof ref<string>>
@@ -22,10 +28,13 @@ let mockState: {
   awsSessionToken: ReturnType<typeof ref<string>>
   awsRegion: ReturnType<typeof ref<string>>
   model: ReturnType<typeof ref<string>>
+  analysisModel: ReturnType<typeof ref<string>>
+  analysisWindowSeconds: ReturnType<typeof ref<number>>
   outputMode: ReturnType<typeof ref<string>>
   audioTimeoutSeconds: ReturnType<typeof ref<number>>
   systemPrompt: ReturnType<typeof ref<string>>
   realtimeModels: ReturnType<typeof ref<typeof MOCK_MODELS>>
+  analysisModels: ReturnType<typeof ref<typeof MOCK_ANALYSIS_MODELS>>
   modelsLoading: ReturnType<typeof ref<boolean>>
   storageEncrypted: ReturnType<typeof ref<boolean>>
   isLoaded: ReturnType<typeof ref<boolean>>
@@ -44,10 +53,13 @@ function createMockState() {
     awsSessionToken: ref(''),
     awsRegion: ref('us-east-1'),
     model: ref('gpt-4o-realtime-preview'),
+    analysisModel: ref('gpt-4.1'),
+    analysisWindowSeconds: ref(30),
     outputMode: ref('text'),
     audioTimeoutSeconds: ref(5),
     systemPrompt: ref('default system prompt'),
     realtimeModels: ref(MOCK_MODELS),
+    analysisModels: ref(MOCK_ANALYSIS_MODELS),
     modelsLoading: ref(false),
     storageEncrypted: ref(true),
     isLoaded: ref(true),
@@ -526,5 +538,77 @@ describe('SettingsPanel', () => {
     mockState.provider.value = 'nova-sonic'
     const w = mountPanel()
     expect(w.find('#aws-region').attributes('type')).toBe('text')
+  })
+
+  // ── Analysis model dropdown ────────────────────────────────────────────────
+
+  it('renders the analysis model dropdown when provider is openai', () => {
+    mockState.provider.value = 'openai'
+    const w = mountPanel()
+    expect(w.find('#analysis-model').exists()).toBe(true)
+  })
+
+  it('hides the analysis model dropdown when provider is gemini', () => {
+    mockState.provider.value = 'gemini'
+    const w = mountPanel()
+    expect(w.find('#analysis-model').exists()).toBe(false)
+  })
+
+  it('hides the analysis model dropdown when provider is nova-sonic', () => {
+    mockState.provider.value = 'nova-sonic'
+    const w = mountPanel()
+    expect(w.find('#analysis-model').exists()).toBe(false)
+  })
+
+  it('analysis model dropdown is populated with analysisModels from the composable', () => {
+    mockState.provider.value = 'openai'
+    const w = mountPanel()
+    const options = w.find('#analysis-model').findAll('option')
+    expect(options).toHaveLength(MOCK_ANALYSIS_MODELS.length)
+    expect(options[0].element.value).toBe('gpt-4.1')
+  })
+
+  it('analysis model dropdown reflects the current analysisModel value', () => {
+    mockState.provider.value = 'openai'
+    mockState.analysisModel.value = 'gpt-4o'
+    const w = mountPanel()
+    const select = w.find('#analysis-model').element as HTMLSelectElement
+    expect(select.value).toBe('gpt-4o')
+  })
+
+  it('analysis model dropdown is disabled while models are loading', () => {
+    mockState.provider.value = 'openai'
+    mockState.modelsLoading.value = true
+    const w = mountPanel()
+    expect((w.find('#analysis-model').element as HTMLSelectElement).disabled).toBe(true)
+  })
+
+  // ── Analysis window input ──────────────────────────────────────────────────
+
+  it('renders the analysis window input when provider is openai', () => {
+    mockState.provider.value = 'openai'
+    const w = mountPanel()
+    expect(w.find('#analysis-window').exists()).toBe(true)
+  })
+
+  it('hides the analysis window input when provider is gemini', () => {
+    mockState.provider.value = 'gemini'
+    const w = mountPanel()
+    expect(w.find('#analysis-window').exists()).toBe(false)
+  })
+
+  it('analysis window input has min=20 and max=60', () => {
+    mockState.provider.value = 'openai'
+    const w = mountPanel()
+    const input = w.find('#analysis-window')
+    expect(input.attributes('min')).toBe('20')
+    expect(input.attributes('max')).toBe('60')
+  })
+
+  it('analysis window input reflects the current analysisWindowSeconds value', () => {
+    mockState.provider.value = 'openai'
+    mockState.analysisWindowSeconds.value = 45
+    const w = mountPanel()
+    expect((w.find('#analysis-window').element as HTMLInputElement).value).toBe('45')
   })
 })

@@ -61,6 +61,14 @@
       "label": "实时模型",
       "refreshTitle": "从 OpenAI 刷新模型列表"
     },
+    "analysisModel": {
+      "label": "后台分析模型",
+      "hint": "用于定期执行作品深度分析（OpenAI Responses API）。"
+    },
+    "analysisWindow": {
+      "label": "分析窗口（秒）",
+      "hint": "执行一次深度作品分析的频率。最短 20 秒，最长 60 秒。"
+    },
     "outputMode": {
       "label": "输出模式",
       "text": "文本",
@@ -121,8 +129,10 @@
     "emptyHint": "AI 会在检测到音乐停顿时作出回应",
     "roles": {
       "assistant": "AI 反馈",
-      "user": "你的音轨"
-    }
+      "user": "你的音轨",
+      "analysis": "30 秒分析"
+    },
+    "analysisWorking": "分析中…"
   },
   "messageInput": {
     "placeholder": "询问有关你的音乐的问题…（按 Enter 发送）",

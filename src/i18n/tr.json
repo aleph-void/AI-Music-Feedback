@@ -61,6 +61,14 @@
       "label": "Gerçek zamanlı model",
       "refreshTitle": "OpenAI'den model listesini yenile"
     },
+    "analysisModel": {
+      "label": "Arka plan analiz modeli",
+      "hint": "Periyodik beste analizi geçişi için kullanılır (OpenAI Responses API)."
+    },
+    "analysisWindow": {
+      "label": "Analiz penceresi (saniye)",
+      "hint": "Derinlemesine beste analizinin ne sıklıkla çalıştırılacağını belirler. Min. 20 sn, maks. 60 sn."
+    },
     "outputMode": {
       "label": "Çıkış modu",
       "text": "Metin",
@@ -121,8 +129,10 @@
     "emptyHint": "Yapay zeka, müziğinizde bir duraklama algıladığında yanıt verir",
     "roles": {
       "assistant": "Yapay zeka geri bildirimi",
-      "user": "Parçanız"
-    }
+      "user": "Parçanız",
+      "analysis": "30 sn analiz"
+    },
+    "analysisWorking": "Analiz ediliyor…"
   },
   "messageInput": {
     "placeholder": "Müziğiniz hakkında bir soru sorun… (Göndermek için Enter)",

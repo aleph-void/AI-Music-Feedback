@@ -61,6 +61,14 @@
       "label": "即時模型",
       "refreshTitle": "從 OpenAI 重新整理模型清單"
     },
+    "analysisModel": {
+      "label": "背景分析模型",
+      "hint": "用於定期進行作品深度分析（OpenAI Responses API）。"
+    },
+    "analysisWindow": {
+      "label": "分析視窗（秒）",
+      "hint": "執行一次深入作品分析的頻率。最短 20 秒，最長 60 秒。"
+    },
     "outputMode": {
       "label": "輸出模式",
       "text": "文字",
@@ -121,8 +129,10 @@
     "emptyHint": "AI 會在偵測到音樂停頓時回應",
     "roles": {
       "assistant": "AI 回饋",
-      "user": "你的音軌"
-    }
+      "user": "你的音軌",
+      "analysis": "30 秒分析"
+    },
+    "analysisWorking": "分析中…"
   },
   "messageInput": {
     "placeholder": "問一個關於你音樂的問題…（按 Enter 傳送）",

@@ -55,6 +55,31 @@
           </option>
         </select>
       </div>
+
+      <div class="field">
+        <div class="label-row">
+          <label for="analysis-model">{{ t('settings.analysisModel.label') }}</label>
+        </div>
+        <select id="analysis-model" v-model="settings.analysisModel.value" :disabled="settings.modelsLoading.value">
+          <option v-for="m in settings.analysisModels.value" :key="m.id" :value="m.id">
+            {{ m.label }}
+          </option>
+        </select>
+        <span class="hint">{{ t('settings.analysisModel.hint') }}</span>
+      </div>
+
+      <div class="field">
+        <label for="analysis-window">{{ t('settings.analysisWindow.label') }}</label>
+        <input
+          id="analysis-window"
+          v-model.number="settings.analysisWindowSeconds.value"
+          type="number"
+          min="20"
+          max="60"
+          step="5"
+        />
+        <span class="hint">{{ t('settings.analysisWindow.hint') }}</span>
+      </div>
     </template>
 
     <!-- Gemini credentials -->

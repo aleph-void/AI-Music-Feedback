@@ -61,6 +61,14 @@
       "label": "Model czasu rzeczywistego",
       "refreshTitle": "Odśwież listę modeli z OpenAI"
     },
+    "analysisModel": {
+      "label": "Model analizy w tle",
+      "hint": "Używany do okresowej analizy kompozycji (OpenAI Responses API)."
+    },
+    "analysisWindow": {
+      "label": "Okno analizy (sekundy)",
+      "hint": "Jak często uruchamiać pogłębioną analizę kompozycji. Min. 20 s, maks. 60 s."
+    },
     "outputMode": {
       "label": "Tryb wyjścia",
       "text": "Tekst",
@@ -121,8 +129,10 @@
     "emptyHint": "AI odpowie, gdy wykryje przerwę w Twojej muzyce",
     "roles": {
       "assistant": "Opinia AI",
-      "user": "Twój utwór"
-    }
+      "user": "Twój utwór",
+      "analysis": "Analiza 30 s"
+    },
+    "analysisWorking": "Analizowanie…"
   },
   "messageInput": {
     "placeholder": "Zadaj pytanie o swoją muzykę… (Enter, aby wysłać)",

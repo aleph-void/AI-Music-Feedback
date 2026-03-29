@@ -39,9 +39,21 @@
         :class="[msg.role, { pending: !msg.complete }]"
       >
         <div class="message-role">
-          {{ msg.role === 'assistant' ? t('transcript.roles.assistant') : t('transcript.roles.user') }}
+          <template v-if="msg.role === 'analysis'">
+            {{ t('transcript.roles.analysis') }}
+            <span v-if="!msg.complete" class="analysis-spinner" />
+          </template>
+          <template v-else>
+            {{ msg.role === 'assistant' ? t('transcript.roles.assistant') : t('transcript.roles.user') }}
+          </template>
         </div>
-        <div class="message-content">{{ msg.content }}<span v-if="!msg.complete" class="cursor" /></div>
+        <div class="message-content">
+          <template v-if="msg.role === 'analysis' && !msg.complete">
+            {{ t('transcript.analysisWorking') }}
+          </template>
+          <template v-else>{{ msg.content }}</template>
+          <span v-if="msg.role !== 'analysis' && !msg.complete" class="cursor" />
+        </div>
         <div class="message-time">{{ formatTime(msg.timestamp) }}</div>
       </div>
     </div>
@@ -99,7 +111,10 @@ function formatTime(ts: number): string {
 
 async function copyTranscript() {
   const text = props.transcript
-    .map(m => `[${m.role === 'assistant' ? 'AI' : 'You'}] ${m.content}`)
+    .map(m => {
+      if (m.role === 'analysis') return `[${t('transcript.roles.analysis')}]\n${m.content}`
+      return `[${m.role === 'assistant' ? 'AI' : 'You'}] ${m.content}`
+    })
     .join('\n\n')
   if (copiedTimer !== null) {
     clearTimeout(copiedTimer)
@@ -270,6 +285,48 @@ async function copyTranscript() {
 
 .message.assistant .message-time {
   text-align: right;
+}
+
+/* ── Analysis entries ─────────────────────────────────────────────────────── */
+
+.message.analysis {
+  align-self: stretch;
+  max-width: 100%;
+  border-left: 3px solid #0d9488;
+  padding-left: 0.75rem;
+  opacity: 0.95;
+}
+
+.message.analysis .message-role {
+  color: #0d9488;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.message.analysis .message-content {
+  background: #0a2828;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  white-space: pre-wrap;
+}
+
+.message.analysis .message-time {
+  text-align: left;
+}
+
+.analysis-spinner {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid #0d9488;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 @keyframes fadeIn {

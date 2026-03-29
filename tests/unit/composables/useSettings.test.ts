@@ -389,4 +389,97 @@ describe('useSettings', () => {
     await fetchModels()
     expect(globalThis.fetch).not.toHaveBeenCalled()
   })
+
+  // ── analysisModel / analysisModels ─────────────────────────────────────────
+
+  it('starts with analysisModel set to the first fallback analysis model', () => {
+    const { analysisModel } = useSettings()
+    expect(analysisModel.value).toBe('gpt-4.1')
+  })
+
+  it('starts with fallback analysisModels list', () => {
+    const { analysisModels } = useSettings()
+    expect(analysisModels.value.length).toBeGreaterThan(0)
+    expect(analysisModels.value[0].id).toBe('gpt-4.1')
+  })
+
+  it('fetchModels() populates analysisModels with gpt- non-realtime models', async () => {
+    globalThis.fetch = mockFetch([
+      { id: 'gpt-4.1' },
+      { id: 'gpt-4o' },
+      { id: 'gpt-4o-mini' },
+      { id: 'gpt-4o-realtime-preview' },
+      { id: 'whisper-1' }
+    ])
+    const { apiKey, analysisModels, fetchModels } = useSettings()
+    apiKey.value = 'sk-abc'
+    await fetchModels()
+    const ids = analysisModels.value.map(m => m.id)
+    expect(ids).toContain('gpt-4.1')
+    expect(ids).toContain('gpt-4o')
+    expect(ids).not.toContain('gpt-4o-realtime-preview')
+    expect(ids).not.toContain('whisper-1')
+  })
+
+  it('fetchModels() resets analysisModel to first available if current is not in list', async () => {
+    globalThis.fetch = mockFetch([{ id: 'gpt-4o-mini' }, { id: 'gpt-4o-realtime-preview' }])
+    const { apiKey, analysisModel, fetchModels } = useSettings()
+    apiKey.value = 'sk-abc'
+    analysisModel.value = 'gpt-4.1' // not in fetched list
+    await fetchModels()
+    expect(analysisModel.value).toBe('gpt-4o-mini')
+  })
+
+  it('save() includes analysisModel in the blob', async () => {
+    window.electronAPI.saveApiKey = vi.fn().mockResolvedValue({ success: true })
+    const { analysisModel, save } = useSettings()
+    analysisModel.value = 'gpt-4o'
+    await save()
+    const raw = (window.electronAPI.saveApiKey as ReturnType<typeof vi.fn>).mock.calls[0][0] as string
+    const blob = JSON.parse(raw)
+    expect(blob.analysisModel).toBe('gpt-4o')
+  })
+
+  it('starts with analysisWindowSeconds = 30', () => {
+    const { analysisWindowSeconds } = useSettings()
+    expect(analysisWindowSeconds.value).toBe(30)
+  })
+
+  it('save() includes analysisWindowSeconds in the blob', async () => {
+    window.electronAPI.saveApiKey = vi.fn().mockResolvedValue({ success: true })
+    const { analysisWindowSeconds, save } = useSettings()
+    analysisWindowSeconds.value = 45
+    await save()
+    const raw = (window.electronAPI.saveApiKey as ReturnType<typeof vi.fn>).mock.calls[0][0] as string
+    expect(JSON.parse(raw).analysisWindowSeconds).toBe(45)
+  })
+
+  it('load() restores analysisModel from the blob', async () => {
+    const blob = {
+      v: 1, provider: 'openai', openaiKey: 'sk-x', geminiKey: '',
+      awsAccessKeyId: '', awsSecretAccessKey: '', awsSessionToken: '',
+      awsRegion: 'us-east-1', model: 'gpt-4o-realtime-preview',
+      analysisModel: 'gpt-4o-mini', analysisWindowSeconds: 45,
+      outputMode: 'text', audioTimeoutSeconds: 5, systemPrompt: ''
+    }
+    window.electronAPI.loadApiKey = vi.fn().mockResolvedValue({ key: JSON.stringify(blob), encrypted: true })
+    const { analysisModel, analysisWindowSeconds, load } = useSettings()
+    await load()
+    expect(analysisModel.value).toBe('gpt-4o-mini')
+    expect(analysisWindowSeconds.value).toBe(45)
+  })
+
+  it('load() clamps analysisWindowSeconds to [20, 60]', async () => {
+    const blob = {
+      v: 1, provider: 'openai', openaiKey: 'sk-x', geminiKey: '',
+      awsAccessKeyId: '', awsSecretAccessKey: '', awsSessionToken: '',
+      awsRegion: 'us-east-1', model: 'gpt-4o-realtime-preview',
+      analysisModel: 'gpt-4.1', analysisWindowSeconds: 5,
+      outputMode: 'text', audioTimeoutSeconds: 5, systemPrompt: ''
+    }
+    window.electronAPI.loadApiKey = vi.fn().mockResolvedValue({ key: JSON.stringify(blob), encrypted: true })
+    const { analysisWindowSeconds, load } = useSettings()
+    await load()
+    expect(analysisWindowSeconds.value).toBe(20)
+  })
 })

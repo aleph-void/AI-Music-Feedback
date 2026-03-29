@@ -189,13 +189,18 @@ function encodeEventStreamFrame(headers: Record<string, string>, payloadStr: str
   return buf
 }
 
+const ALLOWED_EVENT_STREAM_HEADERS = new Set([
+  ':message-type', ':event-type', ':content-type',
+  ':exception-type', ':error-code', ':error-message'
+])
+
 function decodeEventStreamFrame(data: ArrayBuffer): { headers: Record<string, string>; payload: string } | null {
   try {
     const view = new DataView(data)
     const bytes = new Uint8Array(data)
     const headersLength = view.getUint32(4)
     let offset = 12
-    const headers: Record<string, string> = Object.create(null) as Record<string, string>
+    const headers: Record<string, string> = {}
     const headersEnd = offset + headersLength
     while (offset < headersEnd) {
       const nameLen = bytes[offset++]
@@ -203,7 +208,8 @@ function decodeEventStreamFrame(data: ArrayBuffer): { headers: Record<string, st
       const type = bytes[offset++]
       if (type === 7) {
         const valueLen = view.getUint16(offset); offset += 2
-        headers[name] = new TextDecoder().decode(bytes.subarray(offset, offset + valueLen)); offset += valueLen
+        const value = new TextDecoder().decode(bytes.subarray(offset, offset + valueLen)); offset += valueLen
+        if (ALLOWED_EVENT_STREAM_HEADERS.has(name)) headers[name] = value
       }
     }
     const payloadEnd = view.getUint32(0) - 4

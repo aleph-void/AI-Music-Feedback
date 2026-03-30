@@ -123,10 +123,12 @@ const mergedTranscript = computed(() =>
 
 // Start/stop the analysis engine as the connection state changes
 watch(realtimeApi.status, status => {
-  if (status === 'connected' && settings.provider.value === 'openai') {
+  const p = settings.provider.value
+  if (status === 'connected' && (p === 'openai' || p === 'gemini')) {
     analysisEngine.start({
-      apiKey: settings.apiKey.value,
-      model: settings.analysisModel.value,
+      provider: p,
+      apiKey: p === 'openai' ? settings.apiKey.value : settings.geminiApiKey.value,
+      model: p === 'openai' ? settings.analysisModel.value : settings.geminiAnalysisModel.value,
       windowSeconds: settings.analysisWindowSeconds.value,
       systemPrompt: settings.systemPrompt.value,
       getTranscript: () => realtimeApi.transcript.value,
@@ -184,6 +186,7 @@ function connectToApi() {
 
 function onAudioChunk(buffer: ArrayBuffer) {
   realtimeApi.appendAudio(buffer)
+  analysisEngine.receiveAudioChunk(buffer)
 }
 
 function onCaptureStopped() {

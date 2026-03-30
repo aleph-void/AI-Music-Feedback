@@ -65,6 +65,10 @@
       "label": "Modèle d'analyse en arrière-plan",
       "hint": "Utilisé pour l'analyse périodique de la composition (OpenAI Responses API)."
     },
+    "geminiAnalysisModel": {
+      "label": "Modèle d'analyse en arrière-plan",
+      "refreshTitle": "Actualiser la liste des modèles depuis Google"
+    },
     "analysisWindow": {
       "label": "Fenêtre d'analyse (secondes)",
       "hint": "Fréquence d'exécution d'une analyse approfondie de la composition. Min. 20 s, max. 60 s."

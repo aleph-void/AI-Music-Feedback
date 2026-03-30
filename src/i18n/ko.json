@@ -65,6 +65,10 @@
       "label": "백그라운드 분석 모델",
       "hint": "주기적인 작곡 분석 단계에 사용됩니다 (OpenAI Responses API)."
     },
+    "geminiAnalysisModel": {
+      "label": "백그라운드 분석 모델",
+      "refreshTitle": "Google에서 모델 목록 새로고침"
+    },
     "analysisWindow": {
       "label": "분석 창(초)",
       "hint": "심층 작곡 분석을 얼마나 자주 실행할지 설정합니다. 최소 20초, 최대 60초."

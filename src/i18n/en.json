@@ -65,6 +65,10 @@
       "label": "Background Analysis Model",
       "hint": "Used for the periodic composition analysis pass (OpenAI Responses API)."
     },
+    "geminiAnalysisModel": {
+      "label": "Background Analysis Model",
+      "refreshTitle": "Refresh model list from Google"
+    },
     "analysisWindow": {
       "label": "Analysis Window (seconds)",
       "hint": "How often to run a deep composition analysis. Min 20s, max 60s."

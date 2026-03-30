@@ -19,6 +19,11 @@ const MOCK_ANALYSIS_MODELS = [
   { id: 'gpt-4o-mini', label: 'gpt-4o-mini' }
 ]
 
+const MOCK_GEMINI_ANALYSIS_MODELS = [
+  { id: 'gemini-2.5-flash-preview', label: 'gemini-2.5-flash-preview' },
+  { id: 'gemini-2.0-flash', label: 'gemini-2.0-flash' }
+]
+
 let mockState: {
   provider: ReturnType<typeof ref<string>>
   apiKey: ReturnType<typeof ref<string>>
@@ -35,6 +40,8 @@ let mockState: {
   systemPrompt: ReturnType<typeof ref<string>>
   realtimeModels: ReturnType<typeof ref<typeof MOCK_MODELS>>
   analysisModels: ReturnType<typeof ref<typeof MOCK_ANALYSIS_MODELS>>
+  geminiAnalysisModel: ReturnType<typeof ref<string>>
+  geminiAnalysisModels: ReturnType<typeof ref<typeof MOCK_GEMINI_ANALYSIS_MODELS>>
   modelsLoading: ReturnType<typeof ref<boolean>>
   storageEncrypted: ReturnType<typeof ref<boolean>>
   isLoaded: ReturnType<typeof ref<boolean>>
@@ -60,6 +67,8 @@ function createMockState() {
     systemPrompt: ref('default system prompt'),
     realtimeModels: ref(MOCK_MODELS),
     analysisModels: ref(MOCK_ANALYSIS_MODELS),
+    geminiAnalysisModel: ref('gemini-2.5-flash-preview'),
+    geminiAnalysisModels: ref(MOCK_GEMINI_ANALYSIS_MODELS),
     modelsLoading: ref(false),
     storageEncrypted: ref(true),
     isLoaded: ref(true),
@@ -591,10 +600,10 @@ describe('SettingsPanel', () => {
     expect(w.find('#analysis-window').exists()).toBe(true)
   })
 
-  it('hides the analysis window input when provider is gemini', () => {
+  it('shows the analysis window input when provider is gemini', () => {
     mockState.provider.value = 'gemini'
     const w = mountPanel()
-    expect(w.find('#analysis-window').exists()).toBe(false)
+    expect(w.find('#analysis-window').exists()).toBe(true)
   })
 
   it('analysis window input has min=20 and max=60', () => {
@@ -610,5 +619,93 @@ describe('SettingsPanel', () => {
     mockState.analysisWindowSeconds.value = 45
     const w = mountPanel()
     expect((w.find('#analysis-window').element as HTMLInputElement).value).toBe('45')
+  })
+
+  // ── Gemini analysis model dropdown ─────────────────────────────────────────
+
+  it('renders the gemini analysis model dropdown when provider is gemini', () => {
+    mockState.provider.value = 'gemini'
+    const w = mountPanel()
+    expect(w.find('#gemini-analysis-model').exists()).toBe(true)
+  })
+
+  it('hides the gemini analysis model dropdown when provider is openai', () => {
+    mockState.provider.value = 'openai'
+    const w = mountPanel()
+    expect(w.find('#gemini-analysis-model').exists()).toBe(false)
+  })
+
+  it('gemini analysis model dropdown is populated from geminiAnalysisModels', () => {
+    mockState.provider.value = 'gemini'
+    const w = mountPanel()
+    const options = w.find('#gemini-analysis-model').findAll('option')
+    expect(options).toHaveLength(MOCK_GEMINI_ANALYSIS_MODELS.length)
+    expect(options[0].element.value).toBe('gemini-2.5-flash-preview')
+  })
+
+  it('gemini analysis model dropdown reflects the current geminiAnalysisModel value', () => {
+    mockState.provider.value = 'gemini'
+    mockState.geminiAnalysisModel.value = 'gemini-2.0-flash'
+    const w = mountPanel()
+    expect((w.find('#gemini-analysis-model').element as HTMLSelectElement).value).toBe('gemini-2.0-flash')
+  })
+
+  it('gemini analysis model field has a refresh button', () => {
+    mockState.provider.value = 'gemini'
+    const w = mountPanel()
+    // The refresh button is in the same .field as #gemini-analysis-model
+    const field = w.find('#gemini-analysis-model').element.closest('.field')!
+    const btn = field.querySelector('button')
+    expect(btn).not.toBeNull()
+  })
+
+  it('gemini refresh button calls fetchModels on click', async () => {
+    mockState.provider.value = 'gemini'
+    mockState.geminiApiKey.value = 'AIza-x'
+    const w = mountPanel()
+    const field = w.find('#gemini-analysis-model').element.closest('.field')!
+    const btn = field.querySelector('button') as HTMLButtonElement
+    await btn.click()
+    expect(mockState.fetchModels).toHaveBeenCalledTimes(1)
+  })
+
+  it('gemini refresh button is disabled when geminiApiKey is empty', () => {
+    mockState.provider.value = 'gemini'
+    mockState.geminiApiKey.value = ''
+    const w = mountPanel()
+    const field = w.find('#gemini-analysis-model').element.closest('.field')!
+    const btn = field.querySelector('button') as HTMLButtonElement
+    expect(btn.disabled).toBe(true)
+  })
+
+  it('gemini refresh button is disabled while modelsLoading is true', () => {
+    mockState.provider.value = 'gemini'
+    mockState.geminiApiKey.value = 'AIza-x'
+    mockState.modelsLoading.value = true
+    const w = mountPanel()
+    const field = w.find('#gemini-analysis-model').element.closest('.field')!
+    const btn = field.querySelector('button') as HTMLButtonElement
+    expect(btn.disabled).toBe(true)
+  })
+
+  it('gemini analysis model select is disabled while modelsLoading is true', () => {
+    mockState.provider.value = 'gemini'
+    mockState.modelsLoading.value = true
+    const w = mountPanel()
+    expect((w.find('#gemini-analysis-model').element as HTMLSelectElement).disabled).toBe(true)
+  })
+
+  // ── Analysis window shared visibility ──────────────────────────────────────
+
+  it('shows analysis window for gemini provider', () => {
+    mockState.provider.value = 'gemini'
+    const w = mountPanel()
+    expect(w.find('#analysis-window').exists()).toBe(true)
+  })
+
+  it('hides analysis window for nova-sonic provider', () => {
+    mockState.provider.value = 'nova-sonic'
+    const w = mountPanel()
+    expect(w.find('#analysis-window').exists()).toBe(false)
   })
 })

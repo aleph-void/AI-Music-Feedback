@@ -65,6 +65,10 @@
       "label": "Modelo de análise em segundo plano",
       "hint": "Usado para a etapa periódica de análise da composição (OpenAI Responses API)."
     },
+    "geminiAnalysisModel": {
+      "label": "Modelo de análise em segundo plano",
+      "refreshTitle": "Atualizar lista de modelos da Google"
+    },
     "analysisWindow": {
       "label": "Janela de análise (segundos)",
       "hint": "Com que frequência executar uma análise profunda da composição. Mín. 20 s, máx. 60 s."

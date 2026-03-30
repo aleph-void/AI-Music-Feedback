@@ -362,22 +362,40 @@ describe('useSettings', () => {
     expect(apiKey.value).toBe('sk-legacy')
   })
 
-  it('load() does not call OpenAI models API when provider is gemini', async () => {
-    globalThis.fetch = vi.fn()
+  it('load() calls Gemini models API (not OpenAI) when provider is gemini', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({ models: [] })
+    })
     const blob = { v: 1, provider: 'gemini', openaiKey: '', geminiKey: 'AIza-x',
       awsAccessKeyId: '', awsSecretAccessKey: '', awsSessionToken: '', awsRegion: 'us-east-1',
       model: 'gpt-4o-realtime-preview', outputMode: 'text', audioTimeoutSeconds: 5, systemPrompt: '' }
     window.electronAPI.loadApiKey = vi.fn().mockResolvedValue({ key: JSON.stringify(blob), encrypted: true })
     const { load } = useSettings()
     await load()
-    expect(globalThis.fetch).not.toHaveBeenCalled()
+    const url = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][0] as string
+    expect(url).toContain('generativelanguage.googleapis.com')
+    expect(url).not.toContain('api.openai.com')
   })
 
-  it('fetchModels() does nothing when provider is gemini', async () => {
-    globalThis.fetch = vi.fn()
-    const { provider, apiKey, fetchModels } = useSettings()
+  it('fetchModels() calls the Gemini models endpoint when provider is gemini', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({ models: [] })
+    })
+    const { provider, geminiApiKey, fetchModels } = useSettings()
     provider.value = 'gemini'
-    apiKey.value = 'AIza-x'
+    geminiApiKey.value = 'AIza-x'
+    await fetchModels()
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('generativelanguage.googleapis.com')
+    )
+  })
+
+  it('fetchModels() does nothing for gemini when geminiApiKey is empty', async () => {
+    globalThis.fetch = vi.fn()
+    const { provider, fetchModels } = useSettings()
+    provider.value = 'gemini'
     await fetchModels()
     expect(globalThis.fetch).not.toHaveBeenCalled()
   })
@@ -388,6 +406,112 @@ describe('useSettings', () => {
     provider.value = 'nova-sonic'
     await fetchModels()
     expect(globalThis.fetch).not.toHaveBeenCalled()
+  })
+
+  // ── Gemini model fetching ──────────────────────────────────────────────────
+
+  it('fetchModels() populates geminiAnalysisModels from Google API', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({
+        models: [
+          { name: 'models/gemini-2.0-flash', displayName: 'Gemini 2.0 Flash', supportedGenerationMethods: ['generateContent'] },
+          { name: 'models/gemini-1.5-pro', displayName: 'Gemini 1.5 Pro', supportedGenerationMethods: ['generateContent'] },
+          { name: 'models/embedding-001', displayName: 'Embedding 001', supportedGenerationMethods: ['embedContent'] }
+        ]
+      })
+    })
+    const { provider, geminiApiKey, geminiAnalysisModels, fetchModels } = useSettings()
+    provider.value = 'gemini'
+    geminiApiKey.value = 'AIza-x'
+    await fetchModels()
+    const ids = geminiAnalysisModels.value.map(m => m.id)
+    expect(ids).toContain('gemini-2.0-flash')
+    expect(ids).toContain('gemini-1.5-pro')
+    expect(ids).not.toContain('embedding-001')
+  })
+
+  it('fetchModels() strips models/ prefix from Gemini model IDs', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({
+        models: [
+          { name: 'models/gemini-2.0-flash', displayName: 'Gemini 2.0 Flash', supportedGenerationMethods: ['generateContent'] }
+        ]
+      })
+    })
+    const { provider, geminiApiKey, geminiAnalysisModels, fetchModels } = useSettings()
+    provider.value = 'gemini'
+    geminiApiKey.value = 'AIza-x'
+    await fetchModels()
+    expect(geminiAnalysisModels.value[0].id).toBe('gemini-2.0-flash')
+    expect(geminiAnalysisModels.value[0].label).toBe('Gemini 2.0 Flash')
+  })
+
+  it('fetchModels() uses model id as label when displayName is absent', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({
+        models: [
+          { name: 'models/gemini-2.0-flash', supportedGenerationMethods: ['generateContent'] }
+        ]
+      })
+    })
+    const { provider, geminiApiKey, geminiAnalysisModels, fetchModels } = useSettings()
+    provider.value = 'gemini'
+    geminiApiKey.value = 'AIza-x'
+    await fetchModels()
+    expect(geminiAnalysisModels.value[0].label).toBe('gemini-2.0-flash')
+  })
+
+  it('fetchModels() passes the API key as a query parameter for Gemini', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({ models: [] })
+    })
+    const { provider, geminiApiKey, fetchModels } = useSettings()
+    provider.value = 'gemini'
+    geminiApiKey.value = 'AIza-testkey'
+    await fetchModels()
+    const url = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][0] as string
+    expect(url).toContain('key=AIza-testkey')
+  })
+
+  it('fetchModels() resets geminiAnalysisModel if current is not in fetched list', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({
+        models: [
+          { name: 'models/gemini-2.0-flash', displayName: 'Gemini 2.0 Flash', supportedGenerationMethods: ['generateContent'] }
+        ]
+      })
+    })
+    const { provider, geminiApiKey, geminiAnalysisModel, fetchModels } = useSettings()
+    provider.value = 'gemini'
+    geminiApiKey.value = 'AIza-x'
+    geminiAnalysisModel.value = 'gemini-1.5-pro' // not in fetched list
+    await fetchModels()
+    expect(geminiAnalysisModel.value).toBe('gemini-2.0-flash')
+  })
+
+  it('fetchModels() keeps existing Gemini models on API error', async () => {
+    globalThis.fetch = vi.fn().mockRejectedValue(new Error('network'))
+    const { provider, geminiApiKey, geminiAnalysisModels, fetchModels } = useSettings()
+    provider.value = 'gemini'
+    geminiApiKey.value = 'AIza-x'
+    const before = geminiAnalysisModels.value.map(m => m.id)
+    await fetchModels()
+    expect(geminiAnalysisModels.value.map(m => m.id)).toEqual(before)
+  })
+
+  it('fetchModels() keeps existing Gemini models on non-OK response', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({ ok: false })
+    const { provider, geminiApiKey, geminiAnalysisModels, fetchModels } = useSettings()
+    provider.value = 'gemini'
+    geminiApiKey.value = 'AIza-x'
+    const before = geminiAnalysisModels.value.map(m => m.id)
+    await fetchModels()
+    expect(geminiAnalysisModels.value.map(m => m.id)).toEqual(before)
   })
 
   // ── analysisModel / analysisModels ─────────────────────────────────────────
@@ -467,6 +591,34 @@ describe('useSettings', () => {
     await load()
     expect(analysisModel.value).toBe('gpt-4o-mini')
     expect(analysisWindowSeconds.value).toBe(45)
+  })
+
+  it('starts with geminiAnalysisModel set to the first fallback Gemini model', () => {
+    const { geminiAnalysisModel } = useSettings()
+    expect(geminiAnalysisModel.value).toBe('gemini-2.5-flash-preview')
+  })
+
+  it('save() includes geminiAnalysisModel in the blob', async () => {
+    window.electronAPI.saveApiKey = vi.fn().mockResolvedValue({ success: true })
+    const { geminiAnalysisModel, save } = useSettings()
+    geminiAnalysisModel.value = 'gemini-2.0-flash'
+    await save()
+    const raw = (window.electronAPI.saveApiKey as ReturnType<typeof vi.fn>).mock.calls[0][0] as string
+    expect(JSON.parse(raw).geminiAnalysisModel).toBe('gemini-2.0-flash')
+  })
+
+  it('load() restores geminiAnalysisModel from the blob', async () => {
+    const blob = {
+      v: 1, provider: 'gemini', openaiKey: '', geminiKey: 'AIza-x',
+      awsAccessKeyId: '', awsSecretAccessKey: '', awsSessionToken: '',
+      awsRegion: 'us-east-1', model: 'gpt-4o-realtime-preview',
+      analysisModel: 'gpt-4.1', geminiAnalysisModel: 'gemini-1.5-pro',
+      analysisWindowSeconds: 30, outputMode: 'text', audioTimeoutSeconds: 5, systemPrompt: ''
+    }
+    window.electronAPI.loadApiKey = vi.fn().mockResolvedValue({ key: JSON.stringify(blob), encrypted: true })
+    const { geminiAnalysisModel, load } = useSettings()
+    await load()
+    expect(geminiAnalysisModel.value).toBe('gemini-1.5-pro')
   })
 
   it('load() clamps analysisWindowSeconds to [20, 60]', async () => {

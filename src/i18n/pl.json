@@ -65,6 +65,10 @@
       "label": "Model analizy w tle",
       "hint": "Używany do okresowej analizy kompozycji (OpenAI Responses API)."
     },
+    "geminiAnalysisModel": {
+      "label": "Model analizy w tle",
+      "refreshTitle": "Odśwież listę modeli z Google"
+    },
     "analysisWindow": {
       "label": "Okno analizy (sekundy)",
       "hint": "Jak często uruchamiać pogłębioną analizę kompozycji. Min. 20 s, maks. 60 s."

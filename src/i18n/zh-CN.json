@@ -65,6 +65,10 @@
       "label": "后台分析模型",
       "hint": "用于定期执行作品深度分析（OpenAI Responses API）。"
     },
+    "geminiAnalysisModel": {
+      "label": "后台分析模型",
+      "refreshTitle": "从 Google 刷新模型列表"
+    },
     "analysisWindow": {
       "label": "分析窗口（秒）",
       "hint": "执行一次深度作品分析的频率。最短 20 秒，最长 60 秒。"

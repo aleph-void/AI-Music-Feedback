@@ -20,6 +20,13 @@ const FALLBACK_ANALYSIS_MODELS: RealtimeModel[] = [
   { id: 'gpt-4o-mini', label: 'gpt-4o-mini' }
 ]
 
+const FALLBACK_GEMINI_ANALYSIS_MODELS: RealtimeModel[] = [
+  { id: 'gemini-2.5-flash-preview', label: 'gemini-2.5-flash-preview' },
+  { id: 'gemini-2.0-flash', label: 'gemini-2.0-flash' },
+  { id: 'gemini-1.5-pro', label: 'gemini-1.5-pro' },
+  { id: 'gemini-1.5-flash', label: 'gemini-1.5-flash' }
+]
+
 function modelLabel(id: string): string {
   return /\d{4}-\d{2}-\d{2}$/.test(id) ? id : `${id} (latest)`
 }
@@ -39,6 +46,7 @@ const awsRegion = ref('us-east-1')
 // Shared settings
 const model = ref(FALLBACK_MODELS[0].id)
 const analysisModel = ref(FALLBACK_ANALYSIS_MODELS[0].id)
+const geminiAnalysisModel = ref(FALLBACK_GEMINI_ANALYSIS_MODELS[0].id)
 const analysisWindowSeconds = ref(30)
 const outputMode = ref<OutputMode>('text')
 const audioTimeoutSeconds = ref(5)
@@ -51,6 +59,7 @@ const storageEncrypted = ref(true)
 const isLoaded = ref(false)
 const realtimeModels = ref<RealtimeModel[]>(FALLBACK_MODELS)
 const analysisModels = ref<RealtimeModel[]>(FALLBACK_ANALYSIS_MODELS)
+const geminiAnalysisModels = ref<RealtimeModel[]>(FALLBACK_GEMINI_ANALYSIS_MODELS)
 const modelsLoading = ref(false)
 
 // ── Credentials blob (v1) ─────────────────────────────────────────────────────
@@ -66,6 +75,7 @@ interface CredentialsBlob {
   awsRegion: string
   model: string
   analysisModel: string
+  geminiAnalysisModel: string
   analysisWindowSeconds: number
   outputMode: OutputMode
   audioTimeoutSeconds: number
@@ -76,8 +86,14 @@ interface CredentialsBlob {
 
 export function useSettings() {
   async function fetchModels() {
-    // Only OpenAI exposes a model list endpoint
-    if (provider.value !== 'openai') return
+    if (provider.value === 'openai') {
+      await fetchOpenAIModels()
+    } else if (provider.value === 'gemini') {
+      await fetchGeminiModels()
+    }
+  }
+
+  async function fetchOpenAIModels() {
     const key = apiKey.value.replace(/\s+/g, '')
     if (!key) return
     modelsLoading.value = true
@@ -116,6 +132,36 @@ export function useSettings() {
     }
   }
 
+  async function fetchGeminiModels() {
+    const key = geminiApiKey.value.replace(/\s+/g, '')
+    if (!key) return
+    modelsLoading.value = true
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}`
+      )
+      if (!res.ok) return
+      const data = await res.json() as { models?: { name: string; displayName?: string; supportedGenerationMethods?: string[] }[] }
+      if (!Array.isArray(data.models)) return
+      const found = data.models
+        .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
+        .map(m => {
+          const id = m.name.replace(/^models\//, '')
+          return { id, label: m.displayName ?? id }
+        })
+      if (found.length > 0) {
+        geminiAnalysisModels.value = found
+        if (!found.some(m => m.id === geminiAnalysisModel.value)) {
+          geminiAnalysisModel.value = found[0].id
+        }
+      }
+    } catch {
+      // Network or parse error — keep existing model list
+    } finally {
+      modelsLoading.value = false
+    }
+  }
+
   async function load() {
     if (isLoaded.value) return
     if (!window.electronAPI) return
@@ -134,6 +180,7 @@ export function useSettings() {
           awsRegion.value = blob.awsRegion ?? 'us-east-1'
           model.value = blob.model ?? FALLBACK_MODELS[0].id
           analysisModel.value = blob.analysisModel ?? FALLBACK_ANALYSIS_MODELS[0].id
+          geminiAnalysisModel.value = blob.geminiAnalysisModel ?? FALLBACK_GEMINI_ANALYSIS_MODELS[0].id
           analysisWindowSeconds.value = Math.min(60, Math.max(20, blob.analysisWindowSeconds ?? 30))
           outputMode.value = blob.outputMode ?? 'text'
           audioTimeoutSeconds.value = blob.audioTimeoutSeconds ?? 5
@@ -167,6 +214,7 @@ export function useSettings() {
       awsRegion: awsRegion.value,
       model: model.value,
       analysisModel: analysisModel.value,
+      geminiAnalysisModel: geminiAnalysisModel.value,
       analysisWindowSeconds: analysisWindowSeconds.value,
       outputMode: outputMode.value,
       audioTimeoutSeconds: audioTimeoutSeconds.value,
@@ -186,12 +234,14 @@ export function useSettings() {
     awsRegion,
     model,
     analysisModel,
+    geminiAnalysisModel,
     analysisWindowSeconds,
     outputMode,
     audioTimeoutSeconds,
     systemPrompt,
     realtimeModels: readonly(realtimeModels),
     analysisModels: readonly(analysisModels),
+    geminiAnalysisModels: readonly(geminiAnalysisModels),
     modelsLoading: readonly(modelsLoading),
     storageEncrypted: readonly(storageEncrypted),
     isLoaded: readonly(isLoaded),

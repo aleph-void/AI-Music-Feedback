@@ -68,18 +68,6 @@
         <span class="hint">{{ t('settings.analysisModel.hint') }}</span>
       </div>
 
-      <div class="field">
-        <label for="analysis-window">{{ t('settings.analysisWindow.label') }}</label>
-        <input
-          id="analysis-window"
-          v-model.number="settings.analysisWindowSeconds.value"
-          type="number"
-          min="20"
-          max="60"
-          step="5"
-        />
-        <span class="hint">{{ t('settings.analysisWindow.hint') }}</span>
-      </div>
     </template>
 
     <!-- Gemini credentials -->
@@ -106,6 +94,40 @@
         <span v-if="!settings.storageEncrypted.value" class="warning">
           ⚠ {{ t('settings.apiKey.encryptionWarning') }}
         </span>
+      </div>
+
+      <div class="field">
+        <div class="label-row">
+          <label for="gemini-analysis-model">{{ t('settings.geminiAnalysisModel.label') }}</label>
+          <button
+            class="icon-btn"
+            @click="settings.fetchModels()"
+            :disabled="settings.modelsLoading.value || !settings.geminiApiKey.value"
+            :title="t('settings.geminiAnalysisModel.refreshTitle')"
+          >{{ settings.modelsLoading.value ? '…' : '↻' }}</button>
+        </div>
+        <select id="gemini-analysis-model" v-model="settings.geminiAnalysisModel.value" :disabled="settings.modelsLoading.value">
+          <option v-for="m in settings.geminiAnalysisModels.value" :key="m.id" :value="m.id">
+            {{ m.label }}
+          </option>
+        </select>
+        <span class="hint">{{ t('settings.analysisModel.hint') }}</span>
+      </div>
+    </template>
+
+    <!-- Shared analysis window — shown for providers that support background analysis -->
+    <template v-if="settings.provider.value === 'openai' || settings.provider.value === 'gemini'">
+      <div class="field">
+        <label for="analysis-window">{{ t('settings.analysisWindow.label') }}</label>
+        <input
+          id="analysis-window"
+          v-model.number="settings.analysisWindowSeconds.value"
+          type="number"
+          min="20"
+          max="60"
+          step="5"
+        />
+        <span class="hint">{{ t('settings.analysisWindow.hint') }}</span>
       </div>
     </template>
 

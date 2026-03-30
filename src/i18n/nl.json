@@ -65,6 +65,10 @@
       "label": "Achtergrond-analysemodel",
       "hint": "Gebruikt voor de periodieke compositie-analyse (OpenAI Responses API)."
     },
+    "geminiAnalysisModel": {
+      "label": "Achtergrond-analysemodel",
+      "refreshTitle": "Modellijst vernieuwen vanuit Google"
+    },
     "analysisWindow": {
       "label": "Analysevenster (seconden)",
       "hint": "Hoe vaak een diepgaande compositie-analyse moet worden uitgevoerd. Min. 20 s, max. 60 s."

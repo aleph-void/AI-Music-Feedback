@@ -65,6 +65,10 @@
       "label": "バックグラウンド解析モデル",
       "hint": "定期的な楽曲解析パスに使用します（OpenAI Responses API）。"
     },
+    "geminiAnalysisModel": {
+      "label": "バックグラウンド解析モデル",
+      "refreshTitle": "Google からモデル一覧を更新"
+    },
     "analysisWindow": {
       "label": "解析ウィンドウ（秒）",
       "hint": "詳細な楽曲解析を実行する頻度です。最小20秒、最大60秒。"

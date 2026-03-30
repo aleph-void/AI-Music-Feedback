@@ -30,6 +30,7 @@ function mockErrorResponse(status = 500) {
 
 let useAnalysisEngine: typeof import('@/composables/useAnalysisEngine').useAnalysisEngine
 let runAnalysis: typeof import('@/composables/useAnalysisEngine').runAnalysis
+let encodeWav: typeof import('@/composables/useAnalysisEngine').encodeWav
 
 beforeEach(async () => {
   vi.useFakeTimers()
@@ -37,6 +38,7 @@ beforeEach(async () => {
   const mod = await import('@/composables/useAnalysisEngine')
   useAnalysisEngine = mod.useAnalysisEngine
   runAnalysis = mod.runAnalysis
+  encodeWav = mod.encodeWav
 })
 
 afterEach(() => {
@@ -61,6 +63,7 @@ describe('useAnalysisEngine', () => {
       const setIntervalSpy = vi.spyOn(globalThis, 'setInterval')
       const engine = useAnalysisEngine()
       engine.start({
+        provider: 'openai',
         apiKey: 'sk-test',
         model: 'gpt-4.1',
         windowSeconds: 30,
@@ -73,14 +76,14 @@ describe('useAnalysisEngine', () => {
     it('stop() clears the interval', () => {
       const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval')
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [] })
       engine.stop()
       expect(clearIntervalSpy).toHaveBeenCalled()
     })
 
     it('stop() resets isAnalyzing to false', () => {
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [] })
       engine.stop()
       expect(engine.isAnalyzing.value).toBe(false)
     })
@@ -88,29 +91,29 @@ describe('useAnalysisEngine', () => {
     it('uses the configured windowSeconds as the interval duration', () => {
       const setIntervalSpy = vi.spyOn(globalThis, 'setInterval')
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 45, systemPrompt: '', getTranscript: () => [] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 45, systemPrompt: '', getTranscript: () => [] })
       expect(setIntervalSpy).toHaveBeenCalledWith(expect.any(Function), 45_000)
     })
 
     it('clamps windowSeconds below 20 up to 20 seconds', () => {
       const setIntervalSpy = vi.spyOn(globalThis, 'setInterval')
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 5, systemPrompt: '', getTranscript: () => [] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 5, systemPrompt: '', getTranscript: () => [] })
       expect(setIntervalSpy).toHaveBeenCalledWith(expect.any(Function), 20_000)
     })
 
     it('clamps windowSeconds above 60 down to 60 seconds', () => {
       const setIntervalSpy = vi.spyOn(globalThis, 'setInterval')
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 120, systemPrompt: '', getTranscript: () => [] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 120, systemPrompt: '', getTranscript: () => [] })
       expect(setIntervalSpy).toHaveBeenCalledWith(expect.any(Function), 60_000)
     })
 
     it('calling start() twice stops the previous interval first', () => {
       const clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval')
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [] })
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [] })
       expect(clearIntervalSpy).toHaveBeenCalledTimes(1)
     })
   })
@@ -123,7 +126,7 @@ describe('useAnalysisEngine', () => {
       globalThis.fetch = mockOkResponse('Some analysis text')
 
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
 
       vi.setSystemTime(now + 30_000)
       vi.advanceTimersByTime(30_000)
@@ -141,7 +144,7 @@ describe('useAnalysisEngine', () => {
       globalThis.fetch = fetchMock
 
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [] })
 
       vi.advanceTimersByTime(30_000)
       await flushPromises()
@@ -158,7 +161,7 @@ describe('useAnalysisEngine', () => {
 
       const analysisMsg = makeMsg({ role: 'analysis', timestamp: now })
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [analysisMsg] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [analysisMsg] })
 
       vi.setSystemTime(now + 30_000)
       vi.advanceTimersByTime(30_000)
@@ -174,7 +177,7 @@ describe('useAnalysisEngine', () => {
       globalThis.fetch = mockOkResponse('Great harmonic motion here.')
 
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
 
       vi.setSystemTime(now + 30_000)
       vi.advanceTimersByTime(30_000)
@@ -193,7 +196,7 @@ describe('useAnalysisEngine', () => {
       globalThis.fetch = mockOkResponse('Analysis result')
 
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
 
       vi.setSystemTime(now + 30_000)
       vi.advanceTimersByTime(30_000)
@@ -210,7 +213,7 @@ describe('useAnalysisEngine', () => {
       globalThis.fetch = mockOkResponse('Analysis')
 
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: 'Help me compose', getTranscript: () => [msg] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: 'Help me compose', getTranscript: () => [msg] })
 
       vi.setSystemTime(now + 30_000)
       vi.advanceTimersByTime(30_000)
@@ -230,6 +233,7 @@ describe('useAnalysisEngine', () => {
 
       const engine = useAnalysisEngine()
       engine.start({
+        provider: 'openai',
         apiKey: 'sk-test',
         model: 'gpt-4.1',
         windowSeconds: 30,
@@ -254,7 +258,7 @@ describe('useAnalysisEngine', () => {
       globalThis.fetch = mockOkResponse('Analysis')
 
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
 
       vi.setSystemTime(now + 30_000)
       vi.advanceTimersByTime(30_000)
@@ -274,7 +278,7 @@ describe('useAnalysisEngine', () => {
       globalThis.fetch = mockOkResponse('Try a Neapolitan chord here.')
 
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
 
       vi.setSystemTime(now + 30_000)
       vi.advanceTimersByTime(30_000)
@@ -298,7 +302,7 @@ describe('useAnalysisEngine', () => {
       })
 
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
 
       vi.setSystemTime(now + 30_000)
       vi.advanceTimersByTime(30_000)
@@ -314,7 +318,7 @@ describe('useAnalysisEngine', () => {
       globalThis.fetch = mockErrorResponse(500)
 
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
 
       vi.setSystemTime(now + 30_000)
       vi.advanceTimersByTime(30_000)
@@ -330,7 +334,7 @@ describe('useAnalysisEngine', () => {
       globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network error'))
 
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
 
       vi.setSystemTime(now + 30_000)
       vi.advanceTimersByTime(30_000)
@@ -351,7 +355,7 @@ describe('useAnalysisEngine', () => {
       })
 
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
 
       vi.setSystemTime(now + 30_000)
       vi.advanceTimersByTime(30_000)
@@ -378,7 +382,7 @@ describe('useAnalysisEngine', () => {
       globalThis.fetch = fetchMock
 
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
 
       vi.setSystemTime(now + 30_000)
       vi.advanceTimersByTime(30_000)
@@ -401,7 +405,7 @@ describe('useAnalysisEngine', () => {
       globalThis.fetch = fetchMock
 
       const engine = useAnalysisEngine()
-      engine.start({ apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg1, msg2] })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg1, msg2] })
 
       // First window: 0–30s, only msg1 is in range
       vi.advanceTimersByTime(30_000)
@@ -429,6 +433,271 @@ describe('useAnalysisEngine', () => {
       globalThis.fetch = fetchMock
       await runAnalysis()
       expect(fetchMock).not.toHaveBeenCalled()
+    })
+  })
+
+  // ── receiveAudioChunk ──────────────────────────────────────────────────────
+
+  describe('receiveAudioChunk()', () => {
+    it('does nothing when engine is not started', () => {
+      const engine = useAnalysisEngine()
+      // Should not throw
+      expect(() => engine.receiveAudioChunk(new ArrayBuffer(512))).not.toThrow()
+    })
+
+    it('stop() clears the buffered audio', async () => {
+      const now = Date.now()
+      vi.setSystemTime(now)
+      globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({ output_text: 'ok' }) })
+
+      const engine = useAnalysisEngine()
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [] })
+      engine.receiveAudioChunk(new ArrayBuffer(512))
+      engine.stop()
+
+      // After stop, starting again and running should not include stale audio
+      const msg = makeMsg({ timestamp: now + 1_000 })
+      engine.start({ provider: 'openai', apiKey: 'sk-test', model: 'gpt-4.1', windowSeconds: 30, systemPrompt: '', getTranscript: () => [msg] })
+      vi.advanceTimersByTime(30_000)
+      await flushPromises()
+
+      const body = JSON.parse(((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit])[1].body as string)
+      const packet = JSON.parse(body.input as string)
+      // OpenAI path: no audio key in packet
+      expect(packet.window_start_ms).toBeDefined()
+    })
+
+    it('clear() also clears the buffered audio', async () => {
+      const now = Date.now()
+      vi.setSystemTime(now)
+      const fetchMock = vi.fn()
+      globalThis.fetch = fetchMock
+
+      const engine = useAnalysisEngine()
+      engine.start({ provider: 'gemini', apiKey: 'AIza-test', model: 'gemini-2.0-flash', windowSeconds: 30, systemPrompt: '', getTranscript: () => [] })
+      engine.receiveAudioChunk(new ArrayBuffer(512))
+      engine.clear()
+      engine.stop()
+
+      // After clear, Gemini analysis should not fire (no audio in buffer)
+      engine.start({ provider: 'gemini', apiKey: 'AIza-test', model: 'gemini-2.0-flash', windowSeconds: 30, systemPrompt: '', getTranscript: () => [] })
+      vi.advanceTimersByTime(30_000)
+      await flushPromises()
+
+      expect(fetchMock).not.toHaveBeenCalled()
+    })
+  })
+
+  // ── Gemini provider ────────────────────────────────────────────────────────
+
+  describe('Gemini analysis', () => {
+    const GEMINI_CONFIG = {
+      provider: 'gemini' as const,
+      apiKey: 'AIza-test-key',
+      model: 'gemini-2.0-flash',
+      windowSeconds: 30,
+      systemPrompt: 'Help me compose',
+      getTranscript: () => [] as never[]
+    }
+
+    it('calls the Gemini generateContent endpoint', async () => {
+      const now = Date.now()
+      vi.setSystemTime(now)
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ candidates: [{ content: { parts: [{ text: 'Nice chord.' }] } }] })
+      })
+
+      const engine = useAnalysisEngine()
+      engine.start({ ...GEMINI_CONFIG, getTranscript: () => [] })
+      engine.receiveAudioChunk(new ArrayBuffer(256))
+
+      vi.advanceTimersByTime(30_000)
+      await flushPromises()
+
+      const [url] = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit]
+      expect(url).toContain('generativelanguage.googleapis.com')
+      expect(url).toContain('gemini-2.0-flash')
+      expect(url).toContain('AIza-test-key')
+    })
+
+    it('includes the API key as a query parameter', async () => {
+      const now = Date.now()
+      vi.setSystemTime(now)
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ candidates: [{ content: { parts: [{ text: 'ok' }] } }] })
+      })
+
+      const engine = useAnalysisEngine()
+      engine.start({ ...GEMINI_CONFIG, getTranscript: () => [] })
+      engine.receiveAudioChunk(new ArrayBuffer(128))
+
+      vi.advanceTimersByTime(30_000)
+      await flushPromises()
+
+      const [url] = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit]
+      expect(url).toContain('key=AIza-test-key')
+    })
+
+    it('includes audio as inlineData with audio/wav mime type when chunks are present', async () => {
+      const now = Date.now()
+      vi.setSystemTime(now)
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ candidates: [{ content: { parts: [{ text: 'ok' }] } }] })
+      })
+
+      const engine = useAnalysisEngine()
+      engine.start({ ...GEMINI_CONFIG, getTranscript: () => [] })
+      engine.receiveAudioChunk(new ArrayBuffer(256))
+
+      vi.advanceTimersByTime(30_000)
+      await flushPromises()
+
+      const body = JSON.parse(((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit])[1].body as string)
+      const parts = body.contents[0].parts as Array<{ inlineData?: { mimeType: string; data: string } }>
+      const audioPart = parts.find(p => p.inlineData)
+      expect(audioPart?.inlineData?.mimeType).toBe('audio/wav')
+      expect(audioPart?.inlineData?.data).toBeTruthy()
+    })
+
+    it('omits inlineData when no audio was received', async () => {
+      const now = Date.now()
+      vi.setSystemTime(now)
+      const msg = makeMsg({ timestamp: now + 1_000 })
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ candidates: [{ content: { parts: [{ text: 'ok' }] } }] })
+      })
+
+      const engine = useAnalysisEngine()
+      engine.start({ ...GEMINI_CONFIG, getTranscript: () => [msg] })
+      // No receiveAudioChunk call
+
+      vi.advanceTimersByTime(30_000)
+      await flushPromises()
+
+      const body = JSON.parse(((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit])[1].body as string)
+      const parts = body.contents[0].parts as Array<{ inlineData?: object }>
+      expect(parts.every(p => !p.inlineData)).toBe(true)
+    })
+
+    it('skips the API call when there are no messages AND no audio', async () => {
+      const fetchMock = vi.fn()
+      globalThis.fetch = fetchMock
+
+      const engine = useAnalysisEngine()
+      engine.start({ ...GEMINI_CONFIG, getTranscript: () => [] })
+      // No audio, no transcript
+
+      vi.advanceTimersByTime(30_000)
+      await flushPromises()
+
+      expect(fetchMock).not.toHaveBeenCalled()
+    })
+
+    it('runs the analysis with audio only (no transcript messages)', async () => {
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ candidates: [{ content: { parts: [{ text: 'Audio analysis.' }] } }] })
+      })
+      globalThis.fetch = fetchMock
+
+      const engine = useAnalysisEngine()
+      engine.start({ ...GEMINI_CONFIG, getTranscript: () => [] })
+      engine.receiveAudioChunk(new ArrayBuffer(256))
+
+      vi.advanceTimersByTime(30_000)
+      await flushPromises()
+
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+      expect(engine.entries.value[0].content).toBe('Audio analysis.')
+    })
+
+    it('parses the response from candidates[0].content.parts[0].text', async () => {
+      const now = Date.now()
+      vi.setSystemTime(now)
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({
+          candidates: [{ content: { parts: [{ text: 'Try a Dorian mode shift.' }] } }]
+        })
+      })
+
+      const engine = useAnalysisEngine()
+      engine.start({ ...GEMINI_CONFIG, getTranscript: () => [] })
+      engine.receiveAudioChunk(new ArrayBuffer(128))
+
+      vi.advanceTimersByTime(30_000)
+      await flushPromises()
+
+      expect(engine.entries.value[0].content).toBe('Try a Dorian mode shift.')
+      expect(engine.entries.value[0].complete).toBe(true)
+    })
+
+    it('clears the audio buffer after each window', async () => {
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ candidates: [{ content: { parts: [{ text: 'ok' }] } }] })
+      })
+      globalThis.fetch = fetchMock
+
+      const engine = useAnalysisEngine()
+      engine.start({ ...GEMINI_CONFIG, getTranscript: () => [] })
+      engine.receiveAudioChunk(new ArrayBuffer(256))
+
+      // First window fires — uses the chunk
+      vi.advanceTimersByTime(30_000)
+      await flushPromises()
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+
+      // Second window fires — no new audio, no transcript → skipped
+      vi.advanceTimersByTime(30_000)
+      await flushPromises()
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+    })
+
+    it('sends system_instruction in the request body', async () => {
+      const now = Date.now()
+      vi.setSystemTime(now)
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ candidates: [{ content: { parts: [{ text: 'ok' }] } }] })
+      })
+
+      const engine = useAnalysisEngine()
+      engine.start({ ...GEMINI_CONFIG, getTranscript: () => [] })
+      engine.receiveAudioChunk(new ArrayBuffer(128))
+
+      vi.advanceTimersByTime(30_000)
+      await flushPromises()
+
+      const body = JSON.parse(((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit])[1].body as string)
+      expect(body.system_instruction.parts[0].text).toContain('composition analyst')
+    })
+  })
+
+  // ── encodeWav ──────────────────────────────────────────────────────────────
+
+  describe('encodeWav()', () => {
+    it('produces a valid RIFF WAV header', () => {
+      const pcm = new Uint8Array(100).fill(0)
+      const wav = encodeWav([pcm])
+      expect(wav[0]).toBe(0x52) // R
+      expect(wav[1]).toBe(0x49) // I
+      expect(wav[2]).toBe(0x46) // F
+      expect(wav[3]).toBe(0x46) // F
+    })
+
+    it('data section length matches total chunk bytes', () => {
+      const a = new Uint8Array(100)
+      const b = new Uint8Array(200)
+      const wav = encodeWav([a, b])
+      const view = new DataView(wav.buffer)
+      const dataSize = view.getUint32(40, true)
+      expect(dataSize).toBe(300)
+      expect(wav.byteLength).toBe(44 + 300)
     })
   })
 })

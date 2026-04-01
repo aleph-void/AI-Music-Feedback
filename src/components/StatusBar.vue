@@ -83,8 +83,8 @@ const statusLabel = computed(() => {
 }
 
 .status-dot.disconnected { background: var(--text-secondary); }
-.status-dot.connecting   { background: #f59e0b; animation: pulse 1s ease-in-out infinite; }
-.status-dot.connected    { background: #22c55e; }
+.status-dot.connecting   { background: var(--color-warning); animation: pulse 1s ease-in-out infinite; }
+.status-dot.connected    { background: var(--color-success); }
 .status-dot.error        { background: var(--color-error); }
 
 .status-text {
@@ -98,7 +98,7 @@ const statusLabel = computed(() => {
 }
 
 .recording-badge {
-  color: #f87171;
+  color: var(--color-recording);
   font-weight: 500;
   animation: pulse 1.5s ease-in-out infinite;
 }

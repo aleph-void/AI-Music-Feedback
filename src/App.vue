@@ -232,48 +232,62 @@ async function handleExportTranscript() {
 </script>
 
 <style>
-/* ── Dark theme (default) — derived from logo palette ── */
+/*
+ * Color palette — derived from logo (resources/icon.svg):
+ *   Deep indigo bg:  #1e1e3a → #0d1b36
+ *   Indigo bars:     #6366f1  #818cf8  #a5b4fc
+ *   Note / text:     #e2e8f0
+ *   Live-dot green:  #22c55e  #86efac
+ */
+
+/* ── Dark theme — the logo's own palette ── */
 [data-theme="dark"] {
   --bg-app: #1e1e3a;
-  --bg-sidebar: #161630;
+  --bg-sidebar: #181832;
   --bg-main: #0d1b36;
-  --bg-input: #1a1a3a;
-  --bg-hover: #252550;
-  --bg-message-user: #1e2a5f;
-  --bg-message-assistant: #2d1b4e;
-  --bg-analysis: #0a2828;
-  --bg-statusbar: #12122e;
-  --border: #2a2a5c;
+  --bg-input: #1a1a38;
+  --bg-hover: #2a2a52;
+  --bg-message-user: #252550;
+  --bg-message-assistant: #1e1e4a;
+  --bg-analysis: #0d2a1e;
+  --bg-statusbar: #141430;
+  --border: #2e2e58;
   --accent: #6366f1;
   --accent-hover: #818cf8;
   --accent-light: #a5b4fc;
   --text-primary: #e2e8f0;
-  --text-secondary: #7a8ba8;
+  --text-secondary: #8888b8;
   --color-error: #ef4444;
   --color-warning: #f59e0b;
   --color-success: #22c55e;
+  --color-success-light: #86efac;
+  --color-analysis: #22c55e;
+  --color-recording: #ef4444;
 }
 
-/* ── Light theme — logo-inspired indigo/lavender palette ── */
+/* ── Light theme — inverted logo palette ── */
 [data-theme="light"] {
-  --bg-app: #f0eef8;
-  --bg-sidebar: #e8e5f5;
-  --bg-main: #f5f3fb;
+  --bg-app: #eeedf8;
+  --bg-sidebar: #e4e2f2;
+  --bg-main: #f4f2fb;
   --bg-input: #ffffff;
-  --bg-hover: #ddd8f0;
-  --bg-message-user: #e0daf5;
-  --bg-message-assistant: #ede8fc;
-  --bg-analysis: #e0f5f0;
-  --bg-statusbar: #e2dff0;
-  --border: #c4bfe0;
+  --bg-hover: #d8d5ec;
+  --bg-message-user: #dbd6f0;
+  --bg-message-assistant: #eae5fc;
+  --bg-analysis: #ddf5eb;
+  --bg-statusbar: #dddaf0;
+  --border: #b8b4d8;
   --accent: #6366f1;
   --accent-hover: #4f46e5;
   --accent-light: #a5b4fc;
-  --text-primary: #1e1e3a;
-  --text-secondary: #5a5480;
+  --text-primary: #0d1b36;
+  --text-secondary: #4a4878;
   --color-error: #dc2626;
   --color-warning: #d97706;
   --color-success: #16a34a;
+  --color-success-light: #22c55e;
+  --color-analysis: #16a34a;
+  --color-recording: #dc2626;
 }
 
 *, *::before, *::after {

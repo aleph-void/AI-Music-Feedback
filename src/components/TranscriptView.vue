@@ -292,20 +292,20 @@ async function copyTranscript() {
 .message.analysis {
   align-self: stretch;
   max-width: 100%;
-  border-left: 3px solid #0d9488;
+  border-left: 3px solid var(--color-analysis);
   padding-left: 0.75rem;
   opacity: 0.95;
 }
 
 .message.analysis .message-role {
-  color: #0d9488;
+  color: var(--color-analysis);
   display: flex;
   align-items: center;
   gap: 0.4rem;
 }
 
 .message.analysis .message-content {
-  background: #0a2828;
+  background: var(--bg-analysis);
   border-radius: 6px;
   font-size: 0.88rem;
   white-space: pre-wrap;
@@ -319,7 +319,7 @@ async function copyTranscript() {
   display: inline-block;
   width: 8px;
   height: 8px;
-  border: 1.5px solid #0d9488;
+  border: 1.5px solid var(--color-analysis);
   border-top-color: transparent;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;

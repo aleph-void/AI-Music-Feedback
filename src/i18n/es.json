@@ -91,6 +91,12 @@
     "language": {
       "label": "Idioma"
     },
+    "theme": {
+      "label": "Tema",
+      "light": "Claro",
+      "dark": "Oscuro",
+      "system": "Sistema"
+    },
     "saveButton": "Guardar configuración",
     "savingButton": "Guardando...",
     "savedMessage": "¡Guardado!"

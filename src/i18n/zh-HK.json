@@ -91,6 +91,12 @@
     "language": {
       "label": "語言"
     },
+    "theme": {
+      "label": "主題",
+      "light": "淺色",
+      "dark": "深色",
+      "system": "跟隨系統"
+    },
     "saveButton": "儲存設定",
     "savingButton": "儲存中...",
     "savedMessage": "已儲存！"

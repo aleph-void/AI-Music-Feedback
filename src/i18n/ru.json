@@ -91,6 +91,12 @@
     "language": {
       "label": "Язык"
     },
+    "theme": {
+      "label": "Тема",
+      "light": "Светлая",
+      "dark": "Тёмная",
+      "system": "Системная"
+    },
     "saveButton": "Сохранить настройки",
     "savingButton": "Сохранение...",
     "savedMessage": "Сохранено!"

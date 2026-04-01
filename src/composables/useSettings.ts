@@ -1,6 +1,8 @@
 import { ref, readonly } from 'vue'
 import type { OutputMode, Provider } from '@/types/realtime'
 
+export type ThemeMode = 'light' | 'dark' | 'system'
+
 export interface RealtimeModel {
   id: string
   label: string
@@ -55,6 +57,7 @@ const systemPrompt = ref(
   'Provide concise, actionable feedback on what you hear — comment on mix balance, ' +
   'tonality, rhythm, dynamics, or arrangement. Be specific and encouraging.'
 )
+const theme = ref<ThemeMode>('system')
 const storageEncrypted = ref(true)
 const isLoaded = ref(false)
 const realtimeModels = ref<RealtimeModel[]>(FALLBACK_MODELS)
@@ -80,6 +83,7 @@ interface CredentialsBlob {
   outputMode: OutputMode
   audioTimeoutSeconds: number
   systemPrompt: string
+  theme?: ThemeMode
 }
 
 // ── Composable ────────────────────────────────────────────────────────────────
@@ -185,6 +189,7 @@ export function useSettings() {
           outputMode.value = blob.outputMode ?? 'text'
           audioTimeoutSeconds.value = blob.audioTimeoutSeconds ?? 5
           systemPrompt.value = blob.systemPrompt ?? systemPrompt.value
+          theme.value = blob.theme ?? 'system'
         }
       } catch {
         // Legacy: plain OpenAI key stored as raw string
@@ -218,13 +223,15 @@ export function useSettings() {
       analysisWindowSeconds: analysisWindowSeconds.value,
       outputMode: outputMode.value,
       audioTimeoutSeconds: audioTimeoutSeconds.value,
-      systemPrompt: systemPrompt.value
+      systemPrompt: systemPrompt.value,
+      theme: theme.value
     }
     await window.electronAPI.saveApiKey(JSON.stringify(blob))
     await fetchModels()
   }
 
   return {
+    theme,
     provider,
     apiKey,
     geminiApiKey,

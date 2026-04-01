@@ -59,6 +59,7 @@ function createMocks() {
     outputMode: ref('text'),
     audioTimeoutSeconds: ref(5),
     systemPrompt: ref('My prompt'),
+    theme: ref('system'),
     storageEncrypted: ref(true),
     isLoaded: ref(false),
     load: vi.fn().mockResolvedValue(undefined),

@@ -91,6 +91,12 @@
     "language": {
       "label": "اللغة"
     },
+    "theme": {
+      "label": "المظهر",
+      "light": "فاتح",
+      "dark": "داكن",
+      "system": "النظام"
+    },
     "saveButton": "حفظ الإعدادات",
     "savingButton": "جارٍ الحفظ...",
     "savedMessage": "تم الحفظ!"

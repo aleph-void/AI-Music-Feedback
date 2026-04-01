@@ -91,6 +91,12 @@
     "language": {
       "label": "Język"
     },
+    "theme": {
+      "label": "Motyw",
+      "light": "Jasny",
+      "dark": "Ciemny",
+      "system": "Systemowy"
+    },
     "saveButton": "Zapisz ustawienia",
     "savingButton": "Zapisywanie...",
     "savedMessage": "Zapisano!"

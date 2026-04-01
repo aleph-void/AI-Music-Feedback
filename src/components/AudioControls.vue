@@ -379,7 +379,7 @@ select:disabled {
 }
 
 .mic-fill {
-  background: linear-gradient(90deg, #6366f1, #a5b4fc);
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
 }
 
 .error-msg {
@@ -406,7 +406,7 @@ select:disabled {
 
 .level-fill {
   height: 100%;
-  background: linear-gradient(90deg, #22c55e, #86efac);
+  background: linear-gradient(90deg, var(--color-success), var(--color-success-light));
   border-radius: 3px;
   transition: width 0.08s ease-out;
 }

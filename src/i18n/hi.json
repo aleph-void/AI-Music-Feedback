@@ -91,6 +91,12 @@
     "language": {
       "label": "भाषा"
     },
+    "theme": {
+      "label": "थीम",
+      "light": "लाइट",
+      "dark": "डार्क",
+      "system": "सिस्टम"
+    },
     "saveButton": "सेटिंग्स सहेजें",
     "savingButton": "सहेजा जा रहा है...",
     "savedMessage": "सहेजा गया!"

@@ -91,6 +91,12 @@
     "language": {
       "label": "Sprache"
     },
+    "theme": {
+      "label": "Design",
+      "light": "Hell",
+      "dark": "Dunkel",
+      "system": "System"
+    },
     "saveButton": "Einstellungen speichern",
     "savingButton": "Speichern...",
     "savedMessage": "Gespeichert!"

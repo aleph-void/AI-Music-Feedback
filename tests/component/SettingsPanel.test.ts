@@ -65,6 +65,7 @@ function createMockState() {
     outputMode: ref('text'),
     audioTimeoutSeconds: ref(5),
     systemPrompt: ref('default system prompt'),
+    theme: ref('system'),
     realtimeModels: ref(MOCK_MODELS),
     analysisModels: ref(MOCK_ANALYSIS_MODELS),
     geminiAnalysisModel: ref('gemini-2.5-flash-preview'),

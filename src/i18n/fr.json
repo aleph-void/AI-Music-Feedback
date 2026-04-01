@@ -91,6 +91,12 @@
     "language": {
       "label": "Langue"
     },
+    "theme": {
+      "label": "Thème",
+      "light": "Clair",
+      "dark": "Sombre",
+      "system": "Système"
+    },
     "saveButton": "Enregistrer les paramètres",
     "savingButton": "Enregistrement...",
     "savedMessage": "Enregistré !"

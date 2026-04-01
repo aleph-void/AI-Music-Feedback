@@ -91,6 +91,12 @@
     "language": {
       "label": "Taal"
     },
+    "theme": {
+      "label": "Thema",
+      "light": "Licht",
+      "dark": "Donker",
+      "system": "Systeem"
+    },
     "saveButton": "Instellingen opslaan",
     "savingButton": "Opslaan...",
     "savedMessage": "Opgeslagen!"

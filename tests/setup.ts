@@ -13,6 +13,22 @@ config.global.plugins = [
   createI18n({ legacy: false, locale: 'en', fallbackLocale: 'en', messages: { en } })
 ]
 
+// ── matchMedia ──────────────────────────────────────────────────────────────
+Object.defineProperty(globalThis, 'matchMedia', {
+  value: vi.fn((query: string) => ({
+    matches: query === '(prefers-color-scheme: dark)',
+    media: query,
+    onchange: null,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    dispatchEvent: vi.fn()
+  })),
+  writable: true,
+  configurable: true
+})
+
 // ── WebSocket ────────────────────────────────────────────────────────────────
 ;(globalThis as unknown as Record<string, unknown>).WebSocket = MockWebSocket
 

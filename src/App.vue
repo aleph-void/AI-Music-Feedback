@@ -97,6 +97,21 @@ import { useAnalysisEngine } from '@/composables/useAnalysisEngine'
 const { t } = useI18n()
 const showSettings = ref(false)
 const settings = useSettings()
+
+// ── Theme management ─────────────────────────────────────────────────────────
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)')
+
+function applyTheme() {
+  const mode = settings.theme.value
+  const resolved = mode === 'system'
+    ? (prefersDark.matches ? 'dark' : 'light')
+    : mode
+  document.documentElement.setAttribute('data-theme', resolved)
+}
+
+watch(() => settings.theme.value, applyTheme)
+prefersDark.addEventListener('change', applyTheme)
+applyTheme() // set initial theme immediately
 const audioCapture = useAudioCapture()
 const realtimeApi = useRealtimeApi()
 const analysisEngine = useAnalysisEngine()
@@ -150,6 +165,7 @@ onMounted(async () => {
 onUnmounted(() => {
   cleanupExportListener?.()
   analysisEngine.stop()
+  prefersDark.removeEventListener('change', applyTheme)
 })
 
 function clearAll() {
@@ -216,24 +232,48 @@ async function handleExportTranscript() {
 </script>
 
 <style>
-/* Global CSS variables */
-:root {
-  --bg-app: #1a1a2e;
-  --bg-sidebar: #16213e;
-  --bg-main: #0f3460;
-  --bg-input: #1a2744;
-  --bg-hover: #1e2f52;
-  --bg-message-user: #1e3a5f;
+/* ── Dark theme (default) — derived from logo palette ── */
+[data-theme="dark"] {
+  --bg-app: #1e1e3a;
+  --bg-sidebar: #161630;
+  --bg-main: #0d1b36;
+  --bg-input: #1a1a3a;
+  --bg-hover: #252550;
+  --bg-message-user: #1e2a5f;
   --bg-message-assistant: #2d1b4e;
   --bg-analysis: #0a2828;
-  --bg-statusbar: #121229;
-  --border: #2a3a5c;
+  --bg-statusbar: #12122e;
+  --border: #2a2a5c;
   --accent: #6366f1;
+  --accent-hover: #818cf8;
+  --accent-light: #a5b4fc;
   --text-primary: #e2e8f0;
   --text-secondary: #7a8ba8;
   --color-error: #ef4444;
   --color-warning: #f59e0b;
   --color-success: #22c55e;
+}
+
+/* ── Light theme — logo-inspired indigo/lavender palette ── */
+[data-theme="light"] {
+  --bg-app: #f0eef8;
+  --bg-sidebar: #e8e5f5;
+  --bg-main: #f5f3fb;
+  --bg-input: #ffffff;
+  --bg-hover: #ddd8f0;
+  --bg-message-user: #e0daf5;
+  --bg-message-assistant: #ede8fc;
+  --bg-analysis: #e0f5f0;
+  --bg-statusbar: #e2dff0;
+  --border: #c4bfe0;
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --accent-light: #a5b4fc;
+  --text-primary: #1e1e3a;
+  --text-secondary: #5a5480;
+  --color-error: #dc2626;
+  --color-warning: #d97706;
+  --color-success: #16a34a;
 }
 
 *, *::before, *::after {

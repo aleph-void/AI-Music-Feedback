@@ -91,6 +91,12 @@
     "language": {
       "label": "言語"
     },
+    "theme": {
+      "label": "テーマ",
+      "light": "ライト",
+      "dark": "ダーク",
+      "system": "システム"
+    },
     "saveButton": "設定を保存",
     "savingButton": "保存中...",
     "savedMessage": "保存しました！"

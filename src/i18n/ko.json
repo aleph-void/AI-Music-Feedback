@@ -91,6 +91,12 @@
     "language": {
       "label": "언어"
     },
+    "theme": {
+      "label": "테마",
+      "light": "라이트",
+      "dark": "다크",
+      "system": "시스템"
+    },
     "saveButton": "설정 저장",
     "savingButton": "저장 중...",
     "savedMessage": "저장되었습니다!"

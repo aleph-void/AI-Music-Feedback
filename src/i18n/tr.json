@@ -91,6 +91,12 @@
     "language": {
       "label": "Dil"
     },
+    "theme": {
+      "label": "Tema",
+      "light": "Açık",
+      "dark": "Koyu",
+      "system": "Sistem"
+    },
     "saveButton": "Ayarları kaydet",
     "savingButton": "Kaydediliyor...",
     "savedMessage": "Kaydedildi!"

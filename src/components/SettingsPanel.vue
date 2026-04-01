@@ -237,6 +237,27 @@
       </select>
     </div>
 
+    <div class="field">
+      <label>{{ t('settings.theme.label') }}</label>
+      <div class="mode-toggle theme-toggle">
+        <button
+          class="mode-btn"
+          :class="{ active: settings.theme.value === 'light' }"
+          @click="settings.theme.value = 'light'"
+        >{{ t('settings.theme.light') }}</button>
+        <button
+          class="mode-btn"
+          :class="{ active: settings.theme.value === 'dark' }"
+          @click="settings.theme.value = 'dark'"
+        >{{ t('settings.theme.dark') }}</button>
+        <button
+          class="mode-btn"
+          :class="{ active: settings.theme.value === 'system' }"
+          @click="settings.theme.value = 'system'"
+        >{{ t('settings.theme.system') }}</button>
+      </div>
+    </div>
+
     <div class="actions">
       <button class="primary-btn" @click="save" :disabled="saving">
         {{ saving ? t('settings.savingButton') : t('settings.saveButton') }}

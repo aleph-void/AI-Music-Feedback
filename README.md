@@ -1,11 +1,11 @@
 # AI Music Feedback
 
-[![Tests](https://github.com/nstarke/AI-Music-Feedback/actions/workflows/ci.yml/badge.svg)](https://github.com/nstarke/AI-Music-Feedback/actions/workflows/ci.yml)
-[![Security](https://github.com/nstarke/AI-Music-Feedback/actions/workflows/security.yml/badge.svg)](https://github.com/nstarke/AI-Music-Feedback/actions/workflows/security.yml)
+[![Tests](https://github.com/aleph-void/AI-Music-Feedback/actions/workflows/ci.yml/badge.svg)](https://github.com/aleph-void/AI-Music-Feedback/actions/workflows/ci.yml)
+[![Security](https://github.com/aleph-void/AI-Music-Feedback/actions/workflows/security.yml/badge.svg)](https://github.com/aleph-void/AI-Music-Feedback/actions/workflows/security.yml)
 
 A desktop application that streams audio from your computer to the [OpenAI Realtime API](https://platform.openai.com/docs/guides/realtime) and receives live AI feedback on your music.
 
-> **GitHub:** https://github.com/nstarke/AI-Music-Feedback
+> **GitHub:** https://github.com/aleph-void/AI-Music-Feedback
 
 ![AI Music Feedback screenshot](images/screenshot.png)
 
@@ -48,7 +48,7 @@ You can also speak questions through a microphone or type them directly into the
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/nstarke/AI-Music-Feedback.git
+git clone https://github.com/aleph-void/AI-Music-Feedback.git
 cd AI-Music-Feedback
 ```
 

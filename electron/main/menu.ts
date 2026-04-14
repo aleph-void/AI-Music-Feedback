@@ -93,7 +93,7 @@ export function setupMenu(getWindow: () => BrowserWindow | null): void {
         { type: 'separator' as const },
         {
           label: 'About AI Music Feedback…',
-          click: () => shell.openExternal('https://github.com/nstarke/AI-Music-Feedback')
+          click: () => shell.openExternal('https://github.com/aleph-void/AI-Music-Feedback')
         }
       ]
     }

@@ -36,7 +36,8 @@
   linux: {
     target: ["AppImage", "deb"],
     icon: "resources/icon.png",
-    category: "Audio"
+    category: "Audio",
+    maintainer: "Aleph Void LLC <contact@alephvoid.com>"
   },
   nsis: {
     oneClick: false,

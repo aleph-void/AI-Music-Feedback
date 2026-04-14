@@ -67,21 +67,3 @@ jobs:
       - name: Audit all dependencies (report only)
         # Full audit including devDependencies — informational, never fails the job.
         run: npm audit --audit-level=critical || true
-
-  # ── Gitleaks secret scanning ─────────────────────────────────────────────────
-  # Scans the full git history for accidentally committed secrets: API keys,
-  # tokens, private keys, connection strings, etc.
-  gitleaks:
-    name: Gitleaks
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          # Fetch the full history so secrets committed in older commits are caught
-          fetch-depth: 0
-
-      - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

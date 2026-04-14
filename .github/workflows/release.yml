@@ -143,7 +143,18 @@ jobs:
           fi
 
       - name: Build and package
-        run: npm run ${{ matrix.pack_script }}
+        shell: bash
+        run: |
+          # On macOS without a signing cert, pass --config.mac.identity=null to
+          # electron-builder.  CSC_IDENTITY_AUTO_DISCOVERY=false suppresses Keychain
+          # lookup but electron-builder will still attempt to sign if CSC_LINK is
+          # unset and resolves to an empty path (the workspace dir), producing the
+          # "not a file" error.  identity=null is the only flag that fully skips signing.
+          if [[ "$RUNNER_OS" == "macOS" && -z "${CSC_LINK:-}" ]]; then
+            npm run ${{ matrix.pack_script }} -- --config.mac.identity=null
+          else
+            npm run ${{ matrix.pack_script }}
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # electron-builder bundles an x86 fpm binary; on ARM64 we install fpm

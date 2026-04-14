@@ -232,31 +232,23 @@ async function handleExportTranscript() {
 </script>
 
 <style>
-/*
- * Color palette — derived from logo (resources/icon.svg):
- *   Deep indigo bg:  #1e1e3a → #0d1b36
- *   Indigo bars:     #6366f1  #818cf8  #a5b4fc
- *   Note / text:     #e2e8f0
- *   Live-dot green:  #22c55e  #86efac
- */
-
-/* ── Dark theme — the logo's own palette ── */
+/* ── Dark theme — alephvoid.com palette ── */
 [data-theme="dark"] {
-  --bg-app: #1e1e3a;
-  --bg-sidebar: #181832;
-  --bg-main: #0d1b36;
-  --bg-input: #1a1a38;
-  --bg-hover: #2a2a52;
-  --bg-message-user: #252550;
-  --bg-message-assistant: #1e1e4a;
-  --bg-analysis: #0d2a1e;
-  --bg-statusbar: #141430;
-  --border: #2e2e58;
-  --accent: #6366f1;
-  --accent-hover: #818cf8;
-  --accent-light: #a5b4fc;
-  --text-primary: #e2e8f0;
-  --text-secondary: #8888b8;
+  --bg-app: #0a0a0f;
+  --bg-sidebar: #12121a;
+  --bg-main: #0a0a0f;
+  --bg-input: #16161f;
+  --bg-hover: #1e1e2e;
+  --bg-message-user: #16161f;
+  --bg-message-assistant: #12121a;
+  --bg-analysis: #0a1a0f;
+  --bg-statusbar: #08080c;
+  --border: #1e1e2e;
+  --accent: #6d28d9;
+  --accent-hover: #8b5cf6;
+  --accent-light: #a78bfa;
+  --text-primary: #e4e4e7;
+  --text-secondary: #a1a1aa;
   --color-error: #ef4444;
   --color-warning: #f59e0b;
   --color-success: #22c55e;
@@ -265,23 +257,23 @@ async function handleExportTranscript() {
   --color-recording: #ef4444;
 }
 
-/* ── Light theme — inverted logo palette ── */
+/* ── Light theme — alephvoid.com accent, light backgrounds ── */
 [data-theme="light"] {
-  --bg-app: #eeedf8;
-  --bg-sidebar: #e4e2f2;
-  --bg-main: #f4f2fb;
+  --bg-app: #f7f5ff;
+  --bg-sidebar: #eeebfa;
+  --bg-main: #faf9ff;
   --bg-input: #ffffff;
-  --bg-hover: #d8d5ec;
-  --bg-message-user: #dbd6f0;
-  --bg-message-assistant: #eae5fc;
-  --bg-analysis: #ddf5eb;
-  --bg-statusbar: #dddaf0;
-  --border: #b8b4d8;
-  --accent: #6366f1;
-  --accent-hover: #4f46e5;
-  --accent-light: #a5b4fc;
-  --text-primary: #0d1b36;
-  --text-secondary: #4a4878;
+  --bg-hover: #e2dcf7;
+  --bg-message-user: #e8e3f5;
+  --bg-message-assistant: #f2effe;
+  --bg-analysis: #dcfce7;
+  --bg-statusbar: #e5e0f7;
+  --border: #cbbef0;
+  --accent: #6d28d9;
+  --accent-hover: #5b21b6;
+  --accent-light: #a78bfa;
+  --text-primary: #0a0a0f;
+  --text-secondary: #52496e;
   --color-error: #dc2626;
   --color-warning: #d97706;
   --color-success: #16a34a;
@@ -299,7 +291,7 @@ async function handleExportTranscript() {
 html, body {
   height: 100%;
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg-app);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;

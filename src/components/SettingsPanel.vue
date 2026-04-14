@@ -365,7 +365,7 @@ input, textarea {
   padding: 0.5rem 0.75rem;
   color: var(--text-primary);
   font-size: 0.9rem;
-  font-family: monospace;
+  font-family: 'JetBrains Mono', monospace;
   outline: none;
   transition: border-color 0.15s;
 }
